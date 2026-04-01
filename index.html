@@ -710,8 +710,9 @@
                             state.watched[key] = { rating: parseInt(f.Rating, 10), timestamp: f.RatingTimestamp || new Date().toISOString() };
                         }
                     }
-                    if (f.RankOverride && !state.rankOverrides[key]) {
-                        state.rankOverrides[key] = f.RankOverride;
+                    const ro = (f.RankOverride || '').trim();
+                    if (ro && !state.rankOverrides[key]) {
+                        state.rankOverrides[key] = ro;
                     }
                 });
                 state.genreFilter = null;
@@ -895,7 +896,7 @@
                         ? `<img class="poster-img w-full h-full object-cover absolute inset-0"
                                src="${esc(posterUrl)}"
                                alt="${esc(film.Title)}"
-                               loading="lazy"
+                               loading="eager"
                                onload="this.classList.add('loaded')"
                                onerror="this.remove();this.parentElement.querySelector('.poster-placeholder').classList.remove('hidden')">`
                         : ''}
@@ -1057,7 +1058,7 @@
                     const img = document.createElement('img');
                     img.className = 'poster-img w-full h-full object-cover absolute inset-0';
                     img.alt = state.films[idx].Title;
-                    img.loading = 'lazy';
+                    img.loading = 'eager';
                     img.onload = () => img.classList.add('loaded');
                     img.onerror = () => {
                         img.remove();
