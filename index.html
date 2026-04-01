@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineVault — Personal Cinema Collection</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PapaParse for CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    display: ['"Playfair Display"', 'Georgia', 'serif'],
+                    body: ['Inter', 'system-ui', 'sans-serif'],
+                }
+            }
+        }
+    }
+    </script>
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: #080808; }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* ── Skeleton shimmer ── */
+        @keyframes shimmer {
+            0% { background-position: -300% 0; }
+            100% { background-position: 300% 0; }
+        }
+        .poster-skeleton {
+            background: linear-gradient(90deg, #151515 30%, #1d1d1d 50%, #151515 70%);
+            background-size: 200% 100%;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        /* ── Card hover ── */
+        .film-card { transition: transform 0.2s ease, border-color 0.2s ease; }
+        .film-card:hover { transform: translateY(-3px); border-color: #333 !important; }
+
+        /* ── Poster fade-in ── */
+        .poster-img {
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .poster-img.loaded { opacity: 1; }
+
+        /* ── Modal ── */
+        .modal-backdrop {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: opacity 0.2s ease;
+        }
+        .modal-content {
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+        .modal-enter .modal-content { transform: scale(0.95); opacity: 0; }
+        .modal-active .modal-content { transform: scale(1); opacity: 1; }
+
+        /* ── Action buttons ── */
+        .action-btn {
+            transition: transform 0.15s ease, color 0.15s ease;
+        }
+        .action-btn:hover { transform: scale(1.15); }
+        .action-btn:active { transform: scale(0.95); }
+
+        /* ── View toggle pill ── */
+        .view-pill {
+            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        }
+
+        /* ── Gold accent ── */
+        .gold { color: #c9a84c; }
+        .bg-gold { background: #c9a84c; }
+
+        /* ── Select styling ── */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpolyline points='1,3 5,7 9,3' fill='none' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 28px;
+            transition: border-color 0.15s ease;
+        }
+        select:hover { border-color: #3a3a3a; }
+
+        /* ── Placeholder poster ── */
+        .poster-placeholder {
+            background: linear-gradient(160deg, #141414 0%, #0d0d0d 100%);
+            border: 1px dashed #252525;
+        }
+
+        /* ── Link hover ── */
+        .ext-link { transition: color 0.15s ease; }
+        .ext-link:hover { color: #c9a84c !important; }
+
+        /* ── Responsive grid ── */
+        .film-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(2, 1fr);
+        }
+        @media (min-width: 540px)  { .film-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 768px)  { .film-grid { grid-template-columns: repeat(4, 1fr); gap: 1.15rem; } }
+        @media (min-width: 1024px) { .film-grid { grid-template-columns: repeat(5, 1fr); } }
+        @media (min-width: 1280px) { .film-grid { grid-template-columns: repeat(6, 1fr); } }
+    </style>
+</head>
+<body class="text-gray-300 min-h-screen">
+
+    <!-- ═══════════════════ HEADER ═══════════════════ -->
+    <header class="sticky top-0 z-40 bg-[#0c0c0c]/95 backdrop-blur-md border-b border-[#1a1a1a]">
+        <!-- Top row -->
+        <div class="max-w-[1600px] mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-2 mr-2 shrink-0">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="8" x2="7" y2="8"/><line x1="2" y1="14" x2="7" y2="14"/><line x1="17" y1="8" x2="22" y2="8"/><line x1="17" y1="14" x2="22" y2="14"/></svg>
+                <span class="font-display text-lg text-white tracking-wide">CineVault</span>
+            </a>
+
+            <!-- Year selector -->
+            <select id="yearSelect" class="bg-[#151515] border border-[#2a2a2a] rounded-md px-3 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-[#c9a84c] cursor-pointer shrink-0 min-w-[80px]"></select>
+
+            <!-- Search -->
+            <div class="relative flex-1 min-w-[180px] max-w-md">
+                <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input id="searchInput" type="text" placeholder="Search films, directors, genres…"
+                       class="w-full bg-[#151515] border border-[#2a2a2a] rounded-md pl-8 pr-8 py-1.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-[#c9a84c]">
+                <button id="searchClear" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-300 hidden" title="Clear search">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <!-- Spacer -->
+            <div class="flex-1 hidden lg:block"></div>
+
+            <!-- View toggles -->
+            <div id="viewToggles" class="flex items-center gap-1 text-xs shrink-0">
+                <button data-view="all" class="view-pill px-3 py-1.5 rounded-full border border-[#c9a84c] bg-[#c9a84c]/10 text-[#c9a84c] font-medium">All</button>
+                <button data-view="favorites" class="view-pill px-3 py-1.5 rounded-full border border-[#2a2a2a] text-gray-500 hover:text-gray-300 hover:border-[#444]">
+                    <span class="inline-flex items-center gap-1">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        Favorites <span id="favCount" class="opacity-60">0</span>
+                    </span>
+                </button>
+                <button data-view="watchlist" class="view-pill px-3 py-1.5 rounded-full border border-[#2a2a2a] text-gray-500 hover:text-gray-300 hover:border-[#444]">
+                    <span class="inline-flex items-center gap-1">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                        Watchlist <span id="wlCount" class="opacity-60">0</span>
+                    </span>
+                </button>
+            </div>
+
+            <!-- Export -->
+            <button id="exportBtn" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#2a2a2a] text-xs text-gray-400 hover:text-[#c9a84c] hover:border-[#c9a84c]/50 transition-colors" title="Export your collection as JSON">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export
+            </button>
+        </div>
+
+        <!-- Status bar -->
+        <div class="max-w-[1600px] mx-auto px-4 pb-2 flex items-center justify-between text-[11px] text-gray-600">
+            <span id="statusText">Loading…</span>
+            <span id="yearLabel" class="font-display italic text-gray-500"></span>
+        </div>
+    </header>
+
+    <!-- ═══════════════════ MAIN ═══════════════════ -->
+    <main class="max-w-[1600px] mx-auto px-4 pt-5 pb-16">
+        <!-- Film grid -->
+        <div id="grid" class="film-grid"></div>
+
+        <!-- Skeleton template (outside loadingSkeleton so innerHTML='' never destroys it) -->
+        <template id="skeletonTpl">
+            <div class="rounded-lg overflow-hidden border border-[#1a1a1a]">
+                <div class="aspect-[2/3] poster-skeleton"></div>
+                <div class="p-3 bg-[#111] space-y-2">
+                    <div class="h-3.5 bg-[#1a1a1a] rounded w-4/5"></div>
+                    <div class="h-3 bg-[#1a1a1a] rounded w-3/5"></div>
+                    <div class="h-2.5 bg-[#1a1a1a] rounded w-2/5 mt-1"></div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Loading skeleton grid -->
+        <div id="loadingSkeleton" class="film-grid hidden"></div>
+
+        <!-- Empty state -->
+        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-center">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.2"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="12" cy="11" r="4"/><line x1="2" y1="18" x2="22" y2="18"/></svg>
+            <p id="emptyTitle" class="text-gray-500 text-base mt-4">No films found</p>
+            <p id="emptySub" class="text-gray-600 text-sm mt-1">Try adjusting your search or changing the year.</p>
+        </div>
+
+        <!-- Error state -->
+        <div id="errorState" class="hidden flex flex-col items-center justify-center py-24 text-center">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#553" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p class="text-gray-500 text-base mt-4">Could not load films</p>
+            <p id="errorDetail" class="text-gray-600 text-sm mt-1"></p>
+        </div>
+    </main>
+
+    <!-- ═══════════════════ MODAL ═══════════════════ -->
+    <div id="modal" class="fixed inset-0 z-50 hidden modal-enter" role="dialog" aria-modal="true">
+        <div class="modal-backdrop absolute inset-0 bg-black/70" id="modalBackdrop"></div>
+        <div class="relative flex items-center justify-center min-h-full p-4">
+            <div class="modal-content bg-[#111] border border-[#222] rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <!-- Close button -->
+                <button id="modalClose" class="absolute top-3 right-3 text-gray-500 hover:text-white transition-colors z-10" aria-label="Close">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+                <!-- Content injected by JS -->
+                <div id="modalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ SCRIPT ═══════════════════ -->
+    <script>
+    (() => {
+        'use strict';
+
+        // ════════════════════════════════════════════════
+        //  CONFIGURATION
+        //  Get a free TMDB API key at:
+        //  https://www.themoviedb.org/settings/api
+        // ════════════════════════════════════════════════
+        const CONFIG = {
+            apiKey: 'TMDB_KEY_REMOVED',   // TMDB v3 API key
+            posterSize: 'w342',        // w185, w342, w500
+            posterSizeLg: 'w500',      // for modal
+            defaultYear: '2024',
+        };
+
+        // ════════════════════════════════════════════════
+        //  YEARS
+        // ════════════════════════════════════════════════
+        const YEARS = ['1980s', ...Array.from({ length: 36 }, (_, i) => String(1990 + i))];
+
+        // ════════════════════════════════════════════════
+        //  STATE
+        // ════════════════════════════════════════════════
+        const state = {
+            year: CONFIG.defaultYear,
+            films: [],           // all films for current year
+            filteredFilms: [],   // after search/view filter
+            searchQuery: '',
+            viewMode: 'all',     // 'all' | 'favorites' | 'watchlist'
+            favorites: new Set(),
+            watchlist: new Set(),
+            watched: {},         // filmKey → { rating: 1-5, timestamp: ISO string }
+            filmStore: {},       // key → film data (for export)
+            posterCache: {},     // key → poster URL or null
+            loadId: 0,           // for cancelling stale loads
+        };
+
+        // ════════════════════════════════════════════════
+        //  DOM REFS
+        // ════════════════════════════════════════════════
+        const $ = (s) => document.querySelector(s);
+        const yearSelect = $('#yearSelect');
+        const searchInput = $('#searchInput');
+        const searchClear = $('#searchClear');
+        const grid = $('#grid');
+        const loadingSkeleton = $('#loadingSkeleton');
+        const emptyState = $('#emptyState');
+        const errorState = $('#errorState');
+        const statusText = $('#statusText');
+        const yearLabel = $('#yearLabel');
+        const favCount = $('#favCount');
+        const wlCount = $('#wlCount');
+        const modal = $('#modal');
+        const modalBody = $('#modalBody');
+        const viewToggles = $('#viewToggles');
+
+        // ════════════════════════════════════════════════
+        //  HELPERS
+        // ════════════════════════════════════════════════
+        function filmKey(film) {
+            return `${film.Title}|||${film.Year}`;
+        }
+
+        function esc(str) {
+            const d = document.createElement('div');
+            d.textContent = str || '';
+            return d.innerHTML;
+        }
+
+        function imdbUrl(title, year) {
+            return `https://www.imdb.com/find/?q=${encodeURIComponent(title + ' ' + year)}&s=tt`;
+        }
+
+        function rtUrl(title) {
+            return `https://www.rottentomatoes.com/search?search=${encodeURIComponent(title)}`;
+        }
+
+        // ════════════════════════════════════════════════
+        //  LOCAL STORAGE
+        // ════════════════════════════════════════════════
+        function loadPersisted() {
+            try {
+                const f = JSON.parse(localStorage.getItem('cv_favorites') || '[]');
+                const w = JSON.parse(localStorage.getItem('cv_watchlist') || '[]');
+                const watched = JSON.parse(localStorage.getItem('cv_watched') || '{}');
+                const s = JSON.parse(localStorage.getItem('cv_filmStore') || '{}');
+                const p = JSON.parse(localStorage.getItem('cv_posterCache') || '{}');
+                state.favorites = new Set(f);
+                state.watchlist = new Set(w);
+                state.watched = watched;
+                state.filmStore = s;
+                state.posterCache = p;
+            } catch { /* ignore corrupt data */ }
+        }
+
+        function saveFavorites() {
+            localStorage.setItem('cv_favorites', JSON.stringify([...state.favorites]));
+        }
+
+        function saveWatchlist() {
+            localStorage.setItem('cv_watchlist', JSON.stringify([...state.watchlist]));
+        }
+
+        function saveWatched() {
+            localStorage.setItem('cv_watched', JSON.stringify(state.watched));
+        }
+
+        function saveFilmStore() {
+            localStorage.setItem('cv_filmStore', JSON.stringify(state.filmStore));
+        }
+
+        function savePosterCache() {
+            localStorage.setItem('cv_posterCache', JSON.stringify(state.posterCache));
+        }
+
+        // ════════════════════════════════════════════════
+        //  CSV LOADING
+        // ════════════════════════════════════════════════
+        async function loadYear(year) {
+            state.year = year;
+            state.loadId++;
+            const loadId = state.loadId;
+
+            // UI: show loading
+            grid.innerHTML = '';
+            emptyState.classList.add('hidden');
+            errorState.classList.add('hidden');
+            showSkeletons();
+            statusText.textContent = 'Loading…';
+            yearLabel.textContent = year === '1980s' ? '1980 – 1989' : year;
+
+            const fileName = `films_${year}.csv`;
+            try {
+                const resp = await fetch(fileName);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const text = await resp.text();
+                if (loadId !== state.loadId) return; // stale
+
+                const result = Papa.parse(text, { header: true, skipEmptyLines: true });
+                state.films = result.data.filter(r => r.Title && r.Title.trim());
+                hideSkeletons();
+                applyFilters();
+                fetchPosters(loadId);
+            } catch (err) {
+                if (loadId !== state.loadId) return;
+                hideSkeletons();
+                errorState.classList.remove('hidden');
+                $('#errorDetail').textContent = `Could not load ${fileName}: ${err.message}`;
+                state.films = [];
+                statusText.textContent = 'Error';
+            }
+        }
+
+        // ════════════════════════════════════════════════
+        //  FILTERING
+        // ════════════════════════════════════════════════
+        function applyFilters() {
+            let films = state.films;
+            const q = state.searchQuery.toLowerCase().trim();
+
+            // View filter
+            if (state.viewMode === 'favorites') {
+                films = films.filter(f => state.favorites.has(filmKey(f)));
+            } else if (state.viewMode === 'watchlist') {
+                films = films.filter(f => state.watchlist.has(filmKey(f)));
+            }
+
+            // Search filter
+            if (q) {
+                films = films.filter(f => {
+                    const hay = `${f.Title} ${f.Director} ${f.Primary_Genre}`.toLowerCase();
+                    return hay.includes(q);
+                });
+            }
+
+            state.filteredFilms = films;
+            renderGrid();
+            updateStatus();
+        }
+
+        function updateStatus() {
+            const total = state.films.length;
+            const shown = state.filteredFilms.length;
+            const label = state.viewMode === 'favorites' ? 'favorite' : state.viewMode === 'watchlist' ? 'watchlisted' : '';
+
+            if (state.searchQuery && label) {
+                statusText.textContent = `${shown} of ${total} ${label} films matching "${state.searchQuery}"`;
+            } else if (state.searchQuery) {
+                statusText.textContent = `${shown} of ${total} films matching "${state.searchQuery}"`;
+            } else if (label) {
+                statusText.textContent = `${shown} ${label} film${shown !== 1 ? 's' : ''}`;
+            } else {
+                statusText.textContent = `${total} film${total !== 1 ? 's' : ''}`;
+            }
+
+            // Update counts for current year
+            const fy = state.films.filter(f => state.favorites.has(filmKey(f))).length;
+            const wy = state.films.filter(f => state.watchlist.has(filmKey(f))).length;
+            favCount.textContent = fy || '0';
+            wlCount.textContent = wy || '0';
+        }
+
+        // ════════════════════════════════════════════════
+        //  RENDERING
+        // ════════════════════════════════════════════════
+        function renderGrid() {
+            if (state.filteredFilms.length === 0) {
+                grid.innerHTML = '';
+                if (state.films.length > 0) {
+                    emptyState.classList.remove('hidden');
+                    if (state.viewMode !== 'all') {
+                        $('#emptyTitle').textContent = state.viewMode === 'favorites' ? 'No favorites yet' : 'Watchlist is empty';
+                        $('#emptySub').textContent = 'Tap the heart or bookmark icon on any film card.';
+                    } else {
+                        $('#emptyTitle').textContent = 'No films found';
+                        $('#emptySub').textContent = 'Try adjusting your search.';
+                    }
+                } else {
+                    emptyState.classList.add('hidden');
+                }
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            const html = state.filteredFilms.map((film, visualIdx) => {
+                const origIdx = state.films.indexOf(film);
+                return createCardHTML(film, origIdx);
+            }).join('');
+            grid.innerHTML = html;
+        }
+
+        function createCardHTML(film, idx) {
+            const key = filmKey(film);
+            const isFav = state.favorites.has(key);
+            const isWl = state.watchlist.has(key);
+            const posterUrl = state.posterCache[key];
+            const rank = film.Rank || '';
+            const genre = (film.Primary_Genre || '').split('/')[0].trim();
+
+            return `
+            <div class="film-card bg-[#111] rounded-lg overflow-hidden border border-[#1a1a1a] cursor-default" data-idx="${idx}">
+                <!-- Poster area -->
+                <div class="relative aspect-[2/3] bg-[#0e0e0e] overflow-hidden">
+                    ${posterUrl && posterUrl !== 'null'
+                        ? `<img class="poster-img w-full h-full object-cover absolute inset-0"
+                               src="${esc(posterUrl)}"
+                               alt="${esc(film.Title)}"
+                               loading="lazy"
+                               onload="this.classList.add('loaded')"
+                               onerror="this.remove();this.parentElement.querySelector('.poster-placeholder').classList.remove('hidden')">`
+                        : ''}
+                    ${!posterUrl
+                        ? '<div class="poster-skeleton absolute inset-0"></div>'
+                        : ''}
+                    <!-- Placeholder (shown on error or no poster) -->
+                    <div class="poster-placeholder absolute inset-0 ${posterUrl === null ? '' : 'hidden'} flex flex-col items-center justify-center p-4 text-center">
+                        <svg class="mb-2 text-[#222]" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="12" cy="10" r="3.5"/><path d="M2 18 l6-4 4 3 4-5 6 6"/></svg>
+                        <span class="text-[10px] text-[#2a2a2a] leading-tight font-display italic">${esc(film.Title)}</span>
+                    </div>
+
+                    <!-- Rank badge -->
+                    ${rank ? `<span class="absolute top-2 left-2 bg-black/70 text-[#c9a84c] text-[10px] font-semibold px-1.5 py-0.5 rounded-md border border-[#c9a84c]/20 backdrop-blur-sm">#${esc(rank)}</span>` : ''}
+
+                    <!-- Action buttons overlay -->
+                    <div class="absolute top-1.5 right-1.5 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity" style="opacity:1">
+                        <button class="action-btn btn-favorite w-7 h-7 flex items-center justify-center rounded-full ${isFav ? 'bg-red-500/20 text-red-400' : 'bg-black/50 text-gray-400 hover:text-red-400'} backdrop-blur-sm" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" ${isFav ? 'fill="currentColor"' : 'fill="none"'} stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        </button>
+                        <button class="action-btn btn-watchlist w-7 h-7 flex items-center justify-center rounded-full ${isWl ? 'bg-blue-500/20 text-blue-400' : 'bg-black/50 text-gray-400 hover:text-blue-400'} backdrop-blur-sm" title="${isWl ? 'Remove from Watchlist' : 'Add to Watchlist'}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" ${isWl ? 'fill="currentColor"' : 'fill="none"'} stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Info area -->
+                <div class="p-2.5 pb-3">
+                    <h3 class="text-[13px] font-semibold text-gray-100 leading-tight truncate" title="${esc(film.Title)}">${esc(film.Title)}</h3>
+                    <p class="text-[11px] text-gray-500 truncate mt-0.5">${esc(film.Director || 'Unknown')}</p>
+                    <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                        ${genre ? `<span class="text-[9px] uppercase tracking-wider text-gray-500 bg-[#1a1a1a] px-1.5 py-0.5 rounded">${esc(genre)}</span>` : ''}
+                        <span class="text-[9px] text-gray-600">${esc(film.Year || '')}</span>
+                    </div>
+                    <!-- Quick links -->
+                    <div class="flex items-center gap-2 mt-2 pt-2 border-t border-[#1a1a1a]">
+                        <a href="${imdbUrl(film.Title, film.Year)}" target="_blank" rel="noopener" class="ext-link text-[10px] font-semibold text-yellow-600/70 hover:text-yellow-500 tracking-wide">IMDb</a>
+                        <a href="${rtUrl(film.Title)}" target="_blank" rel="noopener" class="ext-link text-[10px] font-semibold text-red-500/50 hover:text-red-400 tracking-wide">RT</a>
+                        <div class="flex-1"></div>
+                        <button class="btn-info text-gray-600 hover:text-[#c9a84c] transition-colors" title="View details">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // ════════════════════════════════════════════════
+        //  SKELETON LOADING
+        // ════════════════════════════════════════════════
+        function showSkeletons() {
+            const tpl = $('#skeletonTpl').content;
+            loadingSkeleton.innerHTML = '';
+            for (let i = 0; i < 18; i++) {
+                loadingSkeleton.appendChild(tpl.cloneNode(true));
+            }
+            loadingSkeleton.classList.remove('hidden');
+        }
+
+        function hideSkeletons() {
+            loadingSkeleton.classList.add('hidden');
+        }
+
+        // ════════════════════════════════════════════════
+        //  POSTER FETCHING (TMDB API)
+        // ════════════════════════════════════════════════
+        let posterQueue = [];
+        let posterProcessing = false;
+
+        async function fetchPosters(loadId) {
+            if (!CONFIG.apiKey || CONFIG.apiKey === 'YOUR_KEY_HERE') {
+                // No API key — mark all as null so placeholders show
+                state.films.forEach(f => {
+                    const k = filmKey(f);
+                    if (!(k in state.posterCache)) state.posterCache[k] = null;
+                });
+                renderGrid();
+                return;
+            }
+
+            // Queue films that don't have cached posters
+            const toFetch = state.films.filter(f => !(filmKey(f) in state.posterCache));
+            if (toFetch.length === 0) return;
+
+            posterQueue = toFetch.map(f => ({ film: f, loadId }));
+            if (!posterProcessing) processPosterQueue();
+        }
+
+        async function processPosterQueue() {
+            posterProcessing = true;
+
+            while (posterQueue.length > 0) {
+                const batch = posterQueue.splice(0, 4);
+                await Promise.allSettled(batch.map(item => fetchOnePoster(item)));
+                if (posterQueue.length > 0) {
+                    await new Promise(r => setTimeout(r, 180));
+                }
+            }
+
+            posterProcessing = false;
+            savePosterCache();
+        }
+
+        async function fetchOnePoster({ film, loadId }) {
+            if (loadId !== state.loadId) return;
+            const key = filmKey(film);
+            if (key in state.posterCache) return;
+
+            try {
+                const q = encodeURIComponent(film.Title);
+                const y = film.Year || '';
+                const url = `https://api.themoviedb.org/3/search/movie?api_key=${CONFIG.apiKey}&query=${q}&year=${y}&include_adult=false`;
+                const res = await fetch(url);
+
+                if (res.status === 401) {
+                    // Bad API key — stop all fetching
+                    posterQueue = [];
+                    console.warn('CineVault: Invalid TMDB API key');
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.results && data.results.length > 0 && data.results[0].poster_path) {
+                    state.posterCache[key] = `https://image.tmdb.org/t/p/${CONFIG.posterSize}${data.results[0].poster_path}`;
+                } else {
+                    state.posterCache[key] = null;
+                }
+            } catch {
+                state.posterCache[key] = null;
+            }
+
+            if (loadId !== state.loadId) return;
+            updateCardPoster(key);
+        }
+
+        function updateCardPoster(key) {
+            const idx = state.films.findIndex(f => filmKey(f) === key);
+            if (idx === -1) return;
+
+            const card = grid.querySelector(`[data-idx="${idx}"]`);
+            if (!card) return;
+
+            const posterArea = card.querySelector('.aspect-\\[2\\/3\\]');
+            if (!posterArea) return;
+
+            const skeleton = posterArea.querySelector('.poster-skeleton');
+            const placeholder = posterArea.querySelector('.poster-placeholder');
+            const existingImg = posterArea.querySelector('.poster-img');
+
+            const url = state.posterCache[key];
+            if (url && url !== 'null') {
+                if (skeleton) skeleton.remove();
+                if (!existingImg) {
+                    const img = document.createElement('img');
+                    img.className = 'poster-img w-full h-full object-cover absolute inset-0';
+                    img.alt = state.films[idx].Title;
+                    img.loading = 'lazy';
+                    img.onload = () => img.classList.add('loaded');
+                    img.onerror = () => {
+                        img.remove();
+                        if (placeholder) placeholder.classList.remove('hidden');
+                    };
+                    img.src = url;
+                    posterArea.insertBefore(img, posterArea.firstChild);
+                    if (placeholder) placeholder.classList.add('hidden');
+                }
+            } else {
+                if (skeleton) skeleton.remove();
+                if (placeholder) placeholder.classList.remove('hidden');
+            }
+        }
+
+        // ════════════════════════════════════════════════
+        //  MODAL
+        // ════════════════════════════════════════════════
+        function openModal(film) {
+            const key = filmKey(film);
+            const isFav = state.favorites.has(key);
+            const isWl = state.watchlist.has(key);
+            const posterUrl = state.posterCache[key];
+            const lgPoster = posterUrl ? posterUrl.replace(CONFIG.posterSize, CONFIG.posterSizeLg) : null;
+
+            modalBody.innerHTML = `
+            <div class="md:flex">
+                <!-- Poster -->
+                <div class="md:w-64 shrink-0 bg-[#0a0a0a]">
+                    ${lgPoster
+                        ? `<img src="${esc(lgPoster)}" alt="${esc(film.Title)}" class="w-full h-auto"
+                               onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')">
+                           <div class="poster-placeholder hidden flex items-center justify-center h-80 text-[#222]">
+                               <span class="font-display italic text-sm p-4 text-center">${esc(film.Title)}</span>
+                           </div>`
+                        : `<div class="poster-placeholder flex items-center justify-center h-80 text-[#222]">
+                               <span class="font-display italic text-sm p-4 text-center">${esc(film.Title)}</span>
+                           </div>`}
+                </div>
+                <!-- Details -->
+                <div class="p-5 md:p-6 flex-1 min-w-0">
+                    <div class="flex items-start gap-3 mb-4">
+                        ${film.Rank ? `<span class="shrink-0 bg-[#c9a84c]/10 text-[#c9a84c] text-xs font-bold px-2 py-1 rounded-md border border-[#c9a84c]/20">#${esc(film.Rank)}</span>` : ''}
+                        <div>
+                            <h2 class="font-display text-xl text-white leading-tight">${esc(film.Title)}</h2>
+                            <p class="text-sm text-gray-400 mt-0.5">${esc(film.Director || 'Unknown')} · <span class="text-gray-500">${esc(film.Year || '')}</span></p>
+                        </div>
+                    </div>
+                    ${film.Primary_Genre ? `<span class="inline-block text-[10px] uppercase tracking-widest text-gray-500 bg-[#1a1a1a] px-2 py-0.5 rounded mb-4">${esc(film.Primary_Genre)}</span>` : ''}
+
+                    ${film.Synopsis && !film.Synopsis.startsWith('Featured on') ? `
+                    <div class="mb-4">
+                        <h4 class="text-[10px] uppercase tracking-widest text-gray-600 mb-1.5">Synopsis</h4>
+                        <p class="text-[13px] text-gray-300 leading-relaxed">${esc(film.Synopsis)}</p>
+                    </div>` : ''}
+
+                    ${film.Major_Awards ? `
+                    <div class="mb-5">
+                        <h4 class="text-[10px] uppercase tracking-widest text-gray-600 mb-1.5">Awards & Recognition</h4>
+                        <p class="text-[12px] text-gray-400 leading-relaxed">${esc(film.Major_Awards)}</p>
+                    </div>` : ''}
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2 flex-wrap pt-3 border-t border-[#1a1a1a]">
+                        <button class="modal-fav flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs border transition-colors ${isFav ? 'border-red-500/30 bg-red-500/10 text-red-400' : 'border-[#2a2a2a] text-gray-400 hover:border-red-500/30 hover:text-red-400'}">
+                            <svg width="13" height="13" viewBox="0 0 24 24" ${isFav ? 'fill="currentColor"' : 'fill="none"'} stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            ${isFav ? 'Favorited' : 'Favorite'}
+                        </button>
+                        <button class="modal-wl flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs border transition-colors ${isWl ? 'border-blue-500/30 bg-blue-500/10 text-blue-400' : 'border-[#2a2a2a] text-gray-400 hover:border-blue-500/30 hover:text-blue-400'}">
+                            <svg width="13" height="13" viewBox="0 0 24 24" ${isWl ? 'fill="currentColor"' : 'fill="none"'} stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                            ${isWl ? 'Watchlisted' : 'Watchlist'}
+                        </button>
+                        <div class="flex-1"></div>
+                        <a href="${imdbUrl(film.Title, film.Year)}" target="_blank" rel="noopener" class="ext-link flex items-center gap-1 text-[11px] font-semibold text-yellow-600/70 hover:text-yellow-500">
+                            IMDb <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        </a>
+                        <a href="${rtUrl(film.Title)}" target="_blank" rel="noopener" class="ext-link flex items-center gap-1 text-[11px] font-semibold text-red-500/50 hover:text-red-400">
+                            RT <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>`;
+
+            // Wire up modal actions
+            modalBody.querySelector('.modal-fav')?.addEventListener('click', () => {
+                toggleFavorite(film);
+                openModal(film); // re-render modal
+            });
+            modalBody.querySelector('.modal-wl')?.addEventListener('click', () => {
+                toggleWatchlist(film);
+                openModal(film);
+            });
+
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                modal.classList.remove('modal-enter');
+                modal.classList.add('modal-active');
+            });
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('modal-active');
+            modal.classList.add('modal-enter');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 200);
+        }
+
+        // ════════════════════════════════════════════════
+        //  FAVORITES / WATCHLIST
+        // ════════════════════════════════════════════════
+        function toggleFavorite(film) {
+            const key = filmKey(film);
+            if (state.favorites.has(key)) {
+                state.favorites.delete(key);
+                removeFromStore(key);
+            } else {
+                state.favorites.add(key);
+                addToStore(key, film);
+            }
+            saveFavorites();
+            applyFilters();
+        }
+
+        function toggleWatchlist(film) {
+            const key = filmKey(film);
+            if (state.watchlist.has(key)) {
+                state.watchlist.delete(key);
+                removeFromStore(key);
+            } else {
+                state.watchlist.add(key);
+                addToStore(key, film);
+            }
+            saveWatchlist();
+            applyFilters();
+        }
+
+        function addToStore(key, film) {
+            state.filmStore[key] = {
+                title: film.Title,
+                year: film.Year,
+                director: film.Director,
+                genre: film.Primary_Genre,
+                rank: film.Rank,
+                synopsis: film.Synopsis,
+                awards: film.Major_Awards,
+            };
+            saveFilmStore();
+        }
+
+        function toggleWatched(film, rating) {
+            const key = filmKey(film);
+            state.watched[key] = { rating, timestamp: new Date().toISOString() };
+            addToStore(key, film);
+            saveWatched();
+        }
+
+        function removeWatched(film) {
+            const key = filmKey(film);
+            delete state.watched[key];
+            removeFromStore(key);
+            saveWatched();
+        }
+
+        function removeFromStore(key) {
+            if (!state.favorites.has(key) && !state.watchlist.has(key) && !state.watched[key]) {
+                delete state.filmStore[key];
+                saveFilmStore();
+            }
+        }
+
+        // ════════════════════════════════════════════════
+        //  EXPORT
+        // ════════════════════════════════════════════════
+        function exportCollection() {
+            const toEntry = (key) => {
+                const data = state.filmStore[key];
+                if (!data) {
+                    const [title, year] = key.split('|||');
+                    return { title, year };
+                }
+                return { ...data };
+            };
+
+            const collection = {
+                exported: new Date().toISOString().split('T')[0],
+                favorites: [...state.favorites].map(toEntry).sort((a, b) => (a.year || '').localeCompare(b.year || '') || (a.title || '').localeCompare(b.title || '')),
+                watchlist: [...state.watchlist].map(toEntry).sort((a, b) => (a.year || '').localeCompare(b.year || '') || (a.title || '').localeCompare(b.title || '')),
+            };
+
+            const blob = new Blob([JSON.stringify(collection, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'my_cinema_list.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ════════════════════════════════════════════════
+        //  EVENT LISTENERS
+        // ════════════════════════════════════════════════
+
+        // Year selector
+        yearSelect.addEventListener('change', (e) => {
+            loadYear(e.target.value);
+        });
+
+        // Search input (debounced)
+        let searchTimer;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                state.searchQuery = searchInput.value;
+                searchClear.classList.toggle('hidden', !searchInput.value);
+                applyFilters();
+            }, 200);
+        });
+
+        searchClear.addEventListener('click', () => {
+            searchInput.value = '';
+            state.searchQuery = '';
+            searchClear.classList.add('hidden');
+            applyFilters();
+        });
+
+        // View toggles
+        viewToggles.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-view]');
+            if (!btn) return;
+            state.viewMode = btn.dataset.view;
+
+            viewToggles.querySelectorAll('[data-view]').forEach(b => {
+                const isActive = b.dataset.view === state.viewMode;
+                b.classList.toggle('border-[#c9a84c]', isActive);
+                b.classList.toggle('bg-[#c9a84c]/10', isActive);
+                b.classList.toggle('text-[#c9a84c]', isActive);
+                b.classList.toggle('border-[#2a2a2a]', !isActive);
+                b.classList.toggle('text-gray-500', !isActive);
+            });
+            applyFilters();
+        });
+
+        // Grid event delegation
+        grid.addEventListener('click', (e) => {
+            const card = e.target.closest('.film-card');
+            if (!card) return;
+
+            const idx = parseInt(card.dataset.idx, 10);
+            const film = state.films[idx];
+            if (!film) return;
+
+            if (e.target.closest('.btn-favorite')) {
+                toggleFavorite(film);
+            } else if (e.target.closest('.btn-watchlist')) {
+                toggleWatchlist(film);
+            } else if (e.target.closest('.btn-info')) {
+                openModal(film);
+            }
+        });
+
+        // Modal close
+        $('#modalClose').addEventListener('click', closeModal);
+        $('#modalBackdrop').addEventListener('click', closeModal);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        // Export
+        $('#exportBtn').addEventListener('click', exportCollection);
+
+        // ════════════════════════════════════════════════
+        //  INIT
+        // ════════════════════════════════════════════════
+        function init() {
+            loadPersisted();
+
+            // Populate year selector
+            YEARS.forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                yearSelect.appendChild(opt);
+            });
+
+            yearSelect.value = CONFIG.defaultYear;
+            loadYear(CONFIG.defaultYear);
+        }
+
+        init();
+    })();
+    </script>
+</body>
+</html>
