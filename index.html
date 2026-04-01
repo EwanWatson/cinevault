@@ -49,7 +49,12 @@
         }
 
         /* ── Card hover ── */
-        .film-card { transition: transform 0.2s ease, border-color 0.2s ease; contain: layout style paint; }
+        .film-card {
+            transition: transform 0.2s ease, border-color 0.2s ease;
+            contain: layout style paint;
+            content-visibility: auto;
+            contain-intrinsic-size: auto 320px;
+        }
         .film-card:hover { transform: translateY(-3px); border-color: #333 !important; }
 
         /* ── Card layout — all structural/text rules defined statically so Edge/Chromium
@@ -68,7 +73,6 @@
             height: 100%;
             object-fit: cover;
             opacity: 1;
-            transform: translateZ(0);
         }
         .card-info { padding: 10px 10px 12px; }
         .card-title {
@@ -112,6 +116,23 @@
         .card-link-imdb:hover { color: #eab308; }
         .card-link-rt { font-size: 10px; font-weight: 600; letter-spacing: 0.025em; color: rgba(239,68,68,0.5); }
         .card-link-rt:hover { color: #f87171; }
+
+        /* ── Blur header — isolate backdrop-filter in a pseudo-element so it
+             composites on its own layer and doesn't block Chromium's threaded scroll ── */
+        .cv-blur-header {
+            position: sticky;
+            isolation: isolate;
+            background: #0c0c0c;
+        }
+        .cv-blur-header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background: rgba(12,12,12,0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
 
         /* ── Modal ── */
         .modal-backdrop {
@@ -234,7 +255,7 @@
 <body class="text-gray-300 min-h-screen">
 
     <!-- ═══════════════════ HEADER ═══════════════════ -->
-    <header class="sticky top-0 z-40 bg-[#0c0c0c]/95 backdrop-blur-md border-b border-[#1a1a1a]">
+    <header class="sticky top-0 z-40 border-b border-[#1a1a1a] cv-blur-header">
         <!-- Top row -->
         <div class="max-w-[1600px] mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
             <!-- Logo -->
