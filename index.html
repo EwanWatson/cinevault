@@ -52,11 +52,65 @@
         .film-card { transition: transform 0.2s ease, border-color 0.2s ease; }
         .film-card:hover { transform: translateY(-3px); border-color: #333 !important; }
 
-        /* ── Poster image rendering ── */
-        .poster-img {
-            opacity: 1 !important;
-            transition: none !important;
+        /* ── Card layout — all structural/text rules defined statically so Edge/Chromium
+           renders cards at correct size/colour on the very first paint, with no
+           dependency on Tailwind CDN's MutationObserver firing after the frame. ── */
+        .card-poster {
+            position: relative;
+            aspect-ratio: 2/3;
+            background: #0e0e0e;
+            overflow: hidden;
         }
+        .poster-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 1;
+        }
+        .card-info { padding: 10px 10px 12px; }
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #f3f4f6;
+            line-height: 1.25;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-sub {
+            font-size: 11px;
+            color: #6b7280;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+        .card-tags { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+        .card-tag {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+            background: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .card-rating { display: flex; align-items: center; gap: 2px; margin-top: 6px; }
+        .card-rating-val { font-size: 9px; color: #4b5563; margin-left: 4px; }
+        .card-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #1a1a1a;
+        }
+        .card-link-imdb { font-size: 10px; font-weight: 600; letter-spacing: 0.025em; color: rgba(202,138,4,0.7); }
+        .card-link-imdb:hover { color: #eab308; }
+        .card-link-rt { font-size: 10px; font-weight: 600; letter-spacing: 0.025em; color: rgba(239,68,68,0.5); }
+        .card-link-rt:hover { color: #f87171; }
 
         /* ── Modal ── */
         .modal-backdrop {
@@ -919,9 +973,9 @@
             return `
             <div class="film-card bg-[#111] rounded-lg overflow-hidden border border-[#1a1a1a] cursor-default" data-idx="${idx}">
                 <!-- Poster area -->
-                <div class="relative aspect-[2/3] bg-[#0e0e0e] overflow-hidden">
+                <div class="card-poster">
                     ${posterUrl && posterUrl !== 'null'
-                        ? `<img class="poster-img w-full h-full object-cover absolute inset-0"
+                        ? `<img class="poster-img"
                                src="${esc(posterUrl)}"
                                alt="${esc(film.Title)}"
                                loading="eager"
@@ -955,18 +1009,18 @@
                 </div>
 
                 <!-- Info area -->
-                <div class="p-2.5 pb-3">
-                    <h3 class="text-[13px] font-semibold text-gray-100 leading-tight truncate" title="${esc(film.Title)}">${esc(film.Title)}</h3>
-                    <p class="text-[11px] text-gray-500 truncate mt-0.5">${esc(film.Director || 'Unknown')}</p>
-                    <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                        ${genre ? `<span class="text-[9px] uppercase tracking-wider text-gray-500 bg-[#1a1a1a] px-1.5 py-0.5 rounded">${esc(genre)}</span>` : ''}
-                        ${film.Year ? `<span class="text-[9px] text-gray-500 bg-[#1a1a1a] px-1.5 py-0.5 rounded">${esc(film.Year)}</span>` : ''}
+                <div class="card-info">
+                    <h3 class="card-title" title="${esc(film.Title)}">${esc(film.Title)}</h3>
+                    <p class="card-sub">${esc(film.Director || 'Unknown')}</p>
+                    <div class="card-tags">
+                        ${genre ? `<span class="card-tag">${esc(genre)}</span>` : ''}
+                        ${film.Year ? `<span class="card-tag">${esc(film.Year)}</span>` : ''}
                     </div>
-                    ${watchedData ? `<div class="flex items-center gap-0.5 mt-1.5">${starsHTML(watchedData.rating, 10)}<span class="text-[9px] text-gray-600 ml-1">${watchedData.rating}/5</span></div>` : ''}
+                    ${watchedData ? `<div class="card-rating">${starsHTML(watchedData.rating, 10)}<span class="card-rating-val">${watchedData.rating}/5</span></div>` : ''}
                     <!-- Quick links -->
-                    <div class="flex items-center gap-2 mt-2 pt-2 border-t border-[#1a1a1a]">
-                        <a href="${imdbUrl(film.Title, film.Year)}" target="_blank" rel="noopener" class="ext-link text-[10px] font-semibold text-yellow-600/70 hover:text-yellow-500 tracking-wide">IMDb</a>
-                        <a href="${rtUrl(film.Title)}" target="_blank" rel="noopener" class="ext-link text-[10px] font-semibold text-red-500/50 hover:text-red-400 tracking-wide">RT</a>
+                    <div class="card-links">
+                        <a href="${imdbUrl(film.Title, film.Year)}" target="_blank" rel="noopener" class="ext-link card-link-imdb">IMDb</a>
+                        <a href="${rtUrl(film.Title)}" target="_blank" rel="noopener" class="ext-link card-link-rt">RT</a>
                         <div class="flex-1"></div>
                         <button class="btn-info text-gray-600 hover:text-[#c9a84c] transition-colors" title="View details">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -1071,7 +1125,7 @@
             const card = grid.querySelector(`[data-idx="${idx}"]`);
             if (!card) return;
 
-            const posterArea = card.querySelector('.aspect-\\[2\\/3\\]');
+            const posterArea = card.querySelector('.card-poster');
             if (!posterArea) return;
 
             const skeleton = posterArea.querySelector('.poster-skeleton');
@@ -1083,7 +1137,7 @@
                 if (skeleton) skeleton.remove();
                 if (!existingImg) {
                     const img = document.createElement('img');
-                    img.className = 'poster-img w-full h-full object-cover absolute inset-0';
+                    img.className = 'poster-img';
                     img.alt = state.films[idx].Title;
                     img.loading = 'eager';
                     img.onerror = () => {
