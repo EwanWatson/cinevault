@@ -404,6 +404,7 @@
         // ════════════════════════════════════════════════
         async function loadYear(year) {
             state.year = year;
+            try { localStorage.setItem('cv_year', year); } catch {}
             state.loadId++;
             const loadId = state.loadId;
 
@@ -934,7 +935,7 @@
                 addToStore(key, film);
             }
             saveFavorites();
-            applyFilters();
+            refreshCard(film);
         }
 
         function toggleWatchlist(film) {
@@ -947,7 +948,7 @@
                 addToStore(key, film);
             }
             saveWatchlist();
-            applyFilters();
+            refreshCard(film);
         }
 
         function addToStore(key, film) {
@@ -1283,8 +1284,13 @@
                 yearSelect.appendChild(opt);
             });
 
-            yearSelect.value = CONFIG.defaultYear;
-            loadYear(CONFIG.defaultYear);
+            let startYear = CONFIG.defaultYear;
+            try {
+                const s = localStorage.getItem('cv_year');
+                if (s && YEARS.includes(s)) startYear = s;
+            } catch {}
+            yearSelect.value = startYear;
+            loadYear(startYear);
         }
 
         init();

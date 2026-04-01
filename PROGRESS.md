@@ -31,6 +31,6 @@
 
 ## Round 2 — New Feature & Bug Fixes
 - [x] **Task 6.1**: Remove Stats Panel Entirely
-- [ ] **Task 6.2**: Persist Selected Year Across Refreshes
-- [ ] **Task 6.3**: Immediate Icon Fill on Favorite / Watchlist Actions
+- [x] **Task 6.2**: Persist Selected Year Across Refreshes
+- [x] **Task 6.3**: Immediate Icon Fill on Favorite / Watchlist Actions
 - [ ] **Task 6.4**: Add Film via IMDB or Rotten Tomatoes Link
