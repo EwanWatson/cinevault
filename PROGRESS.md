@@ -34,3 +34,9 @@
 - [x] **Task 6.2**: Persist Selected Year Across Refreshes
 - [x] **Task 6.3**: Immediate Icon Fill on Favorite / Watchlist Actions
 - [x] **Task 6.4**: Add Film via IMDB or Rotten Tomatoes Link
+
+## Round 3 — New Features & Data Fixes
+- [x] **Task 7.1**: Dedicated Favorites & Watchlist Collection Page
+- [ ] **Task 7.2**: Edit Film Rankings via UI
+- [ ] **Task 7.3**: Fix Mean Girls Data (remove 2024 duplicate, already exists in 2004)
+- [ ] **Task 7.4**: Write Custom Films Directly to CSV (File System Access API) + Auto-create New Year CSVs

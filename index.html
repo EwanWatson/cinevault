@@ -148,6 +148,10 @@
         #addFilmModalContent { transition: transform 0.25s ease, opacity 0.25s ease; }
         #addFilmModal.af-enter #addFilmModalContent { transform: scale(0.95); opacity: 0; }
         #addFilmModal.af-active #addFilmModalContent { transform: scale(1); opacity: 1; }
+
+        /* ── Collection Overlay ── */
+        #collectionOverlay { display: none; }
+        #collectionOverlay.cv-open { display: flex; flex-direction: column; }
     </style>
 </head>
 <body class="text-gray-300 min-h-screen">
@@ -211,6 +215,12 @@
             <button id="exportBtn" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#2a2a2a] text-xs text-gray-400 hover:text-[#c9a84c] hover:border-[#c9a84c]/50 transition-colors" title="Export your collection as JSON">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
+            </button>
+
+            <!-- Collection -->
+            <button id="collectionBtn" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#2a2a2a] text-xs text-gray-400 hover:text-[#c9a84c] hover:border-[#c9a84c]/50 transition-colors" title="View your complete collection">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M15 3H5a2 2 0 0 0-2 2v14l4-2.5" stroke-width="1.5"/></svg>
+                Collection
             </button>
 
             <!-- Add Film -->
@@ -326,6 +336,66 @@
         </div>
     </div>
 
+    <!-- ═══════════════════ COLLECTION OVERLAY ═══════════════════ -->
+    <div id="collectionOverlay" class="fixed inset-0 z-[55] bg-[#080808]" role="dialog" aria-modal="true" aria-label="My Collection">
+        <!-- Sticky header -->
+        <div class="sticky top-0 z-10 bg-[#0c0c0c]/95 backdrop-blur-md border-b border-[#1a1a1a]">
+            <div class="max-w-[1600px] mx-auto px-4 py-3 flex items-center gap-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M15 3H5a2 2 0 0 0-2 2v14l4-2.5" stroke-width="1.5"/></svg>
+                <h2 class="font-display text-base text-white">My Collection</h2>
+                <span id="collCount" class="text-xs text-gray-500 ml-1">0 films</span>
+                <button id="collCloseBtn" class="ml-auto text-gray-500 hover:text-white transition-colors" aria-label="Close collection">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <!-- Filter row -->
+            <div class="max-w-[1600px] mx-auto px-4 pb-3 flex items-center gap-2 flex-wrap">
+                <!-- Tab pills -->
+                <div class="flex gap-1">
+                    <button class="coll-tab view-pill px-3 py-1.5 rounded-full border border-[#c9a84c] bg-[#c9a84c]/10 text-[#c9a84c] text-xs font-medium" data-coll-tab="all">All</button>
+                    <button class="coll-tab view-pill px-3 py-1.5 rounded-full border border-[#2a2a2a] text-gray-500 hover:text-gray-300 hover:border-[#444] text-xs" data-coll-tab="favorites">
+                        <span class="inline-flex items-center gap-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Favorites</span>
+                    </button>
+                    <button class="coll-tab view-pill px-3 py-1.5 rounded-full border border-[#2a2a2a] text-gray-500 hover:text-gray-300 hover:border-[#444] text-xs" data-coll-tab="watchlist">
+                        <span class="inline-flex items-center gap-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Watchlist</span>
+                    </button>
+                    <button class="coll-tab view-pill px-3 py-1.5 rounded-full border border-[#2a2a2a] text-gray-500 hover:text-gray-300 hover:border-[#444] text-xs" data-coll-tab="watched">
+                        <span class="inline-flex items-center gap-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Rated</span>
+                    </button>
+                </div>
+                <!-- Search -->
+                <div class="relative flex-1 min-w-[160px] max-w-xs">
+                    <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input id="collSearchInput" type="text" placeholder="Search collection…"
+                           class="w-full bg-[#151515] border border-[#2a2a2a] rounded-md pl-7 pr-3 py-1.5 text-xs text-gray-200 placeholder-gray-600 focus:outline-none focus:border-[#c9a84c]">
+                </div>
+                <!-- Genre -->
+                <select id="collGenreSelect" class="bg-[#151515] border border-[#2a2a2a] rounded-md px-3 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-[#c9a84c] cursor-pointer shrink-0 min-w-[110px]">
+                    <option value="">All Genres</option>
+                </select>
+                <!-- Year -->
+                <select id="collYearSelect" class="bg-[#151515] border border-[#2a2a2a] rounded-md px-3 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-[#c9a84c] cursor-pointer shrink-0 min-w-[90px]">
+                    <option value="">All Years</option>
+                </select>
+                <!-- Sort -->
+                <select id="collSortSelect" class="bg-[#151515] border border-[#2a2a2a] rounded-md px-3 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-[#c9a84c] cursor-pointer shrink-0 min-w-[170px]">
+                    <option value="year-desc">Year (newest first)</option>
+                    <option value="year-asc">Year (oldest first)</option>
+                    <option value="title-asc">Title A–Z</option>
+                    <option value="title-desc">Title Z–A</option>
+                    <option value="rating-desc">Rating (highest first)</option>
+                    <option value="rating-asc">Rating (lowest first)</option>
+                </select>
+            </div>
+        </div>
+        <!-- Scrollable grid area -->
+        <div class="flex-1 overflow-y-auto">
+            <div class="max-w-[1600px] mx-auto px-4 pt-5 pb-16">
+                <div id="collectionGrid" class="film-grid"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- ═══════════════════ SCRIPT ═══════════════════ -->
     <script>
     (() => {
@@ -375,6 +445,7 @@
             watchedFilter: null, // null | 'watched' | 'unwatched'
             genreFilter: null,   // null | genre string
             customFilms: {},     // { year: [film, ...] } — user-added films
+            collectionViewFilms: null, // flat array currently displayed in collection overlay
         };
 
         // ════════════════════════════════════════════════
@@ -714,7 +785,7 @@
                     <p class="text-[11px] text-gray-500 truncate mt-0.5">${esc(film.Director || 'Unknown')}</p>
                     <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
                         ${genre ? `<span class="text-[9px] uppercase tracking-wider text-gray-500 bg-[#1a1a1a] px-1.5 py-0.5 rounded">${esc(genre)}</span>` : ''}
-                        <span class="text-[9px] text-gray-600">${esc(film.Year || '')}</span>
+                        ${film.Year ? `<span class="text-[9px] text-gray-500 bg-[#1a1a1a] px-1.5 py-0.5 rounded">${esc(film.Year)}</span>` : ''}
                     </div>
                     ${watchedData ? `<div class="flex items-center gap-0.5 mt-1.5">${starsHTML(watchedData.rating, 10)}<span class="text-[9px] text-gray-600 ml-1">${watchedData.rating}/5</span></div>` : ''}
                     <!-- Quick links -->
@@ -1163,12 +1234,28 @@
             const key = filmKey(film);
             const idx = state.films.findIndex(f => filmKey(f) === key);
             updateStatus();
-            if (idx === -1) return;
-            const card = grid.querySelector(`[data-idx="${idx}"]`);
-            if (!card) return;
-            const temp = document.createElement('div');
-            temp.innerHTML = createCardHTML(film, idx);
-            card.replaceWith(temp.firstElementChild);
+            // Update main grid card if visible
+            if (idx !== -1) {
+                const card = grid.querySelector(`[data-idx="${idx}"]`);
+                if (card) {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = createCardHTML(film, idx);
+                    card.replaceWith(temp.firstElementChild);
+                }
+            }
+            // Also refresh collection card if overlay is open
+            if (state.collectionViewFilms) {
+                const ci = state.collectionViewFilms.findIndex(f => filmKey(f) === key);
+                if (ci !== -1) {
+                    const cg = document.getElementById('collectionGrid');
+                    const cc = cg && cg.querySelector(`[data-idx="${ci}"]`);
+                    if (cc) {
+                        const temp = document.createElement('div');
+                        temp.innerHTML = createCardHTML(state.collectionViewFilms[ci], ci);
+                        cc.replaceWith(temp.firstElementChild);
+                    }
+                }
+            }
         }
 
         // ════════════════════════════════════════════════
@@ -1414,6 +1501,180 @@
         }
 
         // ════════════════════════════════════════════════
+        //  COLLECTION VIEW
+        // ════════════════════════════════════════════════
+        const collectionState = {
+            tab: 'all',
+            search: '',
+            genre: '',
+            year: '',
+            sort: 'year-desc',
+        };
+
+        function getCollectionFilms() {
+            const allKeys = new Set([
+                ...state.favorites,
+                ...state.watchlist,
+                ...Object.keys(state.watched),
+            ]);
+            return [...allKeys].map(key => {
+                const [title, year] = key.split('|||');
+                const d = state.filmStore[key] || {};
+                return {
+                    Title: d.title || title,
+                    Year: d.year || year,
+                    Director: d.director || 'Unknown',
+                    Primary_Genre: d.genre || '',
+                    Rank: d.rank || '',
+                    Synopsis: d.synopsis || '',
+                    Major_Awards: d.awards || '',
+                };
+            });
+        }
+
+        function setCollTabActive(btn, isActive) {
+            btn.classList.toggle('border-[#c9a84c]', isActive);
+            btn.classList.toggle('bg-[#c9a84c]/10', isActive);
+            btn.classList.toggle('text-[#c9a84c]', isActive);
+            btn.classList.toggle('border-[#2a2a2a]', !isActive);
+            btn.classList.toggle('text-gray-500', !isActive);
+        }
+
+        function populateCollectionSelects(films) {
+            const genres = new Set();
+            films.forEach(f => {
+                (f.Primary_Genre || '').split('/').forEach(g => {
+                    const t = g.trim();
+                    if (t) genres.add(t);
+                });
+            });
+            const genreEl = document.getElementById('collGenreSelect');
+            genreEl.innerHTML = '<option value="">All Genres</option>';
+            [...genres].sort().forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g;
+                opt.textContent = g;
+                genreEl.appendChild(opt);
+            });
+
+            const years = new Set(films.map(f => f.Year).filter(Boolean));
+            const yearEl = document.getElementById('collYearSelect');
+            yearEl.innerHTML = '<option value="">All Years</option>';
+            [...years].sort((a, b) => b.localeCompare(a)).forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                yearEl.appendChild(opt);
+            });
+        }
+
+        function openCollectionView() {
+            const allFilms = getCollectionFilms();
+            populateCollectionSelects(allFilms);
+
+            document.getElementById('collSearchInput').value = '';
+            document.getElementById('collGenreSelect').value = '';
+            document.getElementById('collYearSelect').value = '';
+            document.getElementById('collSortSelect').value = 'year-desc';
+            collectionState.tab = 'all';
+            collectionState.search = '';
+            collectionState.genre = '';
+            collectionState.year = '';
+            collectionState.sort = 'year-desc';
+
+            document.querySelectorAll('.coll-tab').forEach(btn => {
+                setCollTabActive(btn, btn.dataset.collTab === 'all');
+            });
+
+            renderCollectionGrid();
+
+            document.getElementById('collectionOverlay').classList.add('cv-open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCollectionView() {
+            document.getElementById('collectionOverlay').classList.remove('cv-open');
+            state.collectionViewFilms = null;
+            document.body.style.overflow = '';
+        }
+
+        function renderCollectionGrid() {
+            let films = getCollectionFilms();
+
+            if (collectionState.tab === 'favorites') {
+                films = films.filter(f => state.favorites.has(filmKey(f)));
+            } else if (collectionState.tab === 'watchlist') {
+                films = films.filter(f => state.watchlist.has(filmKey(f)));
+            } else if (collectionState.tab === 'watched') {
+                films = films.filter(f => !!state.watched[filmKey(f)]);
+            }
+
+            if (collectionState.genre) {
+                films = films.filter(f =>
+                    (f.Primary_Genre || '').split('/').map(g => g.trim()).includes(collectionState.genre)
+                );
+            }
+
+            if (collectionState.year) {
+                films = films.filter(f => f.Year === collectionState.year);
+            }
+
+            if (collectionState.search) {
+                const q = collectionState.search.toLowerCase();
+                films = films.filter(f =>
+                    `${f.Title} ${f.Director} ${f.Primary_Genre}`.toLowerCase().includes(q)
+                );
+            }
+
+            switch (collectionState.sort) {
+                case 'year-desc':
+                    films.sort((a, b) => (b.Year || '').localeCompare(a.Year || '') || a.Title.localeCompare(b.Title));
+                    break;
+                case 'year-asc':
+                    films.sort((a, b) => (a.Year || '').localeCompare(b.Year || '') || a.Title.localeCompare(b.Title));
+                    break;
+                case 'title-asc':
+                    films.sort((a, b) => a.Title.localeCompare(b.Title));
+                    break;
+                case 'title-desc':
+                    films.sort((a, b) => b.Title.localeCompare(a.Title));
+                    break;
+                case 'rating-desc':
+                    films.sort((a, b) => {
+                        const ra = (state.watched[filmKey(a)] || {}).rating || 0;
+                        const rb = (state.watched[filmKey(b)] || {}).rating || 0;
+                        return rb - ra || a.Title.localeCompare(b.Title);
+                    });
+                    break;
+                case 'rating-asc':
+                    films.sort((a, b) => {
+                        const ra = (state.watched[filmKey(a)] || {}).rating || 0;
+                        const rb = (state.watched[filmKey(b)] || {}).rating || 0;
+                        return ra - rb || a.Title.localeCompare(b.Title);
+                    });
+                    break;
+            }
+
+            state.collectionViewFilms = films;
+
+            const countEl = document.getElementById('collCount');
+            if (countEl) countEl.textContent = `${films.length} film${films.length !== 1 ? 's' : ''}`;
+
+            const collGrid = document.getElementById('collectionGrid');
+            if (films.length === 0) {
+                collGrid.innerHTML = `
+                    <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                        <p class="text-gray-500 text-sm mt-4">No films found</p>
+                        <p class="text-gray-600 text-[12px] mt-1">Favorite, watchlist, or rate films to see them here.</p>
+                    </div>`;
+                return;
+            }
+
+            collGrid.innerHTML = films.map((film, i) => createCardHTML(film, i)).join('');
+        }
+
+        // ════════════════════════════════════════════════
         //  EVENT LISTENERS
         // ════════════════════════════════════════════════
 
@@ -1511,6 +1772,8 @@
                     hideRatingPicker();
                 } else if (!$('#addFilmModal').classList.contains('hidden')) {
                     closeAddFilmModal();
+                } else if (document.getElementById('collectionOverlay').classList.contains('cv-open')) {
+                    closeCollectionView();
                 } else if (!modal.classList.contains('hidden')) {
                     closeModal();
                 }
@@ -1538,6 +1801,66 @@
         $('#addFilmUrl').addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchFilmDataFromUrl(); });
         $('#addFilmConfirm').addEventListener('click', confirmAddFilm);
         $('#addFilmDownloadCsv').addEventListener('click', downloadYearCsv);
+
+        // Collection overlay
+        $('#collectionBtn').addEventListener('click', openCollectionView);
+        $('#collCloseBtn').addEventListener('click', closeCollectionView);
+
+        // Collection tab pills
+        document.getElementById('collectionOverlay').addEventListener('click', e => {
+            const tab = e.target.closest('.coll-tab');
+            if (!tab) return;
+            collectionState.tab = tab.dataset.collTab;
+            document.querySelectorAll('.coll-tab').forEach(btn => {
+                setCollTabActive(btn, btn.dataset.collTab === collectionState.tab);
+            });
+            renderCollectionGrid();
+        });
+
+        // Collection search (debounced)
+        let collSearchTimer;
+        document.getElementById('collSearchInput').addEventListener('input', e => {
+            clearTimeout(collSearchTimer);
+            collSearchTimer = setTimeout(() => {
+                collectionState.search = e.target.value;
+                renderCollectionGrid();
+            }, 200);
+        });
+
+        // Collection genre / year / sort selects
+        document.getElementById('collGenreSelect').addEventListener('change', e => {
+            collectionState.genre = e.target.value;
+            renderCollectionGrid();
+        });
+        document.getElementById('collYearSelect').addEventListener('change', e => {
+            collectionState.year = e.target.value;
+            renderCollectionGrid();
+        });
+        document.getElementById('collSortSelect').addEventListener('change', e => {
+            collectionState.sort = e.target.value;
+            renderCollectionGrid();
+        });
+
+        // Collection grid card interactions
+        document.getElementById('collectionGrid').addEventListener('click', e => {
+            const card = e.target.closest('.film-card');
+            if (!card) return;
+            const idx = parseInt(card.dataset.idx, 10);
+            const film = state.collectionViewFilms && state.collectionViewFilms[idx];
+            if (!film) return;
+
+            if (e.target.closest('.btn-favorite')) {
+                toggleFavorite(film);
+                renderCollectionGrid();
+            } else if (e.target.closest('.btn-watchlist')) {
+                toggleWatchlist(film);
+                renderCollectionGrid();
+            } else if (e.target.closest('.btn-rate')) {
+                showRatingPicker(film, e.target.closest('.btn-rate'));
+            } else if (e.target.closest('.btn-info')) {
+                openModal(film);
+            }
+        });
 
         // ════════════════════════════════════════════════
         //  INIT
