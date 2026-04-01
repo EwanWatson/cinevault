@@ -52,13 +52,6 @@
         .film-card { transition: transform 0.2s ease, border-color 0.2s ease; }
         .film-card:hover { transform: translateY(-3px); border-color: #333 !important; }
 
-        /* ── Poster fade-in ── */
-        .poster-img {
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-        .poster-img.loaded { opacity: 1; }
-
         /* ── Modal ── */
         .modal-backdrop {
             backdrop-filter: blur(8px);
@@ -893,7 +886,7 @@
                 <!-- Poster area -->
                 <div class="relative aspect-[2/3] bg-[#0e0e0e] overflow-hidden">
                     ${posterUrl && posterUrl !== 'null'
-                        ? `<img class="poster-img loaded w-full h-full object-cover absolute inset-0"
+                        ? `<img class="poster-img w-full h-full object-cover absolute inset-0"
                                src="${esc(posterUrl)}"
                                alt="${esc(film.Title)}"
                                loading="eager"
@@ -1063,7 +1056,6 @@
                         if (placeholder) placeholder.classList.remove('hidden');
                     };
                     img.src = url;
-                    img.classList.add('loaded');
                     posterArea.insertBefore(img, posterArea.firstChild);
                     if (placeholder) placeholder.classList.add('hidden');
                 }
