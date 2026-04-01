@@ -143,6 +143,11 @@
 
         /* ── Star picker / modal stars: minimum 32 px tap target ── */
         .picker-star, .modal-star { min-height: 32px; min-width: 32px; }
+
+        /* ── Add Film modal ── */
+        #addFilmModalContent { transition: transform 0.25s ease, opacity 0.25s ease; }
+        #addFilmModal.af-enter #addFilmModalContent { transform: scale(0.95); opacity: 0; }
+        #addFilmModal.af-active #addFilmModalContent { transform: scale(1); opacity: 1; }
     </style>
 </head>
 <body class="text-gray-300 min-h-screen">
@@ -206,6 +211,12 @@
             <button id="exportBtn" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#2a2a2a] text-xs text-gray-400 hover:text-[#c9a84c] hover:border-[#c9a84c]/50 transition-colors" title="Export your collection as JSON">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
+            </button>
+
+            <!-- Add Film -->
+            <button id="addFilmBtn" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#2a2a2a] text-xs text-gray-400 hover:text-[#c9a84c] hover:border-[#c9a84c]/50 transition-colors" title="Add a film via IMDB or Rotten Tomatoes link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                Add Film
             </button>
         </div>
 
@@ -279,6 +290,42 @@
         </div>
     </div>
 
+    <!-- ═══════════════════ ADD FILM MODAL ═══════════════════ -->
+    <div id="addFilmModal" class="fixed inset-0 z-50 hidden af-enter" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" id="addFilmBackdrop"></div>
+        <div class="relative flex items-center justify-center min-h-full p-4">
+            <div id="addFilmModalContent" class="bg-[#111] border border-[#222] rounded-xl shadow-2xl w-full max-w-lg">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-[#1e1e1e]">
+                    <h2 class="font-display text-base text-white">Add Film</h2>
+                    <button id="addFilmClose" class="text-gray-500 hover:text-white transition-colors" aria-label="Close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="p-5">
+                    <p class="text-[12px] text-gray-500 mb-4">Paste an IMDB or Rotten Tomatoes URL to fetch film details from TMDB.</p>
+                    <div class="flex gap-2 mb-4">
+                        <input id="addFilmUrl" type="url" placeholder="https://www.imdb.com/title/tt…  or  https://www.rottentomatoes.com/m/…"
+                               class="flex-1 bg-[#151515] border border-[#2a2a2a] rounded-md px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-[#c9a84c]">
+                        <button id="addFilmFetch" class="shrink-0 px-4 py-2 rounded-md bg-[#c9a84c]/10 border border-[#c9a84c]/30 text-[#c9a84c] text-sm font-medium hover:bg-[#c9a84c]/20 transition-colors disabled:opacity-50">
+                            Fetch
+                        </button>
+                    </div>
+                    <div id="addFilmStatus" class="hidden text-[12px] mb-4"></div>
+                    <div id="addFilmPreview" class="hidden bg-[#0d0d0d] border border-[#1e1e1e] rounded-lg p-4 mb-4"></div>
+                    <div class="flex items-center justify-between gap-3 pt-3 border-t border-[#1a1a1a]">
+                        <button id="addFilmDownloadCsv" class="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#c9a84c] transition-colors" title="Download all films for this year as CSV">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Download CSV
+                        </button>
+                        <button id="addFilmConfirm" class="hidden px-4 py-2 rounded-md bg-[#c9a84c] text-[#080808] text-sm font-semibold hover:bg-[#d4b05e] transition-colors">
+                            Add to <span id="addFilmYear"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ═══════════════════ SCRIPT ═══════════════════ -->
     <script>
     (() => {
@@ -301,6 +348,15 @@
         // ════════════════════════════════════════════════
         const YEARS = ['1980s', ...Array.from({ length: 36 }, (_, i) => String(1990 + i))];
 
+        // TMDB genre ID → name map (hardcoded for offline use)
+        const TMDB_GENRES = {
+            28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy',
+            80: 'Crime', 99: 'Documentary', 18: 'Drama', 10751: 'Family',
+            14: 'Fantasy', 36: 'History', 27: 'Horror', 10402: 'Music',
+            9648: 'Mystery', 10749: 'Romance', 878: 'Sci-Fi',
+            53: 'Thriller', 10752: 'War', 37: 'Western',
+        };
+
         // ════════════════════════════════════════════════
         //  STATE
         // ════════════════════════════════════════════════
@@ -318,6 +374,7 @@
             loadId: 0,           // for cancelling stale loads
             watchedFilter: null, // null | 'watched' | 'unwatched'
             genreFilter: null,   // null | genre string
+            customFilms: {},     // { year: [film, ...] } — user-added films
         };
 
         // ════════════════════════════════════════════════
@@ -399,6 +456,14 @@
             try { localStorage.setItem('cv_posterCache', JSON.stringify(state.posterCache)); } catch { /* quota exceeded */ }
         }
 
+        function loadCustomFilms() {
+            try { state.customFilms = JSON.parse(localStorage.getItem('cv_custom_films') || '{}'); } catch { state.customFilms = {}; }
+        }
+
+        function saveCustomFilms() {
+            try { localStorage.setItem('cv_custom_films', JSON.stringify(state.customFilms)); } catch { /* quota exceeded */ }
+        }
+
         // ════════════════════════════════════════════════
         //  CSV LOADING
         // ════════════════════════════════════════════════
@@ -426,6 +491,11 @@
 
                 const result = Papa.parse(text, { header: true, skipEmptyLines: true });
                 state.films = result.data.filter(r => r.Title && r.Title.trim());
+                // Merge custom films for this year
+                const customForYear = state.customFilms[year] || [];
+                if (customForYear.length > 0) {
+                    state.films = [...state.films, ...customForYear];
+                }
                 state.genreFilter = null;
                 populateGenreSelect();
                 hideSkeletons();
@@ -622,6 +692,7 @@
 
                     <!-- Rank badge -->
                     ${rank ? `<span class="absolute top-2 left-2 bg-black/70 text-[#c9a84c] text-[10px] font-semibold px-1.5 py-0.5 rounded-md border border-[#c9a84c]/20 backdrop-blur-sm">#${esc(rank)}</span>` : ''}
+                    ${film._custom ? `<span class="absolute bottom-2 left-2 bg-[#c9a84c]/20 text-[#c9a84c] text-[8px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded backdrop-blur-sm border border-[#c9a84c]/30">custom</span>` : ''}
 
                     <!-- Action buttons overlay -->
                     <div class="absolute top-1.5 right-1.5 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity" style="opacity:1">
@@ -1156,6 +1227,193 @@
         }
 
         // ════════════════════════════════════════════════
+        //  ADD FILM MODAL
+        // ════════════════════════════════════════════════
+        let pendingFilm = null;
+
+        function openAddFilmModal() {
+            pendingFilm = null;
+            $('#addFilmUrl').value = '';
+            const statusEl = $('#addFilmStatus');
+            statusEl.className = 'hidden text-[12px] mb-4';
+            statusEl.textContent = '';
+            $('#addFilmPreview').classList.add('hidden');
+            $('#addFilmConfirm').classList.add('hidden');
+            $('#addFilmYear').textContent = state.year;
+            const afModal = $('#addFilmModal');
+            afModal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                afModal.classList.remove('af-enter');
+                afModal.classList.add('af-active');
+            });
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => $('#addFilmUrl').focus(), 60);
+        }
+
+        function closeAddFilmModal() {
+            const afModal = $('#addFilmModal');
+            afModal.classList.remove('af-active');
+            afModal.classList.add('af-enter');
+            setTimeout(() => {
+                afModal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 220);
+        }
+
+        function setAddFilmStatus(msg, isError = false) {
+            const el = $('#addFilmStatus');
+            el.className = `text-[12px] mb-4 ${isError ? 'text-red-400' : 'text-gray-500'}`;
+            el.textContent = msg;
+        }
+
+        async function fetchFilmDataFromUrl() {
+            const rawUrl = $('#addFilmUrl').value.trim();
+            if (!rawUrl) return;
+            const fetchBtn = $('#addFilmFetch');
+            fetchBtn.disabled = true;
+            fetchBtn.textContent = 'Fetching…';
+            $('#addFilmPreview').classList.add('hidden');
+            $('#addFilmConfirm').classList.add('hidden');
+            pendingFilm = null;
+            setAddFilmStatus('Fetching film data…');
+
+            try {
+                let tmdbData = null;
+
+                const imdbMatch = rawUrl.match(/tt\d{7,}/);
+                if (imdbMatch) {
+                    const imdbId = imdbMatch[0];
+                    const res = await fetch(`https://api.themoviedb.org/3/find/${imdbId}?api_key=${CONFIG.apiKey}&external_source=imdb_id`);
+                    if (!res.ok) throw new Error(`TMDB responded with status ${res.status}.`);
+                    const data = await res.json();
+                    if (data.movie_results && data.movie_results.length > 0) {
+                        tmdbData = data.movie_results[0];
+                    } else {
+                        throw new Error('Film not found on TMDB for this IMDB ID.');
+                    }
+                } else {
+                    const rtMatch = rawUrl.match(/rottentomatoes\.com\/m\/([^/?#]+)/);
+                    if (!rtMatch) throw new Error('Unrecognised URL. Please paste an IMDB or Rotten Tomatoes film URL.');
+                    const slug = rtMatch[1].replace(/_/g, ' ');
+                    const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${CONFIG.apiKey}&query=${encodeURIComponent(slug)}&include_adult=false`);
+                    if (!res.ok) throw new Error(`TMDB responded with status ${res.status}.`);
+                    const data = await res.json();
+                    if (data.results && data.results.length > 0) {
+                        tmdbData = data.results[0];
+                    } else {
+                        throw new Error('Film not found on TMDB. Try using the IMDB URL instead.');
+                    }
+                }
+
+                // Fetch director from credits
+                let director = 'Unknown';
+                try {
+                    const credRes = await fetch(`https://api.themoviedb.org/3/movie/${tmdbData.id}/credits?api_key=${CONFIG.apiKey}`);
+                    if (credRes.ok) {
+                        const cred = await credRes.json();
+                        const dirEntry = (cred.crew || []).find(c => c.job === 'Director');
+                        if (dirEntry) director = dirEntry.name;
+                    }
+                } catch { /* leave as Unknown */ }
+
+                const genres = (tmdbData.genre_ids || []).map(id => TMDB_GENRES[id]).filter(Boolean).join('/');
+                const releaseYear = tmdbData.release_date ? tmdbData.release_date.substring(0, 4) : state.year;
+                const nextRank = state.films.length > 0
+                    ? Math.max(...state.films.map(f => parseInt(f.Rank) || 0)) + 1
+                    : 999;
+                const overview = tmdbData.overview || '';
+                const previewSynopsis = overview.length > 220 ? overview.substring(0, 220) + '…' : overview;
+
+                pendingFilm = {
+                    Rank: String(nextRank),
+                    Title: tmdbData.title || 'Unknown',
+                    Year: state.year,
+                    Director: director,
+                    Primary_Genre: genres,
+                    Synopsis: overview,
+                    Major_Awards: '',
+                    Key_Sources: rawUrl,
+                    _custom: true,
+                    _posterPath: tmdbData.poster_path || null,
+                };
+
+                const previewEl = $('#addFilmPreview');
+                previewEl.innerHTML = `
+                    <div class="flex gap-3">
+                        ${pendingFilm._posterPath
+                            ? `<img src="https://image.tmdb.org/t/p/w92${esc(pendingFilm._posterPath)}" alt="${esc(pendingFilm.Title)}" class="w-14 rounded shrink-0 object-cover self-start">`
+                            : `<div class="w-14 h-20 rounded bg-[#1a1a1a] shrink-0 flex items-center justify-center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1"><rect x="2" y="2" width="20" height="20" rx="3"/></svg></div>`}
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-semibold text-white leading-tight">${esc(pendingFilm.Title)}</p>
+                            <p class="text-[11px] text-gray-400 mt-0.5">${esc(director)} &middot; ${esc(releaseYear)}</p>
+                            ${genres ? `<p class="text-[10px] text-gray-500 mt-1">${esc(genres)}</p>` : ''}
+                            ${previewSynopsis ? `<p class="text-[11px] text-gray-500 mt-1.5 leading-relaxed">${esc(previewSynopsis)}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+                previewEl.classList.remove('hidden');
+
+                setAddFilmStatus(`Found: “${pendingFilm.Title}” (${releaseYear}) — will be added to ${state.year}.`);
+                $('#addFilmConfirm').classList.remove('hidden');
+                $('#addFilmYear').textContent = state.year;
+
+            } catch (err) {
+                setAddFilmStatus(err.message, true);
+            } finally {
+                fetchBtn.disabled = false;
+                fetchBtn.textContent = 'Fetch';
+            }
+        }
+
+        function confirmAddFilm() {
+            if (!pendingFilm) return;
+            const year = state.year;
+            const alreadyExists = state.films.some(
+                f => f.Title.toLowerCase() === pendingFilm.Title.toLowerCase()
+            );
+            if (alreadyExists) {
+                setAddFilmStatus(`“${pendingFilm.Title}” is already in the ${year} list.`, true);
+                return;
+            }
+
+            if (!state.customFilms[year]) state.customFilms[year] = [];
+            state.customFilms[year].push(pendingFilm);
+            saveCustomFilms();
+
+            // Cache poster immediately so it shows right away
+            const key = filmKey(pendingFilm);
+            state.posterCache[key] = pendingFilm._posterPath
+                ? `https://image.tmdb.org/t/p/${CONFIG.posterSize}${pendingFilm._posterPath}`
+                : null;
+            savePosterCache();
+
+            state.films.push(pendingFilm);
+            populateGenreSelect();
+            applyFilters();
+            closeAddFilmModal();
+        }
+
+        function downloadYearCsv() {
+            const films = state.films;
+            if (films.length === 0) return;
+            const headers = ['Rank', 'Title', 'Year', 'Director', 'Primary_Genre', 'Synopsis', 'Major_Awards', 'Key_Sources'];
+            const csvRow = (row) => headers.map(h => {
+                const v = (row[h] != null ? String(row[h]) : '').replace(/\r?\n/g, ' ');
+                return (v.includes(',') || v.includes('"')) ? `"${v.replace(/"/g, '""')}"` : v;
+            }).join(',');
+            const lines = [headers.join(','), ...films.map(csvRow)].join('\r\n');
+            const blob = new Blob([lines], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `films_${state.year}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ════════════════════════════════════════════════
         //  EVENT LISTENERS
         // ════════════════════════════════════════════════
 
@@ -1251,6 +1509,8 @@
                 const picker = document.getElementById('ratingPicker');
                 if (!picker.classList.contains('hidden')) {
                     hideRatingPicker();
+                } else if (!$('#addFilmModal').classList.contains('hidden')) {
+                    closeAddFilmModal();
                 } else if (!modal.classList.contains('hidden')) {
                     closeModal();
                 }
@@ -1270,11 +1530,21 @@
         // Export
         $('#exportBtn').addEventListener('click', exportCollection);
 
+        // Add Film modal
+        $('#addFilmBtn').addEventListener('click', openAddFilmModal);
+        $('#addFilmClose').addEventListener('click', closeAddFilmModal);
+        $('#addFilmBackdrop').addEventListener('click', closeAddFilmModal);
+        $('#addFilmFetch').addEventListener('click', fetchFilmDataFromUrl);
+        $('#addFilmUrl').addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchFilmDataFromUrl(); });
+        $('#addFilmConfirm').addEventListener('click', confirmAddFilm);
+        $('#addFilmDownloadCsv').addEventListener('click', downloadYearCsv);
+
         // ════════════════════════════════════════════════
         //  INIT
         // ════════════════════════════════════════════════
         function init() {
             loadPersisted();
+            loadCustomFilms();
 
             // Populate year selector
             YEARS.forEach(y => {
