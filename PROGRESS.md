@@ -8,7 +8,7 @@
 - [x] **Task 1.5**: Year Progress Bar
 
 ## Feature 2 — Stats Dashboard
-- [ ] **Task 2.1**: Add Chart.js CDN & Collapsible Panel Skeleton
+- [x] **Task 2.1**: Add Chart.js CDN & Collapsible Panel Skeleton
 - [ ] **Task 2.2**: Genre Breakdown Doughnut Chart
 - [ ] **Task 2.3**: Director Leaderboard Bar Chart
 - [ ] **Task 2.4**: Quality Heatmap / Comparison Chart
