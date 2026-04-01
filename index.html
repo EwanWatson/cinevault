@@ -870,11 +870,34 @@
             }
 
             emptyState.classList.add('hidden');
+
+            // Stash already-decoded poster imgs before the innerHTML wipe so they
+            // can be re-spliced in afterwards — avoids the re-decode flash that occurs
+            // even for HTTP-cached images when img elements are recreated in the DOM.
+            const decodedImgs = new Map();
+            grid.querySelectorAll('.poster-img').forEach(img => {
+                if (img.complete && img.naturalWidth > 0) {
+                    decodedImgs.set(img.src, img);
+                }
+            });
+
             const html = state.filteredFilms.map((film, visualIdx) => {
                 const origIdx = state.films.indexOf(film);
                 return createCardHTML(film, origIdx);
             }).join('');
             grid.innerHTML = html;
+
+            // Re-splice decoded imgs back in — same src means same decoded pixel data,
+            // no re-decode needed so posters appear instantly with no blank frame.
+            if (decodedImgs.size > 0) {
+                grid.querySelectorAll('.poster-img').forEach(newImg => {
+                    const existing = decodedImgs.get(newImg.src);
+                    if (existing) {
+                        existing.className = newImg.className;
+                        newImg.replaceWith(existing);
+                    }
+                });
+            }
         }
 
         function createCardHTML(film, idx) {
