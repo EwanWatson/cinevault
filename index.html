@@ -444,6 +444,16 @@
         // ════════════════════════════════════════════════
         const YEARS = ['1980s', ...Array.from({ length: 36 }, (_, i) => String(1990 + i))];
 
+        // Maps a 4-digit year (string or number) to its CSV file key.
+        // Pre-1990 years map to a decade string ("1980s", "1970s", etc.);
+        // 1990+ years return as-is ("1994", "2025", etc.).
+        function yearToFileKey(year) {
+            const y = parseInt(year, 10);
+            if (isNaN(y) || y >= 1990) return String(year);
+            const decade = Math.floor(y / 10) * 10;
+            return `${decade}s`;
+        }
+
         // TMDB genre ID → name map (hardcoded for offline use)
         const TMDB_GENRES = {
             28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy',
@@ -633,9 +643,12 @@
                 const extras = JSON.parse(localStorage.getItem('cv_extra_years') || '[]');
                 extras.forEach(y => { if (!YEARS.includes(y)) YEARS.push(y); });
                 YEARS.sort((a, b) => {
-                    if (a === '1980s') return -1;
-                    if (b === '1980s') return 1;
-                    return a.localeCompare(b);
+                    const aIsDecade = isNaN(parseInt(a));
+                    const bIsDecade = isNaN(parseInt(b));
+                    if (aIsDecade && bIsDecade) return a.localeCompare(b);
+                    if (aIsDecade) return -1;
+                    if (bIsDecade) return 1;
+                    return parseInt(a) - parseInt(b);
                 });
             } catch { /* ignore corrupt data */ }
         }
@@ -1532,7 +1545,7 @@
                 pendingFilm = {
                     Rank: String(nextRank),
                     Title: tmdbData.title || 'Unknown',
-                    Year: state.year,
+                    Year: releaseYear,
                     Director: director,
                     Primary_Genre: genres,
                     Synopsis: overview,
@@ -1553,14 +1566,16 @@
                             <p class="text-[11px] text-gray-400 mt-0.5">${esc(director)} &middot; ${esc(releaseYear)}</p>
                             ${genres ? `<p class="text-[10px] text-gray-500 mt-1">${esc(genres)}</p>` : ''}
                             ${previewSynopsis ? `<p class="text-[11px] text-gray-500 mt-1.5 leading-relaxed">${esc(previewSynopsis)}</p>` : ''}
+                            ${parseInt(releaseYear, 10) < 1990 ? `<p class="text-[10px] text-[#c9a84c] mt-1.5">Will be added to the ${yearToFileKey(releaseYear)} list</p>` : ''}
                         </div>
                     </div>
                 `;
                 previewEl.classList.remove('hidden');
 
-                setAddFilmStatus(`Found: “${pendingFilm.Title}” (${releaseYear}) — will be added to ${state.year}.`);
+                const targetKey = yearToFileKey(releaseYear);
+                setAddFilmStatus(`Found: “${pendingFilm.Title}” (${releaseYear}) — will be added to ${targetKey}.`);
                 $('#addFilmConfirm').classList.remove('hidden');
-                $('#addFilmYear').textContent = state.year;
+                $('#addFilmYear').textContent = targetKey;
 
             } catch (err) {
                 setAddFilmStatus(err.message, true);
@@ -1572,7 +1587,9 @@
 
         function confirmAddFilm() {
             if (!pendingFilm) return;
-            const year = state.year;
+            // Derive the correct CSV/storage key from the film's actual release year.
+            // Pre-1990 films route to their decade file ("1980s", "1970s", etc.).
+            const year = yearToFileKey(pendingFilm.Year);
             const alreadyExists = state.films.some(
                 f => f.Title.toLowerCase() === pendingFilm.Title.toLowerCase()
             );
@@ -1581,13 +1598,16 @@
                 return;
             }
 
-            // Auto-add year to dropdown if it doesn't exist yet
+            // Auto-add year/decade key to dropdown if it doesn't exist yet
             if (!YEARS.includes(year)) {
                 YEARS.push(year);
                 YEARS.sort((a, b) => {
-                    if (a === '1980s') return -1;
-                    if (b === '1980s') return 1;
-                    return a.localeCompare(b);
+                    const aIsDecade = isNaN(parseInt(a));
+                    const bIsDecade = isNaN(parseInt(b));
+                    if (aIsDecade && bIsDecade) return a.localeCompare(b);
+                    if (aIsDecade) return -1;
+                    if (bIsDecade) return 1;
+                    return parseInt(a) - parseInt(b);
                 });
                 saveExtraYears();
                 populateYearSelect();
