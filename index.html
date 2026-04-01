@@ -1787,8 +1787,7 @@
                 if (perm === 'granted') {
                     state.dirHandle = handle;
                     updateFolderAccessBtn(true);
-                    await loadUserDataFile();     // merge file → state
-                    await saveUserDataFile();       // write current state → file (one clean write)
+                    await loadUserDataFile();     // merge file → state (no write — avoids live-server reload loop)
                 }
             } catch { /* silently ignore — API not available or permission denied */ }
         }
