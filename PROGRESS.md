@@ -24,7 +24,7 @@
 - [x] **Task 4.1**: Enrich Export with Watched Data
 
 ## Integration & QA
-- [ ] **Task 5.1**: Wire Up Stats Refresh on Year Change
+- [x] **Task 5.1**: Wire Up Stats Refresh on Year Change
 - [ ] **Task 5.2**: Mobile & Responsive Testing
 - [ ] **Task 5.3**: Performance Audit
 - [ ] **Task 5.4**: Final Polish & Edge Cases
