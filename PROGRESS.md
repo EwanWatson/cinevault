@@ -25,6 +25,6 @@
 
 ## Integration & QA
 - [x] **Task 5.1**: Wire Up Stats Refresh on Year Change
-- [ ] **Task 5.2**: Mobile & Responsive Testing
-- [ ] **Task 5.3**: Performance Audit
-- [ ] **Task 5.4**: Final Polish & Edge Cases
+- [x] **Task 5.2**: Mobile & Responsive Testing
+- [x] **Task 5.3**: Performance Audit
+- [x] **Task 5.4**: Final Polish & Edge Cases

@@ -164,6 +164,18 @@
         @media (min-width: 768px)  { .film-grid { grid-template-columns: repeat(4, 1fr); gap: 1.15rem; } }
         @media (min-width: 1024px) { .film-grid { grid-template-columns: repeat(5, 1fr); } }
         @media (min-width: 1280px) { .film-grid { grid-template-columns: repeat(6, 1fr); } }
+
+        /* ── Filter pills: horizontal scroll on narrow viewports ── */
+        #viewToggles {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            flex-wrap: nowrap;
+        }
+        #viewToggles::-webkit-scrollbar { display: none; }
+
+        /* ── Star picker / modal stars: minimum 32 px tap target ── */
+        .picker-star, .modal-star { min-height: 32px; min-width: 32px; }
     </style>
 </head>
 <body class="text-gray-300 min-h-screen">
@@ -451,23 +463,23 @@
         }
 
         function saveFavorites() {
-            localStorage.setItem('cv_favorites', JSON.stringify([...state.favorites]));
+            try { localStorage.setItem('cv_favorites', JSON.stringify([...state.favorites])); } catch { /* quota exceeded */ }
         }
 
         function saveWatchlist() {
-            localStorage.setItem('cv_watchlist', JSON.stringify([...state.watchlist]));
+            try { localStorage.setItem('cv_watchlist', JSON.stringify([...state.watchlist])); } catch { /* quota exceeded */ }
         }
 
         function saveWatched() {
-            localStorage.setItem('cv_watched', JSON.stringify(state.watched));
+            try { localStorage.setItem('cv_watched', JSON.stringify(state.watched)); } catch { /* quota exceeded */ }
         }
 
         function saveFilmStore() {
-            localStorage.setItem('cv_filmStore', JSON.stringify(state.filmStore));
+            try { localStorage.setItem('cv_filmStore', JSON.stringify(state.filmStore)); } catch { /* quota exceeded */ }
         }
 
         function savePosterCache() {
-            localStorage.setItem('cv_posterCache', JSON.stringify(state.posterCache));
+            try { localStorage.setItem('cv_posterCache', JSON.stringify(state.posterCache)); } catch { /* quota exceeded */ }
         }
 
         // ════════════════════════════════════════════════
@@ -716,7 +728,10 @@
                         $('#emptySub').textContent = 'Try adjusting your filters or search.';
                     }
                 } else {
-                    emptyState.classList.add('hidden');
+                    // state.films itself is empty (e.g. blank CSV)
+                    emptyState.classList.remove('hidden');
+                    $('#emptyTitle').textContent = 'No films found';
+                    $('#emptySub').textContent = 'No films in the list for this year.';
                 }
                 return;
             }
@@ -1437,7 +1452,7 @@
                 const isCurrentlyOpen = document.getElementById('statsContent').classList.contains('open');
                 const next = !isCurrentlyOpen;
                 applyStatsPanel(next);
-                localStorage.setItem('cv_statsOpen', String(next));
+                try { localStorage.setItem('cv_statsOpen', String(next)); } catch { /* quota exceeded */ }
                 if (next) renderStats();
             });
         }
