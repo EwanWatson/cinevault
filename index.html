@@ -49,7 +49,7 @@
         }
 
         /* ── Card hover ── */
-        .film-card { transition: transform 0.2s ease, border-color 0.2s ease; }
+        .film-card { transition: transform 0.2s ease, border-color 0.2s ease; contain: layout style paint; }
         .film-card:hover { transform: translateY(-3px); border-color: #333 !important; }
 
         /* ── Card layout — all structural/text rules defined statically so Edge/Chromium
@@ -180,7 +180,6 @@
             display: grid;
             gap: 1rem;
             grid-template-columns: repeat(2, 1fr);
-            will-change: transform;
         }
         @media (min-width: 540px)  { .film-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (min-width: 768px)  { .film-grid { grid-template-columns: repeat(4, 1fr); gap: 1.15rem; } }
@@ -993,18 +992,18 @@
                     </div>
 
                     <!-- Rank badge -->
-                    ${rank ? `<span class="rank-badge absolute top-2 left-2 bg-black/70 text-[#c9a84c] text-[10px] font-semibold px-1.5 py-0.5 rounded-md border border-[#c9a84c]/20 backdrop-blur-sm cursor-pointer select-none" title="Click to edit rank">#${esc(rank)}</span>` : ''}
+                    ${rank ? `<span class="rank-badge absolute top-2 left-2 bg-black/70 text-[#c9a84c] text-[10px] font-semibold px-1.5 py-0.5 rounded-md border border-[#c9a84c]/20 cursor-pointer select-none" title="Click to edit rank">#${esc(rank)}</span>` : ''}
                     ${''}<!-- no custom badge -->
 
                     <!-- Action buttons overlay -->
                     <div class="absolute top-1.5 right-1.5 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity" style="opacity:1">
-                        <button class="action-btn btn-favorite w-7 h-7 flex items-center justify-center rounded-full ${isFav ? 'bg-red-500/20 text-red-400' : 'bg-black/50 text-gray-400 hover:text-red-400'} backdrop-blur-sm" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">
+                        <button class="action-btn btn-favorite w-7 h-7 flex items-center justify-center rounded-full ${isFav ? 'bg-red-500/20 text-red-400' : 'bg-black/50 text-gray-400 hover:text-red-400'}" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">
                             <svg width="14" height="14" viewBox="0 0 24 24" ${isFav ? 'fill="currentColor"' : 'fill="none"'} stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         </button>
-                        <button class="action-btn btn-watchlist w-7 h-7 flex items-center justify-center rounded-full ${isWl ? 'bg-blue-500/20 text-blue-400' : 'bg-black/50 text-gray-400 hover:text-blue-400'} backdrop-blur-sm" title="${isWl ? 'Remove from Watchlist' : 'Add to Watchlist'}">
+                        <button class="action-btn btn-watchlist w-7 h-7 flex items-center justify-center rounded-full ${isWl ? 'bg-blue-500/20 text-blue-400' : 'bg-black/50 text-gray-400 hover:text-blue-400'}" title="${isWl ? 'Remove from Watchlist' : 'Add to Watchlist'}">
                             <svg width="14" height="14" viewBox="0 0 24 24" ${isWl ? 'fill="currentColor"' : 'fill="none"'} stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                         </button>
-                        <button class="action-btn btn-rate w-7 h-7 flex items-center justify-center rounded-full ${isWatched ? 'bg-[#c9a84c]/20 text-[#c9a84c]' : 'bg-black/50 text-gray-400 hover:text-[#c9a84c]'} backdrop-blur-sm" title="${isWatched ? 'Re-rate film' : 'Rate film'}">
+                        <button class="action-btn btn-rate w-7 h-7 flex items-center justify-center rounded-full ${isWatched ? 'bg-[#c9a84c]/20 text-[#c9a84c]' : 'bg-black/50 text-gray-400 hover:text-[#c9a84c]'}" title="${isWatched ? 'Re-rate film' : 'Rate film'}">
                             <svg width="13" height="13" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="${isWatched ? '#c9a84c' : 'none'}" stroke="${isWatched ? '#c9a84c' : 'currentColor'}" stroke-width="1.8" stroke-linejoin="round"/></svg>
                         </button>
                     </div>
