@@ -956,7 +956,7 @@
 
                     <!-- Rank badge -->
                     ${rank ? `<span class="rank-badge absolute top-2 left-2 bg-black/70 text-[#c9a84c] text-[10px] font-semibold px-1.5 py-0.5 rounded-md border border-[#c9a84c]/20 backdrop-blur-sm cursor-pointer select-none" title="Click to edit rank">#${esc(rank)}</span>` : ''}
-                    ${film._custom ? `<span class="absolute bottom-2 left-2 bg-[#c9a84c]/20 text-[#c9a84c] text-[8px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded backdrop-blur-sm border border-[#c9a84c]/30">custom</span>` : ''}
+                    ${''}<!-- no custom badge -->
 
                     <!-- Action buttons overlay -->
                     <div class="absolute top-1.5 right-1.5 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity" style="opacity:1">
@@ -1620,7 +1620,7 @@
                     Synopsis: overview,
                     Major_Awards: '',
                     Key_Sources: rawUrl,
-                    _custom: true,
+                    // _custom flag removed — film goes directly to CSV
                     _posterPath: tmdbData.poster_path || null,
                 };
 
@@ -1684,8 +1684,27 @@
             }
 
             if (!state.customFilms[year]) state.customFilms[year] = [];
-            state.customFilms[year].push(pendingFilm);
-            saveCustomFilms();
+
+            // Assign a sensible rank: one after the current highest rank in this year's films
+            if (!pendingFilm.Rank) {
+                const maxRank = state.films.reduce((max, f) => {
+                    const r = parseInt(state.rankOverrides[filmKey(f)] || f.Rank || '0', 10);
+                    return r > max ? r : max;
+                }, 0);
+                pendingFilm.Rank = String(maxRank + 1);
+            }
+
+            // Write to CSV first; only keep in customFilms if CSV write fails
+            appendFilmToCSV(pendingFilm, year).then(written => {
+                if (!written) {
+                    // CSV write failed — persist in customFilms as fallback
+                    if (!state.customFilms[year]) state.customFilms[year] = [];
+                    state.customFilms[year].push(pendingFilm);
+                    saveCustomFilms();
+                }
+                // If written = true the film is now in the CSV; don't add to customFilms
+                // to avoid a duplicate on next page load
+            });
 
             // Cache poster immediately so it shows right away
             const key = filmKey(pendingFilm);
@@ -1698,8 +1717,7 @@
             populateGenreSelect();
             applyFilters();
 
-            // Write to CSV file on disk (non-blocking; falls back gracefully if no folder access)
-            appendFilmToCSV(pendingFilm, year);
+            // CSV write now happens (async) in the appendFilmToCSV().then() block above
 
             closeAddFilmModal();
         }
