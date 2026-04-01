@@ -677,6 +677,7 @@
             const key = filmKey(film);
             const isFav = state.favorites.has(key);
             const isWl = state.watchlist.has(key);
+            const watchedData = state.watched[key] || null;
             const posterUrl = state.posterCache[key];
             const lgPoster = posterUrl ? posterUrl.replace(CONFIG.posterSize, CONFIG.posterSizeLg) : null;
 
@@ -717,6 +718,18 @@
                         <p class="text-[12px] text-gray-400 leading-relaxed">${esc(film.Major_Awards)}</p>
                     </div>` : ''}
 
+                    <!-- Watched / Rating -->
+                    <div class="mb-4 p-3 rounded-lg bg-[#0d0d0d] border border-[#1e1e1e]">
+                        <h4 class="text-[10px] uppercase tracking-widest text-gray-600 mb-2">Your Rating</h4>
+                        <div class="flex items-center gap-0.5 modal-star-row">
+                            ${[1,2,3,4,5].map(n => `<button class="modal-star flex items-center justify-center w-9 h-9 rounded-lg hover:bg-[#c9a84c]/10 transition-colors" data-rating="${n}" title="${n} star${n > 1 ? 's' : ''}"><svg width="20" height="20" viewBox="0 0 24 24"><path class="msp" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="${watchedData && n <= watchedData.rating ? '#c9a84c' : 'none'}" stroke="${watchedData && n <= watchedData.rating ? '#c9a84c' : '#3a3a3a'}" stroke-width="1.8" stroke-linejoin="round"/></svg></button>`).join('')}
+                            ${watchedData
+                                ? `<span class="ml-2 text-[12px] text-[#c9a84c] font-medium">${watchedData.rating}/5</span><span class="ml-1.5 text-[11px] text-gray-600">&middot; ${relativeTime(watchedData.timestamp)}</span>`
+                                : `<span class="ml-2 text-[11px] text-gray-600">Tap a star to rate</span>`}
+                        </div>
+                        ${watchedData ? `<button class="modal-unwatch mt-2 text-[10px] text-gray-600 hover:text-red-400 transition-colors flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Mark as unwatched</button>` : ''}
+                    </div>
+
                     <!-- Actions -->
                     <div class="flex items-center gap-2 flex-wrap pt-3 border-t border-[#1a1a1a]">
                         <button class="modal-fav flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs border transition-colors ${isFav ? 'border-red-500/30 bg-red-500/10 text-red-400' : 'border-[#2a2a2a] text-gray-400 hover:border-red-500/30 hover:text-red-400'}">
@@ -745,6 +758,36 @@
             });
             modalBody.querySelector('.modal-wl')?.addEventListener('click', () => {
                 toggleWatchlist(film);
+                openModal(film);
+            });
+
+            // Modal star rating wiring
+            const mStars = modalBody.querySelectorAll('.modal-star');
+            const mCurrentRating = watchedData ? watchedData.rating : 0;
+            mStars.forEach((btn, i) => {
+                btn.addEventListener('mouseenter', () => {
+                    mStars.forEach((b, j) => {
+                        const p = b.querySelector('.msp');
+                        if (j <= i) { p.setAttribute('fill', '#c9a84c');  p.setAttribute('stroke', '#c9a84c'); }
+                        else        { p.setAttribute('fill', 'none');      p.setAttribute('stroke', '#3a3a3a'); }
+                    });
+                });
+                btn.addEventListener('click', () => {
+                    toggleWatched(film, parseInt(btn.dataset.rating));
+                    refreshCard(film);
+                    openModal(film);
+                });
+            });
+            modalBody.querySelector('.modal-star-row')?.addEventListener('mouseleave', () => {
+                mStars.forEach((b, j) => {
+                    const p = b.querySelector('.msp');
+                    if (j < mCurrentRating) { p.setAttribute('fill', '#c9a84c'); p.setAttribute('stroke', '#c9a84c'); }
+                    else                    { p.setAttribute('fill', 'none');     p.setAttribute('stroke', '#3a3a3a'); }
+                });
+            });
+            modalBody.querySelector('.modal-unwatch')?.addEventListener('click', () => {
+                removeWatched(film);
+                refreshCard(film);
                 openModal(film);
             });
 
@@ -836,6 +879,20 @@
                 const on = n <= rating;
                 return `<svg width="${size}" height="${size}" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="${on ? '#c9a84c' : 'none'}" stroke="${on ? '#c9a84c' : '#444'}" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
             }).join('');
+        }
+
+        function relativeTime(isoString) {
+            const diff = Date.now() - new Date(isoString).getTime();
+            const mins = Math.floor(diff / 60000);
+            if (mins < 1) return 'just now';
+            if (mins < 60) return `${mins}m ago`;
+            const hrs = Math.floor(mins / 60);
+            if (hrs < 24) return `${hrs}h ago`;
+            const days = Math.floor(hrs / 24);
+            if (days < 7) return `${days}d ago`;
+            if (days < 30) return `${Math.floor(days / 7)}w ago`;
+            if (days < 365) return `${Math.floor(days / 30)}mo ago`;
+            return `${Math.floor(days / 365)}y ago`;
         }
 
         // ════════════════════════════════════════════════
