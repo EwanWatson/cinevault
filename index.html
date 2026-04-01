@@ -1338,9 +1338,10 @@
                 });
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    toggleWatched(pickerFilm, parseInt(btn.dataset.rating));
+                    const targetFilm = pickerFilm;
+                    toggleWatched(targetFilm, parseInt(btn.dataset.rating));
                     hideRatingPicker();
-                    refreshCard(pickerFilm);
+                    refreshCard(targetFilm);
                 });
             });
 
@@ -1354,9 +1355,10 @@
 
             picker.querySelector('.picker-clear')?.addEventListener('click', (e) => {
                 e.stopPropagation();
-                removeWatched(pickerFilm);
+                const targetFilm = pickerFilm;
+                removeWatched(targetFilm);
                 hideRatingPicker();
-                refreshCard(pickerFilm);
+                refreshCard(targetFilm);
             });
 
             // Show offscreen first to measure, then position
