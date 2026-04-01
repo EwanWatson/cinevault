@@ -156,6 +156,10 @@
         /* ── Folder access button active state ── */
         #folderAccessBtn.csv-active { color: #c9a84c; border-color: rgba(201, 168, 76, 0.5); }
 
+        /* ── Data modal ── */
+        #dataModal { display: none; }
+        #dataModal.open { display: flex; }
+
         /* ── Rank edit input ── */
         .rank-edit-input {
             background: transparent;
@@ -248,10 +252,10 @@
                 Add Film
             </button>
 
-            <!-- Folder Access (CSV write) -->
-            <button id="folderAccessBtn" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#2a2a2a] text-xs text-gray-400 hover:text-[#c9a84c] hover:border-[#c9a84c]/50 transition-colors" title="Grant folder access to save films to CSV">
+            <!-- Data management -->
+            <button id="folderAccessBtn" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#2a2a2a] text-xs text-gray-400 hover:text-[#c9a84c] hover:border-[#c9a84c]/50 transition-colors" title="Manage your data — save/load favorites, watchlist & ratings">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                CSV
+                Data
             </button>
         </div>
 
@@ -357,6 +361,58 @@
                         </button>
                     </div>
                     <p id="addFilmCsvNote" class="text-[10px] text-gray-600 text-center mt-2"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ DATA MODAL ═══════════════════ -->
+    <div id="dataModal" class="fixed inset-0 z-[70] items-center justify-center" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" id="dataModalBackdrop"></div>
+        <div class="relative bg-[#111] border border-[#222] rounded-xl shadow-2xl w-full max-w-md mx-4">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#1e1e1e]">
+                <h2 class="font-display text-base text-white">Data Management</h2>
+                <button id="dataModalClose" class="text-gray-500 hover:text-white transition-colors" aria-label="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <!-- Folder access (Chrome/Edge only) -->
+                <div id="dataModalFolderSection" class="bg-[#0d0d0d] border border-[#1e1e1e] rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="mt-0.5 shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-200 font-medium mb-1">Auto-sync to folder</p>
+                            <p id="dataModalFolderDesc" class="text-[11px] text-gray-500 mb-3">Grant access to your film_lists folder. Favorites, watchlist, ratings and custom films will be saved automatically.</p>
+                            <button id="dataModalFolderBtn" class="px-3 py-1.5 rounded-md bg-[#c9a84c]/10 border border-[#c9a84c]/30 text-[#c9a84c] text-xs font-medium hover:bg-[#c9a84c]/20 transition-colors">Connect folder…</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Download -->
+                <div class="bg-[#0d0d0d] border border-[#1e1e1e] rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="mt-0.5 shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-200 font-medium mb-1">Download user_data.json</p>
+                            <p class="text-[11px] text-gray-500 mb-3">Save all your favorites, watchlist, ratings and rank edits as a portable file.</p>
+                            <button id="dataModalDownload" class="px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-gray-300 text-xs font-medium hover:text-[#c9a84c] hover:border-[#c9a84c]/40 transition-colors">Download user_data.json</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Import -->
+                <div class="bg-[#0d0d0d] border border-[#1e1e1e] rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="mt-0.5 shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 5 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-200 font-medium mb-1">Import user_data.json</p>
+                            <p class="text-[11px] text-gray-500 mb-3">Load data from a user_data.json file (e.g. from another machine).</p>
+                            <label class="cursor-pointer px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-gray-300 text-xs font-medium hover:text-[#c9a84c] hover:border-[#c9a84c]/40 transition-colors inline-block">
+                                Choose file…
+                                <input id="importDataFile" type="file" accept=".json" class="hidden">
+                            </label>
+                            <span id="dataModalImportStatus" class="text-[11px] ml-2"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1718,7 +1774,8 @@
                 if (perm === 'granted') {
                     state.dirHandle = handle;
                     updateFolderAccessBtn(true);
-                    await loadUserDataFile();
+                    await loadUserDataFile();     // merge file → state
+                    saveUserDataFile().catch(() => {}); // write current state → file
                 }
             } catch { /* silently ignore — API not available or permission denied */ }
         }
@@ -2057,6 +2114,8 @@
                 const picker = document.getElementById('ratingPicker');
                 if (!picker.classList.contains('hidden')) {
                     hideRatingPicker();
+                } else if (document.getElementById('dataModal').classList.contains('open')) {
+                    closeDataModal();
                 } else if (!$('#addFilmModal').classList.contains('hidden')) {
                     closeAddFilmModal();
                 } else if (document.getElementById('collectionOverlay').classList.contains('cv-open')) {
@@ -2084,20 +2143,95 @@
         $('#addFilmBtn').addEventListener('click', openAddFilmModal);
         $('#addFilmClose').addEventListener('click', closeAddFilmModal);
 
-        // Folder access button
-        document.getElementById('folderAccessBtn').addEventListener('click', async () => {
+        // Data modal
+        function openDataModal() {
+            const modal = document.getElementById('dataModal');
+            // Update folder section based on API availability and current connection state
+            const folderSection = document.getElementById('dataModalFolderSection');
+            const folderBtn = document.getElementById('dataModalFolderBtn');
+            const folderDesc = document.getElementById('dataModalFolderDesc');
             if (!window.showDirectoryPicker) {
-                alert('Your browser does not support the File System Access API.\nUse Chrome or Edge to enable CSV write support.');
-                return;
+                folderSection.style.opacity = '0.45';
+                folderBtn.disabled = true;
+                folderBtn.textContent = 'Not available in Safari';
+                folderDesc.textContent = 'Auto-sync requires Chrome or Edge. Use Download / Import below to move your data between machines.';
+            } else if (state.dirHandle) {
+                folderBtn.textContent = '✓ Folder connected';
+                folderBtn.classList.add('text-green-400', 'border-green-800');
+                folderBtn.classList.remove('text-[#c9a84c]', 'border-[#c9a84c]/30');
+                folderDesc.textContent = 'Your data is being saved automatically to the connected folder.';
+            } else {
+                folderBtn.textContent = 'Connect folder…';
+                folderBtn.classList.remove('text-green-400', 'border-green-800');
+                folderBtn.classList.add('text-[#c9a84c]', 'border-[#c9a84c]/30');
+                folderDesc.textContent = 'Grant access to your film_lists folder. Favorites, watchlist, ratings and custom films will be saved automatically.';
             }
+            modal.classList.add('open');
+        }
+        function closeDataModal() {
+            document.getElementById('dataModal').classList.remove('open');
+        }
+        async function connectFolder() {
+            if (!window.showDirectoryPicker) return;
             try {
                 const handle = await window.showDirectoryPicker({ mode: 'readwrite', startIn: 'documents' });
                 state.dirHandle = handle;
                 await saveDirHandle(handle);
                 updateFolderAccessBtn(true);
+                await loadUserDataFile();          // merge any existing file data
+                await saveUserDataFile();           // write current full state to file
+                openDataModal();                    // refresh modal state
             } catch (err) {
                 if (err.name !== 'AbortError') console.warn('CineVault: Folder access error:', err);
             }
+        }
+        function downloadUserDataJson() {
+            const data = {
+                version: 1,
+                favorites: [...state.favorites],
+                watchlist: [...state.watchlist],
+                watched: state.watched,
+                filmStore: state.filmStore,
+                rankOverrides: state.rankOverrides,
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'user_data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        async function importUserDataFromFile(file) {
+            const statusEl = document.getElementById('dataModalImportStatus');
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                for (const k of (data.favorites || [])) state.favorites.add(k);
+                for (const k of (data.watchlist || [])) state.watchlist.add(k);
+                state.watched = Object.assign({}, state.watched, data.watched || {});
+                state.filmStore = Object.assign({}, state.filmStore, data.filmStore || {});
+                state.rankOverrides = Object.assign({}, state.rankOverrides, data.rankOverrides || {});
+                saveFavorites(); saveWatchlist(); saveWatched(); saveFilmStore(); saveRankOverrides();
+                applyFilters();
+                statusEl.textContent = '✓ Imported';
+                statusEl.className = 'text-[11px] ml-2 text-green-400';
+            } catch {
+                statusEl.textContent = '✗ Invalid file';
+                statusEl.className = 'text-[11px] ml-2 text-red-400';
+            }
+        }
+        document.getElementById('folderAccessBtn').addEventListener('click', openDataModal);
+        document.getElementById('dataModalClose').addEventListener('click', closeDataModal);
+        document.getElementById('dataModalBackdrop').addEventListener('click', closeDataModal);
+        document.getElementById('dataModalFolderBtn').addEventListener('click', connectFolder);
+        document.getElementById('dataModalDownload').addEventListener('click', downloadUserDataJson);
+        document.getElementById('importDataFile').addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (file) importUserDataFromFile(file);
+            e.target.value = ''; // reset so same file can be re-imported
         });
         $('#addFilmBackdrop').addEventListener('click', closeAddFilmModal);
         $('#addFilmFetch').addEventListener('click', fetchFilmDataFromUrl);
