@@ -45,3 +45,6 @@
 - [x] **Task 8.1**: Remove Glass Onion Duplicate in 2022
 - [x] **Task 8.2**: Persist User Data (favorites/watchlist/ratings) to a JSON file via File System Access API
 - [x] **Task 8.3**: Route Pre-1990 Custom Films to Decade CSVs (films_1980s, films_1970s, etc.)
+
+## Round 5 — CSV-native User State
+- [x] **Task 9.1**: Migrate user data into CSV columns; remove user_data.json

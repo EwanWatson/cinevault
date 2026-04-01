@@ -1,0 +1,1442 @@
+{
+  "version": 1,
+  "favorites": [
+    "Mad Max: Fury Road|||2015",
+    "Dune: Part Two|||2024",
+    "Conclave|||2024",
+    "Oppenheimer|||2023",
+    "Killers of the Flower Moon|||2023",
+    "Air|||2023",
+    "Everything Everywhere All at Once|||2022",
+    "The Menu|||2022",
+    "Bullet Train|||2022",
+    "Top Gun: Maverick|||2022"
+  ],
+  "watchlist": [
+    "Late Night with the Devil|||2024",
+    "The Substance|||2024",
+    "I Saw the TV Glow|||2024",
+    "The Outrun|||2024",
+    "Anora|||2024",
+    "Nickel Boys|||2024",
+    "Emilia Perez|||2024",
+    "The Room Next Door|||2024",
+    "The Seed of the Sacred Fig|||2024",
+    "The Brutalist|||2024",
+    "Good One|||2024",
+    "Nosferatu|||2024",
+    "Gladiator II|||2024",
+    "Hit Man|||2024",
+    "Heretic|||2024",
+    "Kinds of Kindness|||2024",
+    "Tardes de Soledad|||2024",
+    "Parthenope|||2024",
+    "Strange Darling|||2024",
+    "Challengers|||2024",
+    "Smile 2|||2024",
+    "The Fall Guy|||2024",
+    "It Ends with Us|||2024",
+    "Madame Web|||2024",
+    "Mononoke the Movie: The Phantom in the Rain|||2024",
+    "Young Woman and the Sea|||2024",
+    "One Battle After Another|||2025",
+    "The Secret Agent|||2025",
+    "Sinners|||2025",
+    "Sentimental Value|||2025",
+    "The Little Sister|||2025",
+    "Marty Supreme|||2025",
+    "Aisha Can't Fly Away|||2025",
+    "Bugonia|||2025",
+    "Chainsaw Man – The Movie: Reze Arc|||2025",
+    "Die My Love|||2025",
+    "Mission: Impossible - The Final Reckoning|||2025",
+    "28 Years Later|||2025",
+    "Wake Up Dead Man: A Knives Out Mystery|||2025",
+    "Nobody|||2025",
+    "Ballerina|||2025",
+    "Honey Don't!|||2025",
+    "The Voice of Hind Rajab|||2025",
+    "Anatomy of a Fall|||2023",
+    "The Taste of Things|||2023",
+    "Poor Things|||2023",
+    "The Creator|||2023",
+    "Barbie|||2023",
+    "20 Days in Mariupol|||2023",
+    "Indiana Jones and the Dial of Destiny|||2023",
+    "The Eternal Memory|||2023",
+    "Society of the Snow|||2023",
+    "Humanist Vampire Seeking Consenting Suicidal Person|||2023",
+    "Maestro|||2023",
+    "The Promised Land|||2023",
+    "The Settlers|||2023",
+    "The Boy and the Heron|||2023",
+    "Joy Ride|||2023",
+    "Mission: Impossible - Dead Reckoning Part One|||2023",
+    "Napoleon|||2023",
+    "Blue Beetle|||2023",
+    "No Hard Feelings|||2023",
+    "Knock at the Cabin|||2023",
+    "Ferrari|||2023",
+    "The Hunger Games: The Ballad of Songbirds and Snakes|||2023",
+    "Fast X|||2023",
+    "The Marvels|||2023",
+    "Saltburn|||2023",
+    "Aquaman and the Lost Kingdom|||2023",
+    "Triangle of Sadness|||2022",
+    "All the Beauty and the Bloodshed|||2022",
+    "The Fabelmans|||2022",
+    "Tar|||2022",
+    "Joyland|||2022",
+    "Stars at Noon|||2022",
+    "The Banshees of Inisherin|||2022",
+    "Emily the Criminal|||2022",
+    "Nope|||2022",
+    "Aftersun|||2022",
+    "The Eternal Daughter|||2022",
+    "The Batman|||2022",
+    "Prey|||2022",
+    "Kimi|||2022",
+    "Watcher|||2022",
+    "The Wonder|||2022",
+    "The Whale|||2022",
+    "Babylon|||2022",
+    "Black Panther: Wakanda Forever|||2022",
+    "Amsterdam|||2022",
+    "Buried in Barstow|||2022",
+    "X|||2022"
+  ],
+  "watched": {
+    "Mad Max: Fury Road|||2015": {
+      "rating": 5,
+      "timestamp": "2026-04-01T10:44:41.818Z"
+    },
+    "The Martian|||2015": {
+      "rating": 4,
+      "timestamp": "2026-04-01T10:45:12.187Z"
+    },
+    "Amy|||2015": {
+      "rating": 3,
+      "timestamp": "2026-04-01T10:45:28.304Z"
+    },
+    "Dune: Part Two|||2024": {
+      "rating": 5,
+      "timestamp": "2026-04-01T11:05:45.692Z"
+    },
+    "Conclave|||2024": {
+      "rating": 5,
+      "timestamp": "2026-04-01T11:06:19.068Z"
+    },
+    "Furiosa: A Mad Max Saga|||2024": {
+      "rating": 3,
+      "timestamp": "2026-04-01T11:07:30.356Z"
+    },
+    "Kung Fu Panda 4|||2024": {
+      "rating": 2,
+      "timestamp": "2026-04-01T11:07:35.373Z"
+    },
+    "Alien: Romulus|||2024": {
+      "rating": 4,
+      "timestamp": "2026-04-01T11:07:55.711Z"
+    },
+    "Deadpool and Wolverine|||2024": {
+      "rating": 3,
+      "timestamp": "2026-04-01T11:08:11.919Z"
+    },
+    "F1|||2025": {
+      "rating": 3,
+      "timestamp": "2026-04-01T11:11:25.600Z"
+    },
+    "Louis Theroux: The Settlers|||2025": {
+      "rating": 3,
+      "timestamp": "2026-04-01T11:37:45.775Z"
+    },
+    "Spider-Man: Across the Spider-Verse|||2023": {
+      "rating": 4,
+      "timestamp": "2026-04-01T11:38:20.407Z"
+    },
+    "Oppenheimer|||2023": {
+      "rating": 5,
+      "timestamp": "2026-04-01T11:39:02.538Z"
+    },
+    "Killers of the Flower Moon|||2023": {
+      "rating": 4,
+      "timestamp": "2026-04-01T11:39:13.449Z"
+    },
+    "John Wick: Chapter 4|||2023": {
+      "rating": 3,
+      "timestamp": "2026-04-01T11:39:51.466Z"
+    },
+    "Air|||2023": {
+      "rating": 4,
+      "timestamp": "2026-04-01T11:40:27.150Z"
+    },
+    "Wonka|||2023": {
+      "rating": 2,
+      "timestamp": "2026-04-01T11:40:34.349Z"
+    },
+    "Dungeons and Dragons: Honor Among Thieves|||2023": {
+      "rating": 3,
+      "timestamp": "2026-04-01T11:40:42.340Z"
+    },
+    "Guardians of the Galaxy Vol. 3|||2023": {
+      "rating": 3,
+      "timestamp": "2026-04-01T11:40:47.720Z"
+    },
+    "Shazam! Fury of the Gods|||2023": {
+      "rating": 2,
+      "timestamp": "2026-04-01T11:42:32.257Z"
+    },
+    "Ant-Man and the Wasp: Quantumania|||2023": {
+      "rating": 2,
+      "timestamp": "2026-04-01T11:42:40.542Z"
+    },
+    "Rebel Moon - Part One: A Child of Fire|||2023": {
+      "rating": 3,
+      "timestamp": "2026-04-01T11:43:01.205Z"
+    },
+    "Rebel Moon - Part Two: The Scargiver|||2024": {
+      "rating": 2,
+      "timestamp": "2026-04-01T11:43:25.942Z"
+    },
+    "Rebel Ridge|||2024": {
+      "rating": 2,
+      "timestamp": "2026-04-01T11:43:28.056Z"
+    },
+    "Everything Everywhere All at Once|||2022": {
+      "rating": 5,
+      "timestamp": "2026-04-01T11:43:54.716Z"
+    },
+    "Puss in Boots: The Last Wish|||2022": {
+      "rating": 4,
+      "timestamp": "2026-04-01T11:44:39.172Z"
+    },
+    "Glass Onion: A Knives Out Mystery|||2022": {
+      "rating": 3,
+      "timestamp": "2026-04-01T11:45:27.106Z"
+    },
+    "The Menu|||2022": {
+      "rating": 5,
+      "timestamp": "2026-04-01T11:47:18.873Z"
+    },
+    "The Lost City|||2022": {
+      "rating": 2,
+      "timestamp": "2026-04-01T11:48:10.126Z"
+    },
+    "Doctor Strange in the Multiverse of Madness|||2022": {
+      "rating": 3,
+      "timestamp": "2026-04-01T11:48:13.177Z"
+    },
+    "Bullet Train|||2022": {
+      "rating": 5,
+      "timestamp": "2026-04-01T11:48:20.908Z"
+    },
+    "Thor: Love and Thunder|||2022": {
+      "rating": 2,
+      "timestamp": "2026-04-01T11:48:35.409Z"
+    },
+    "Top Gun: Maverick|||2022": {
+      "rating": 5,
+      "timestamp": "2026-04-01T11:48:41.651Z"
+    },
+    "Spiderhead|||2022": {
+      "rating": 4,
+      "timestamp": "2026-04-01T11:49:04.269Z"
+    },
+    "Fantastic Beasts: The Secrets of Dumbledore|||2022": {
+      "rating": 2,
+      "timestamp": "2026-04-01T11:49:09.350Z"
+    },
+    "Uncharted|||2022": {
+      "rating": 2,
+      "timestamp": "2026-04-01T11:49:15.041Z"
+    },
+    "Jurassic World Dominion|||2022": {
+      "rating": 2,
+      "timestamp": "2026-04-01T11:49:56.365Z"
+    },
+    "Enola Holmes 2|||2022": {
+      "rating": 2,
+      "timestamp": "2026-04-01T11:50:04.979Z"
+    },
+    "Glass Onion|||2022": {
+      "rating": 3,
+      "timestamp": "2026-04-01T11:50:13.851Z"
+    }
+  },
+  "filmStore": {
+    "Mad Max: Fury Road|||2015": {
+      "title": "Mad Max: Fury Road",
+      "year": "2015",
+      "director": "George Miller",
+      "genre": "Action",
+      "rank": "5",
+      "synopsis": "A haunted loner and a rebellious imperator join forces to flee across a post-apocalyptic wasteland in a non-stop vehicular war that redefined action cinema.",
+      "awards": "6 Oscars (Editing Costume Makeup Production Design Sound Editing Sound Mixing); 10 noms including Picture Director; BAFTA Best Editing; RT 97 MC 90; $379M worldwide; feminist blockbuster landmark"
+    },
+    "The Martian|||2015": {
+      "title": "The Martian",
+      "year": "2015",
+      "director": "Ridley Scott",
+      "genre": "Sci-Fi/Drama",
+      "rank": "15",
+      "synopsis": "An astronaut stranded on Mars must use his ingenuity to survive and signal Earth for rescue in Scotts crowd-pleasing adaptation of Andy Weirs bestselling novel.",
+      "awards": "7 Oscar noms (Picture Actor); Golden Globe Comedy Picture + Actor; RT 91 MC 80; $630M worldwide; Damon charming; science as optimism; Scotts late-career triumph"
+    },
+    "Amy|||2015": {
+      "title": "Amy",
+      "year": "2015",
+      "director": "Asif Kapadia",
+      "genre": "Documentary",
+      "rank": "19",
+      "synopsis": "Kapadias intimate portrait of Amy Winehouse traces her extraordinary talent and devastating decline through archival footage and the voices of those closest to her.",
+      "awards": "Oscar Best Documentary; BAFTA Documentary; RT 97 MC 86; Kapadia archival mastery; Winehouse tragedy; music documentary landmark; fame as destruction"
+    },
+    "Late Night with the Devil|||2024": {
+      "title": "Late Night with the Devil",
+      "year": "2024",
+      "director": "Cameron Cairnes and Colin Cairnes",
+      "genre": "Horror",
+      "rank": "53",
+      "synopsis": "A live-broadcast late night talk show in 1977 goes horrifyingly wrong in the Cairnes brothers found-footage horror that became a cult sensation.",
+      "awards": "RT 97 MC 71; David Dastmalchian Ingrid Torelli Laura Gordon; Australian directors; retro TV horror; Dastmalchian extraordinary career-best; IFC; practical effects meets AI controversy"
+    },
+    "The Substance|||2024": {
+      "title": "The Substance",
+      "year": "2024",
+      "director": "Coralie Fargeat",
+      "genre": "Horror/Sci-Fi",
+      "rank": "44",
+      "synopsis": "An aging celebrity discovers a black-market drug that creates a younger version of herself in Fargeats visceral body horror masterwork about the monstrous cost of beauty standards.",
+      "awards": "Cannes Best Screenplay; Oscar Makeup + 5 noms; BAFTA 5 noms; Golden Globe 5 noms; Demi Moore career-best comeback; Margaret Qualley; Fargeat Revenge follow-up; $77M worldwide; body horror phenomenon; viral scenes"
+    },
+    "I Saw the TV Glow|||2024": {
+      "title": "I Saw the TV Glow",
+      "year": "2024",
+      "director": "Jane Schoenbrun",
+      "genre": "Horror/Drama",
+      "rank": "47",
+      "synopsis": "Two teenagers obsessed with a haunting TV show find their realities distorted as the boundary between fiction and their lives begins to blur in Schoenbruns trans allegory cult phenomenon.",
+      "awards": "Spirit 5 noms; A24; RT 85 MC 73; Justice Smith Brigette Lundy-Paine Fred Durst; Schoenbrun We're All Going follow-up; trans experience allegory; 90s nostalgia; Buffy echoes; cult film of the year"
+    },
+    "The Outrun|||2024": {
+      "title": "The Outrun",
+      "year": "2024",
+      "director": "Nora Fingscheidt",
+      "genre": "Drama",
+      "rank": "43",
+      "synopsis": "A woman returns to the Orkney Islands to rebuild her life after struggling with alcoholism in Fingscheidts adaptation of Amy Liptrots memoir.",
+      "awards": "TIFF; RT 82 MC 68; Saoirse Ronan producing and starring; Liptrot memoir; Orkney windswept beauty; Ronan raw; Fingscheidt System Crasher follow-up; Sony Classics"
+    },
+    "Anora|||2024": {
+      "title": "Anora",
+      "year": "2024",
+      "director": "Sean Baker",
+      "genre": "Comedy/Drama",
+      "rank": "1",
+      "synopsis": "A young sex worker from Brooklyn marries the son of a Russian oligarch only for his family to descend to annul the union in Bakers electrifying Palme dOr winner.",
+      "awards": "Cannes Palme dOr; 5 Oscars (Picture Director Actress Original Screenplay Editing); BAFTA Actress Casting Editing; Golden Globe Actress Comedy; Spirit Feature Director Lead; MC 94 RT 97; Mikey Madison breakout"
+    },
+    "Nickel Boys|||2024": {
+      "title": "Nickel Boys",
+      "year": "2024",
+      "director": "RaMell Ross",
+      "genre": "Drama",
+      "rank": "2",
+      "synopsis": "Two boys at a brutal Florida reform school in the Jim Crow era forge a bond that will sustain them through unimaginable hardship in Ross revolutionary first-person POV adaptation.",
+      "awards": "5 Oscar noms (Picture Adapted Screenplay Cinematography Editing); Golden Globe nom; RT 95 MC 81; Ross documentary filmmaker debut; Colson Whitehead Pulitzer novel; subjective camera; radical form; Amazon MGM"
+    },
+    "Emilia Perez|||2024": {
+      "title": "Emilia Perez",
+      "year": "2024",
+      "director": "Jacques Audiard",
+      "genre": "Musical/Crime",
+      "rank": "3",
+      "synopsis": "A lawyer helps a feared cartel leader transition and start a new life as a woman in Audiards audacious genre-defying musical that became the most nominated non-English film in Oscar history.",
+      "awards": "Cannes Jury Prize + Best Actress (collective) + Soundtrack; 2 Oscars (Supporting Actress International Feature); 13 noms (record non-English); Golden Globe 4 wins (Comedy Intl Supporting Actress Song); Zoe Saldana Karla Sofia Gascon; trans representation debate"
+    },
+    "The Room Next Door|||2024": {
+      "title": "The Room Next Door",
+      "year": "2024",
+      "director": "Pedro Almodovar",
+      "genre": "Drama",
+      "rank": "5",
+      "synopsis": "A war correspondent and a novelist reunite as one prepares to face death on her own terms in Almodovars first English-language feature and Venice Golden Lion winner.",
+      "awards": "Venice Golden Lion (Almodovar first competitive Lion); RT 94 MC 82; Tilda Swinton Julianne Moore John Turturro; Almodovar first English film; euthanasia; friendship and mortality; luminous"
+    },
+    "The Seed of the Sacred Fig|||2024": {
+      "title": "The Seed of the Sacred Fig",
+      "year": "2024",
+      "director": "Mohammad Rasoulof",
+      "genre": "Drama/Thriller",
+      "rank": "7",
+      "synopsis": "An investigating judge for the Revolutionary Court sees his family fracture around the 2022 Iranian protests in Rasoulofs searing political drama made at enormous personal risk.",
+      "awards": "Cannes Special Prize; Oscar nom International Feature (Germany); BAFTA nom; Golden Globe nom; RT 98 MC 86; Rasoulof fled Iran after sentencing; risked imprisonment; family as state microcosm; essential political cinema"
+    },
+    "The Brutalist|||2024": {
+      "title": "The Brutalist",
+      "year": "2024",
+      "director": "Brady Corbet",
+      "genre": "Drama",
+      "rank": "10",
+      "synopsis": "A visionary Hungarian-Jewish architect immigrates to America after WWII and is commissioned by a wealthy industrialist in Corbets monumental three-and-a-half-hour epic about art ambition and power.",
+      "awards": "Venice Silver Lion; 3 Oscars (Director Actor Original Score); 10 noms; BAFTA 4 wins (Director Actor Cinematography Production Design); Golden Globe Drama Director; Adrien Brody Guy Pearce Felicity Jones; Corbet directorial triumph"
+    },
+    "Dune: Part Two|||2024": {
+      "title": "Dune: Part Two",
+      "year": "2024",
+      "director": "Denis Villeneuve",
+      "genre": "Sci-Fi/Action",
+      "rank": "21",
+      "synopsis": "Paul Atreides unites with the Fremen to wage war against House Harkonnen while confronting a terrible destiny in Villeneuves spectacular continuation of the sci-fi epic.",
+      "awards": "$715M worldwide; 2 Oscars (Sound VFX); 5 noms; BAFTA 2 wins; RT 93 MC 79; Chalamet Zendaya Butler Bardem Walken; IMAX spectacle; Villeneuve career-best; sequel superior to Part One"
+    },
+    "Good One|||2024": {
+      "title": "Good One",
+      "year": "2024",
+      "director": "India Donaldson",
+      "genre": "Drama",
+      "rank": "23",
+      "synopsis": "A teenage girl accompanies her father and his friend on a camping trip where an unsettling dynamic shifts the power balance in Donaldsons razor-sharp debut.",
+      "awards": "Sundance; Spirit nom; RT 97 MC 81; Lily Collias James Le Gros Danny McCarthy; Donaldson debut; micro-budget; hiking trip; patriarchal discomfort; Metrograph"
+    },
+    "Nosferatu|||2024": {
+      "title": "Nosferatu",
+      "year": "2024",
+      "director": "Robert Eggers",
+      "genre": "Horror/Gothic",
+      "rank": "30",
+      "synopsis": "A young woman is haunted by an ancient vampire whose obsession draws her towards darkness in Eggers stunning reimagining of Murnaus 1922 classic.",
+      "awards": "$182M worldwide; 4 Oscar noms (Cinematography Makeup Production Design Costume); RT 84 MC 75; Bill Skarsgard Lily-Rose Depp Nicholas Hoult Willem Dafoe; Eggers Witch Lighthouse follow-up; Focus Features; Christmas release horror hit"
+    },
+    "Conclave|||2024": {
+      "title": "Conclave",
+      "year": "2024",
+      "director": "Edward Berger",
+      "genre": "Thriller/Drama",
+      "rank": "36",
+      "synopsis": "Cardinals locked in the Sistine Chapel to elect a new Pope uncover secrets that threaten to shake the Catholic Church in Bergers taut Vatican political thriller.",
+      "awards": "BAFTA Best Film + 4 wins (British Film Actor Editing); Oscar Adapted Screenplay; 8 noms; SAG Outstanding Cast; Golden Globe 6 noms; Ralph Fiennes Stanley Tucci John Lithgow Isabella Rossellini; Berger All Quiet follow-up"
+    },
+    "Gladiator II|||2024": {
+      "title": "Gladiator II",
+      "year": "2024",
+      "director": "Ridley Scott",
+      "genre": "Action/Drama",
+      "rank": "41",
+      "synopsis": "The son of Maximus is drawn into the arena and must fight to reclaim his legacy in Scotts epic sequel to his 2000 Oscar winner.",
+      "awards": "$462M worldwide; BAFTA noms; RT 71 MC 56; Paul Mescal Pedro Pascal Denzel Washington Conger; Scott at 87; Glicked phenomenon alongside Wicked; Washington scene-stealing; Paramount"
+    },
+    "Hit Man|||2024": {
+      "title": "Hit Man",
+      "year": "2024",
+      "director": "Richard Linklater",
+      "genre": "Comedy/Crime",
+      "rank": "42",
+      "synopsis": "A mild-mannered professor moonlighting as a fake hitman for police stings falls for a woman who wants her husband dead in Linklaters delightful true-story comedy.",
+      "awards": "Netflix; RT 97 MC 79; Glen Powell Adria Arjona; Linklater Dazed and Confused follow-up; Powell star-making year; based on Texas Monthly article; Venice premiere; charming"
+    },
+    "Heretic|||2024": {
+      "title": "Heretic",
+      "year": "2024",
+      "director": "Scott Beck and Bryan Woods",
+      "genre": "Horror/Thriller",
+      "rank": "52",
+      "synopsis": "Two young missionaries encounter a dangerous intellectual when they knock on the wrong door in this cat-and-mouse religious horror thriller.",
+      "awards": "$60M worldwide; Golden Globe nom Supporting Actor (Hugh Grant); RT 93 MC 72; Grant against type terrifying; Sophie Thatcher Chloe East; Beck Woods A Quiet Place writers; A24"
+    },
+    "Kinds of Kindness|||2024": {
+      "title": "Kinds of Kindness",
+      "year": "2024",
+      "director": "Yorgos Lanthimos",
+      "genre": "Drama/Comedy",
+      "rank": "54",
+      "synopsis": "Three interconnected stories about people trying to regain control of their lives in Lanthimos darkly absurdist triptych.",
+      "awards": "Cannes Best Actor (Jesse Plemons); RT 72 MC 62; Emma Stone Willem Dafoe Plemons Margaret Qualley Hong Chau; Lanthimos Poor Things follow-up; three stories; Searchlight; divisive"
+    },
+    "Tardes de Soledad|||2024": {
+      "title": "Tardes de Soledad",
+      "year": "2024",
+      "director": "Albert Serra",
+      "genre": "Documentary",
+      "rank": "60",
+      "synopsis": "An intimate portrait of bullfighter Andres Roca Rey captured across several years in Serras immersive verite masterwork that transforms bullfighting into a meditation on ritual masculinity and mortality.",
+      "awards": "Golden Shell San Sebastian (top prize); Venice ARCA Cinema Giovani Award; RT 81 MC 75; Serra La Mort de Louis XIV follow-up; Andres Roca Rey subject; bullfighting as ritual and blood spectacle; verite cinema; must-have list"
+    },
+    "Parthenope|||2024": {
+      "title": "Parthenope",
+      "year": "2024",
+      "director": "Paolo Sorrentino",
+      "genre": "Drama",
+      "rank": "61",
+      "synopsis": "A young woman embodies the spirit of Naples from the 1950s onward in Sorrentinos sumptuous love letter to his home city.",
+      "awards": "Cannes Competition; RT 56 MC 49; Celeste Dalla Porta Gary Oldman; Sorrentino Great Beauty follow-up; Naples; beauty and decay; A24; divisive"
+    },
+    "Strange Darling|||2024": {
+      "title": "Strange Darling",
+      "year": "2024",
+      "director": "JT Mollner",
+      "genre": "Thriller",
+      "rank": "74",
+      "synopsis": "A one-night stand takes a terrifying turn in Mollners non-linear serial killer thriller that keeps rewriting its own rules.",
+      "awards": "RT 91 MC 72; Willa Fitzgerald Kyle Gallner; Mollner debut; shot on 35mm; chapter structure; subverted expectations; Giovanni Ribisi; Magenta Light Studios"
+    },
+    "Challengers|||2024": {
+      "title": "Challengers",
+      "year": "2024",
+      "director": "Luca Guadagnino",
+      "genre": "Drama/Sports",
+      "rank": "75",
+      "synopsis": "A tennis prodigy turned coach navigates a volatile love triangle as her husband faces off against her ex-boyfriend in Guadagninos electrifying erotic sports drama.",
+      "awards": "$96M worldwide; RT 88 MC 72; Zendaya Josh OConnor Mike Faist; Guadagnino Call Me By Your Name follow-up; Trent Reznor Atticus Ross score; tennis as foreplay; cultural moment; Amazon MGM"
+    },
+    "Furiosa: A Mad Max Saga|||2024": {
+      "title": "Furiosa: A Mad Max Saga",
+      "year": "2024",
+      "director": "George Miller",
+      "genre": "Action/Adventure",
+      "rank": "80",
+      "synopsis": "The origin story of Furiosa as she rises from captivity to become the warrior of the wasteland in Millers spectacular prequel to Fury Road.",
+      "awards": "$174M worldwide (underperformed vs $168M budget); RT 89 MC 79; Anya Taylor-Joy Chris Hemsworth Tom Burke; Miller at 79; Fury Road prequel; 15-year Furiosa journey; Hemsworth warlord; WB"
+    },
+    "Kung Fu Panda 4|||2024": {
+      "title": "Kung Fu Panda 4",
+      "year": "2024",
+      "director": "Mike Mitchell",
+      "genre": "Animation/Comedy",
+      "rank": "81",
+      "synopsis": "Po must train a new Dragon Warrior so he can become the Spiritual Leader of the Valley of Peace in this animated franchise continuation.",
+      "awards": "$548M worldwide; RT 71 MC 52; Jack Black Awkwafina Viola Davis; DreamWorks; franchise 4th entry; solid family entertainment; Universal"
+    },
+    "Smile 2|||2024": {
+      "title": "Smile 2",
+      "year": "2024",
+      "director": "Parker Finn",
+      "genre": "Horror",
+      "rank": "87",
+      "synopsis": "A global pop star begins to experience terrifying unexplainable events as she prepares for a world tour in Finns effective horror sequel.",
+      "awards": "$138M worldwide; RT 85 MC 67; Naomi Scott; Finn; pop star horror; concert sequences; Paramount; $28M budget; franchise growing; effective sequel"
+    },
+    "Alien: Romulus|||2024": {
+      "title": "Alien: Romulus",
+      "year": "2024",
+      "director": "Fede Alvarez",
+      "genre": "Horror/Sci-Fi",
+      "rank": "99",
+      "synopsis": "A group of young space colonists encounter the most terrifying life form in the universe aboard a derelict space station in Alvarez thrilling franchise revival.",
+      "awards": "$351M worldwide; RT 80 MC 64; Cailee Spaeny David Jonsson; Alvarez Dont Breathe director; timeline between Alien and Aliens; practical effects; facehugger sequences; 20th Century"
+    },
+    "The Fall Guy|||2024": {
+      "title": "The Fall Guy",
+      "year": "2024",
+      "director": "David Leitch",
+      "genre": "Action/Comedy",
+      "rank": "96",
+      "synopsis": "A battered stuntman must track down a missing movie star while working on the biggest film of his career in Leitchs love letter to Hollywood stunt performers.",
+      "awards": "$181M on $125M budget (underperformed); RT 82 MC 64; Ryan Gosling Emily Blunt Aaron Taylor-Johnson; Leitch; 80s TV adaptation; stunt community tribute; Gosling charm; Universal"
+    },
+    "Deadpool and Wolverine|||2024": {
+      "title": "Deadpool and Wolverine",
+      "year": "2024",
+      "director": "Shawn Levy",
+      "genre": "Action/Comedy",
+      "rank": "105",
+      "synopsis": "Deadpool recruits a reluctant Wolverine to save his universe from extinction in Levys record-breaking R-rated MCU team-up that proved superhero films still have massive appeal.",
+      "awards": "$1.338B worldwide (highest R-rated ever); RT 79 MC 55; Ryan Reynolds Hugh Jackman; first R-rated MCU film; Fox-Marvel crossover; cameos galore; $200M opening weekend; superhero fatigue antidote"
+    },
+    "It Ends with Us|||2024": {
+      "title": "It Ends with Us",
+      "year": "2024",
+      "director": "Justin Baldoni",
+      "genre": "Drama/Romance",
+      "rank": "122",
+      "synopsis": "A woman navigates a complicated new relationship while dealing with the legacy of domestic violence in this adaptation of Colleen Hoovers bestselling novel.",
+      "awards": "$351M worldwide; RT 57 MC 48; Blake Lively Justin Baldoni Brandon Sklenar; Hoover novel; $25M budget; massive female audience; behind-scenes Lively-Baldoni controversy; Sony"
+    },
+    "Madame Web|||2024": {
+      "title": "Madame Web",
+      "year": "2024",
+      "director": "S.J. Clarkson",
+      "genre": "Action/Sci-Fi",
+      "rank": "150",
+      "synopsis": "A paramedic in Manhattan discovers she may have clairvoyant powers linked to a spider in Sonys critically reviled Marvel-adjacent superhero film.",
+      "awards": "$100M on $80M budget (loss); RT 11 MC 24; Dakota Johnson Sydney Sweeney; Clarkson; Sony SSU; critically savaged; meme generator; worst-reviewed superhero film"
+    },
+    "Mononoke the Movie: The Phantom in the Rain|||2024": {
+      "title": "Mononoke the Movie: The Phantom in the Rain",
+      "year": "2024",
+      "director": "",
+      "genre": "Animation",
+      "rank": "167",
+      "synopsis": "Featured on LB Animated list.",
+      "awards": ""
+    },
+    "Young Woman and the Sea|||2024": {
+      "title": "Young Woman and the Sea",
+      "year": "2024",
+      "director": "",
+      "genre": "Biography/Drama",
+      "rank": "181",
+      "synopsis": "Featured on LB Biographical list.",
+      "awards": ""
+    },
+    "One Battle After Another|||2025": {
+      "title": "One Battle After Another",
+      "year": "2025",
+      "director": "Paul Thomas Anderson",
+      "genre": "Drama",
+      "rank": "1",
+      "synopsis": "Epic adaptation of Thomas Pynchon's Vineland following interconnected lives across decades of American counterculture and political upheaval.",
+      "awards": "Won 6 Oscars incl. Best Picture/Director/Adapted Screenplay/Supporting Actor/Editing/Casting; 13 total noms; BAFTA Best Film; Critics Choice Best Picture"
+    },
+    "The Secret Agent|||2025": {
+      "title": "The Secret Agent",
+      "year": "2025",
+      "director": "Kleber Mendonca Filho",
+      "genre": "Thriller",
+      "rank": "2",
+      "synopsis": "A sprawling Brazilian political thriller based on Joseph Conrad's novel reimagined through the lens of contemporary South American intrigue.",
+      "awards": "Won Best Director and Best Actor (Wagner Moura) at Cannes; FIPRESCI Prize; 4 Oscar noms; Critics Choice Best Foreign Language"
+    },
+    "Sinners|||2025": {
+      "title": "Sinners",
+      "year": "2025",
+      "director": "Ryan Coogler",
+      "genre": "Horror",
+      "rank": "3",
+      "synopsis": "Twin brothers return to their Deep South hometown and open a juke joint only to discover ancient evil lurking beneath the region's troubled history.",
+      "awards": "Won 4 Oscars incl. Best Actor (Michael B. Jordan)/Original Screenplay/Cinematography/Original Score; record 16 nominations; $280M domestic"
+    },
+    "Sentimental Value|||2025": {
+      "title": "Sentimental Value",
+      "year": "2025",
+      "director": "Joachim Trier",
+      "genre": "Drama",
+      "rank": "4",
+      "synopsis": "A Norwegian family gathers to settle an inheritance and confronts buried emotional truths that threaten to reshape their bonds forever.",
+      "awards": "Won Best International Feature Film Oscar; Grand Prix at Cannes; 9 Oscar noms; BAFTA Best Foreign Language Film"
+    },
+    "The Little Sister|||2025": {
+      "title": "The Little Sister",
+      "year": "2025",
+      "director": "Hafsia Herzi",
+      "genre": "Drama",
+      "rank": "7",
+      "synopsis": "A young French-Algerian woman navigates her identity and sexuality while growing up as the youngest in a traditional family.",
+      "awards": "Won Best Actress at Cannes (Nadia Melliti); Queer Palm; Cannes Competition"
+    },
+    "Marty Supreme|||2025": {
+      "title": "Marty Supreme",
+      "year": "2025",
+      "director": "Josh Safdie",
+      "genre": "Drama",
+      "rank": "15",
+      "synopsis": "A riveting character study of a legendary New York City ping-pong hustler who transforms the sport into an art form of deception and showmanship.",
+      "awards": "9 Oscar noms incl. Best Picture/Actor (Timothee Chalamet); BAFTA Best Actor; Critics Choice Best Actor; $80.6M domestic"
+    },
+    "Aisha Can't Fly Away|||2025": {
+      "title": "Aisha Can't Fly Away",
+      "year": "2025",
+      "director": "Morad Mostafa",
+      "genre": "Drama",
+      "rank": "29",
+      "synopsis": "An Egyptian-Sudanese drama about a woman trapped by circumstance who dreams of liberation and flight.",
+      "awards": "Cannes Un Certain Regard; Camera d'Or eligible"
+    },
+    "Bugonia|||2025": {
+      "title": "Bugonia",
+      "year": "2025",
+      "director": "Yorgos Lanthimos",
+      "genre": "Sci-Fi",
+      "rank": "31",
+      "synopsis": "Two conspiracy theorists kidnap the CEO of a major corporation convinced she is an alien disguised as a human in this absurdist dark comedy.",
+      "awards": "4 Oscar noms incl. Best Picture; starring Emma Stone; $17.7M domestic"
+    },
+    "F1|||2025": {
+      "title": "F1",
+      "year": "2025",
+      "director": "Joseph Kosinski",
+      "genre": "Action",
+      "rank": "40",
+      "synopsis": "Brad Pitt stars as a veteran Formula One driver who returns from retirement to mentor a rookie teammate at a fictional racing team.",
+      "awards": "Won Oscar for Best Sound; 4 noms; Apple Studios highest-grossing film; $633M worldwide; $189.6M domestic"
+    },
+    "Chainsaw Man – The Movie: Reze Arc|||2025": {
+      "title": "Chainsaw Man – The Movie: Reze Arc",
+      "year": "2025",
+      "director": "Ryu Nakayama",
+      "genre": "Animation",
+      "rank": "53",
+      "synopsis": "Anime adaptation of the Reze Arc from Tatsuki Fujimoto's hit manga Chainsaw Man following Denji's encounter with the mysterious Reze.",
+      "awards": "Major anime release; based on acclaimed manga by Tatsuki Fujimoto; MAPPA studio"
+    },
+    "Die My Love|||2025": {
+      "title": "Die My Love",
+      "year": "2025",
+      "director": "Lynne Ramsay",
+      "genre": "Thriller",
+      "rank": "57",
+      "synopsis": "Lynne Ramsay directs a slow-burn psychological thriller about a woman unraveling under the pressures of motherhood and isolation.",
+      "awards": "Cannes Competition at 78th Cannes Film Festival"
+    },
+    "Mission: Impossible - The Final Reckoning|||2025": {
+      "title": "Mission: Impossible - The Final Reckoning",
+      "year": "2025",
+      "director": "Christopher McQuarrie",
+      "genre": "Action",
+      "rank": "91",
+      "synopsis": "Ethan Hunt faces his most personal and dangerous mission yet in the conclusion to the Dead Reckoning storyline.",
+      "awards": "Cannes world premiere; major franchise installment; $204M worldwide opening"
+    },
+    "28 Years Later|||2025": {
+      "title": "28 Years Later",
+      "year": "2025",
+      "director": "Danny Boyle",
+      "genre": "Horror",
+      "rank": "112",
+      "synopsis": "Danny Boyle returns to the franchise he created with a new chapter set in a Britain still ravaged by the rage virus decades after the original outbreak.",
+      "awards": "Major horror sequel; wide theatrical release 2025"
+    },
+    "Wake Up Dead Man: A Knives Out Mystery|||2025": {
+      "title": "Wake Up Dead Man: A Knives Out Mystery",
+      "year": "2025",
+      "director": "Rian Johnson",
+      "genre": "Mystery/Comedy",
+      "rank": "132",
+      "synopsis": "Detective Benoit Blanc returns for the third Knives Out adventure as an unlikely group of suspects converge on a case that tests his most unconventional methods yet.",
+      "awards": "Netflix; Daniel Craig as Benoit Blanc; Johnson Knives Out Glass Onion follow-up; third installment of acclaimed detective franchise; all Knives Out movies"
+    },
+    "Nobody|||2025": {
+      "title": "Nobody",
+      "year": "2025",
+      "director": "Various",
+      "genre": "Animation",
+      "rank": "159",
+      "synopsis": "A Chinese 2D animated film that became a surprise box office phenomenon and the highest-grossing 2D animated film in China.",
+      "awards": "Highest-grossing 2D animated film in China; highest-grossing Chinese 2D animated film ever"
+    },
+    "Ballerina|||2025": {
+      "title": "Ballerina",
+      "year": "2025",
+      "director": "Len Wiseman",
+      "genre": "Action",
+      "rank": "175",
+      "synopsis": "A John Wick universe spinoff following a young ballerina-turned-assassin seeking vengeance for her father's death.",
+      "awards": "John Wick franchise expansion; Ana de Armas starring; wide theatrical release"
+    },
+    "Honey Don't!|||2025": {
+      "title": "Honey Don't!",
+      "year": "2025",
+      "director": "Ethan Coen",
+      "genre": "Comedy",
+      "rank": "86",
+      "synopsis": "Ethan Coen directs a midnight screening comedy that blends dark humor with genre subversion.",
+      "awards": "Cannes Midnight Screening at 78th Cannes Film Festival"
+    },
+    "The Voice of Hind Rajab|||2025": {
+      "title": "The Voice of Hind Rajab",
+      "year": "2025",
+      "director": "Kaouther Ben Hania",
+      "genre": "Documentary",
+      "rank": "131",
+      "synopsis": "A Tunisian documentary examining the story of a young Palestinian girl whose emergency call became a symbol of civilian suffering.",
+      "awards": "Oscar nom for Best International Feature Film (Tunisia)"
+    },
+    "Louis Theroux: The Settlers|||2025": {
+      "title": "Louis Theroux: The Settlers",
+      "year": "2025",
+      "director": "Louis Theroux",
+      "genre": "Documentary",
+      "rank": "153",
+      "synopsis": "Louis Theroux investigates the Israeli settler movement in the West Bank examining ideology and daily life in contested territory.",
+      "awards": "Featured on LB Documentary list; Louis Theroux"
+    },
+    "Spider-Man: Across the Spider-Verse|||2023": {
+      "title": "Spider-Man: Across the Spider-Verse",
+      "year": "2023",
+      "director": "Joaquim Dos Santos and Kemp Powers and Justin K. Thompson",
+      "genre": "Animation/Action",
+      "rank": "7",
+      "synopsis": "Miles Morales catapults across the multiverse where he encounters a team of Spider-People and must redefine what it means to be a hero in this visually groundbreaking animated sequel.",
+      "awards": "$690M worldwide; Golden Globe noms; BAFTA nom; RT 95 MC 86; sequel to Oscar-winning original; revolutionary animation style; Shameik Moore Hailee Steinfeld Oscar Isaac; cliffhanger ending"
+    },
+    "Anatomy of a Fall|||2023": {
+      "title": "Anatomy of a Fall",
+      "year": "2023",
+      "director": "Justine Triet",
+      "genre": "Drama/Thriller",
+      "rank": "1",
+      "synopsis": "A woman is suspected of murdering her husband with their visually impaired son as the only witness in Triets gripping courtroom drama dissecting a marriage.",
+      "awards": "Cannes Palme dOr (Triet 3rd female winner); Oscar Original Screenplay; 5 Oscar noms; BAFTA Original Screenplay; Golden Globe 4 noms; Sandra Huller extraordinary; French-German production"
+    },
+    "The Taste of Things|||2023": {
+      "title": "The Taste of Things",
+      "year": "2023",
+      "director": "Tran Anh Hung",
+      "genre": "Drama/Romance",
+      "rank": "2",
+      "synopsis": "A brilliant chef and his devoted cook share a romance told through the language of food in Trans sumptuous sensory love story set in 19th-century France.",
+      "awards": "Cannes Best Director; Oscar nom International Feature (France); RT 92 MC 80; Juliette Binoche Benoit Magimel; Vietnamese-French director; food as love language; Marcel Rouff novel; sensuous"
+    },
+    "Poor Things|||2023": {
+      "title": "Poor Things",
+      "year": "2023",
+      "director": "Yorgos Lanthimos",
+      "genre": "Fantasy/Comedy",
+      "rank": "3",
+      "synopsis": "A young woman brought back to life by a brilliant scientist embarks on a wild odyssey of self-discovery in Lanthimos visually stunning feminist fable.",
+      "awards": "Venice Golden Lion; 4 Oscars (Actress Production Design Costume Makeup); 11 noms; BAFTA 5 wins; Golden Globe Comedy Picture Supporting Actor; Emma Stone career-best; Mark Ruffalo Willem Dafoe"
+    },
+    "The Creator|||2023": {
+      "title": "The Creator",
+      "year": "2023",
+      "director": "Gareth Edwards",
+      "genre": "Sci-Fi/Action",
+      "rank": "11",
+      "synopsis": "A former soldier is recruited to hunt down and kill the Creator of a mysterious AI weapon in Edwards visually stunning original sci-fi set amid an AI war.",
+      "awards": "Oscar 2 noms (Sound VFX); $104M worldwide; RT 65 MC 63; John David Washington Gemma Chan Madeleine Yuna Voyles; Edwards Rogue One director; original sci-fi; Southeast Asia; AI existentialism"
+    },
+    "Barbie|||2023": {
+      "title": "Barbie",
+      "year": "2023",
+      "director": "Greta Gerwig",
+      "genre": "Comedy/Fantasy",
+      "rank": "8",
+      "synopsis": "Barbie is expelled from Barbieland for being imperfect and discovers the real world in Gerwigs subversive feminist blockbuster that became a global cultural phenomenon.",
+      "awards": "$1.44B worldwide (highest-grossing 2023 highest by female director); 8 Oscar noms 1 win (Song); Golden Globe Comedy Picture; Barbenheimer; Robbie Gosling; America Ferrera monologue; first comedy to $1B"
+    },
+    "20 Days in Mariupol|||2023": {
+      "title": "20 Days in Mariupol",
+      "year": "2023",
+      "director": "Mstyslav Chernov",
+      "genre": "Documentary",
+      "rank": "9",
+      "synopsis": "AP journalists trapped in the besieged Ukrainian city of Mariupol document the first 20 days of the Russian invasion in Chernovs harrowing frontline testimony.",
+      "awards": "Oscar Documentary Feature; Sundance Audience Award World Doc; BAFTA noms; RT 99 MC 83; Chernov AP journalist; maternity hospital bombing; real-time war documentation; essential viewing"
+    },
+    "Indiana Jones and the Dial of Destiny|||2023": {
+      "title": "Indiana Jones and the Dial of Destiny",
+      "year": "2023",
+      "director": "James Mangold",
+      "genre": "Action/Adventure",
+      "rank": "12",
+      "synopsis": "An aging Indiana Jones is dragged back into action by his goddaughter to stop a former Nazi from obtaining a legendary artifact in this franchise farewell.",
+      "awards": "$384M on $300M budget (major loss); Oscar nom Score; RT 69 MC 58; Harrison Ford Phoebe Waller-Bridge Mads Mikkelsen; Mangold Logan director; Ford final Indy; de-aging technology; Archimedes"
+    },
+    "Oppenheimer|||2023": {
+      "title": "Oppenheimer",
+      "year": "2023",
+      "director": "Christopher Nolan",
+      "genre": "Biography/Drama",
+      "rank": "13",
+      "synopsis": "A physicist leads the development of the atomic bomb only to face the moral consequences of his creation in Nolans towering three-hour epic that dominated the cultural conversation.",
+      "awards": "7 Oscars (Picture Director Actor Supporting Actor Score Sound Editing); 13 noms; BAFTA 7 wins; Golden Globe Drama Picture Director Actor Score Supporting Actor; SAG Cast Actor; $976M worldwide; Barbenheimer phenomenon; Cillian Murphy Robert Downey Jr"
+    },
+    "The Eternal Memory|||2023": {
+      "title": "The Eternal Memory",
+      "year": "2023",
+      "director": "Maite Alberdi",
+      "genre": "Documentary",
+      "rank": "14",
+      "synopsis": "A couple navigates the husbands Alzheimers disease over two decades as memory fades but love endures in Alberdis deeply moving Chilean documentary.",
+      "awards": "Sundance World Cinema Documentary Grand Jury Prize; Oscar nom Documentary; RT 96 MC 79; Chilean; Augusto Gongora journalist; Paulina Urrutia actress; devastating love story; memory and identity"
+    },
+    "Killers of the Flower Moon|||2023": {
+      "title": "Killers of the Flower Moon",
+      "year": "2023",
+      "director": "Martin Scorsese",
+      "genre": "Crime/Drama",
+      "rank": "21",
+      "synopsis": "Members of the Osage Nation are systematically murdered for their oil wealth in 1920s Oklahoma in Scorseses sprawling epic about American greed and betrayal.",
+      "awards": "10 Oscar noms 0 wins; Golden Globe 7 noms; BAFTA 9 noms; SAG noms; $159M worldwide; DiCaprio De Niro Lily Gladstone; Gladstone first Native American Best Actress nom; Scorsese at 80; Apple TV+"
+    },
+    "Society of the Snow|||2023": {
+      "title": "Society of the Snow",
+      "year": "2023",
+      "director": "J.A. Bayona",
+      "genre": "Drama/Survival",
+      "rank": "27",
+      "synopsis": "Survivors of the 1972 Andes plane crash face impossible choices in Bayonas harrowing and deeply humane retelling of the Uruguayan rugby team disaster.",
+      "awards": "Oscar noms International Feature Makeup; BAFTA noms; Netflix; RT 90 MC 74; Bayona Impossible Jurassic follow-up; Spanish-language; non-professional actors; cannibalism dilemma; gut-wrenching"
+    },
+    "Humanist Vampire Seeking Consenting Suicidal Person|||2023": {
+      "title": "Humanist Vampire Seeking Consenting Suicidal Person",
+      "year": "2023",
+      "director": "Ariane Louis-Seize",
+      "genre": "Horror/Comedy",
+      "rank": "35",
+      "synopsis": "A young vampire who struggles to kill befriends a suicidal teenager in a mutually beneficial arrangement in Louis-Seizes darkly funny Canadian genre gem.",
+      "awards": "Venice Horizons; TIFF; RT 97 MC 73; Louis-Seize debut; Canadian; vampire-romance; deadpan humor; Quebec; offbeat genre mashup; Sara Montpetit Felix-Antoine Benard; cult potential"
+    },
+    "Maestro|||2023": {
+      "title": "Maestro",
+      "year": "2023",
+      "director": "Bradley Cooper",
+      "genre": "Drama/Biography",
+      "rank": "36",
+      "synopsis": "The complex love story between composer Leonard Bernstein and actress Felicia Montealegre spanning decades in Coopers ambitious follow-up to A Star Is Born.",
+      "awards": "7 Oscar noms 0 wins; Golden Globe 4 noms; BAFTA 7 noms; SAG noms; Cooper directed starred; Carey Mulligan; Netflix; Bernstein estate approved; prosthetic nose controversy; ambitious"
+    },
+    "John Wick: Chapter 4|||2023": {
+      "title": "John Wick: Chapter 4",
+      "year": "2023",
+      "director": "Chad Stahelski",
+      "genre": "Action/Thriller",
+      "rank": "52",
+      "synopsis": "John Wick uncovers a path to defeating the High Table but must face off against a new enemy in Stahelskis spectacular franchise peak that redefined action cinema.",
+      "awards": "$447M worldwide; RT 94 MC 78; Keanu Reeves Donnie Yen Bill Skarsgard; franchise best; Paris Osaka Berlin; staircase fight; overhead oner; 169 minutes; action masterpiece"
+    },
+    "The Promised Land|||2023": {
+      "title": "The Promised Land",
+      "year": "2023",
+      "director": "Nikolaj Arcel",
+      "genre": "Drama",
+      "rank": "60",
+      "synopsis": "A poor soldiers captain attempts to conquer the uninhabitable Danish heath to build a colony in Arcels epic historical drama showcasing Mads Mikkelsens commanding presence.",
+      "awards": "Denmark Oscar submission; RT 87 MC 69; Mads Mikkelsen; Arcel A Royal Affair follow-up; 18th century Jutland; colonialism; class; Mikkelsen towering; Magnolia; Amanda Collin"
+    },
+    "The Settlers|||2023": {
+      "title": "The Settlers",
+      "year": "2023",
+      "director": "Felipe Galvez",
+      "genre": "Drama/Western",
+      "rank": "66",
+      "synopsis": "Three horsemen are sent to claim land in Chilean Patagonia with brutal consequences for the indigenous population in Galvezs colonial revisionist western debut.",
+      "awards": "Cannes FIPRESCI Prize; RT 82 MC 72; Galvez debut; Chilean Patagonia; Selknam genocide; colonial violence; revisionist western; decolonial cinema; MUBI"
+    },
+    "The Boy and the Heron|||2023": {
+      "title": "The Boy and the Heron",
+      "year": "2023",
+      "director": "Hayao Miyazaki",
+      "genre": "Animation/Fantasy",
+      "rank": "71",
+      "synopsis": "A boy discovers a fantastical world after his mothers death in Miyazakis deeply personal animated masterwork that serves as the legendary directors likely final film.",
+      "awards": "Oscar Animated Feature; Golden Globe nom; BAFTA nom; $283M worldwide; Miyazaki at 82; Studio Ghibli; no marketing campaign; autobiographical; first Ghibli $100M+ domestic"
+    },
+    "Air|||2023": {
+      "title": "Air",
+      "year": "2023",
+      "director": "Ben Affleck",
+      "genre": "Drama/Biography",
+      "rank": "73",
+      "synopsis": "Nike pursues rookie Michael Jordan for a groundbreaking sneaker deal that would change the sports industry forever in Afflecks crowd-pleasing corporate origin story.",
+      "awards": "$90M worldwide; RT 92 MC 72; Matt Damon Affleck Viola Davis Chris Tucker Jason Bateman; Affleck directed; Nike Jordan; 1984; Sonny Vaccaro; Amazon; adult drama hit"
+    },
+    "Wonka|||2023": {
+      "title": "Wonka",
+      "year": "2023",
+      "director": "Paul King",
+      "genre": "Musical/Fantasy",
+      "rank": "83",
+      "synopsis": "The young Willy Wonka discovers his talent for chocolate-making and encounters the chocolate cartels dark underbelly in Kings charming musical origin story.",
+      "awards": "$634M worldwide; Golden Globe nom Actor Comedy (Chalamet); RT 83 MC 67; Timothee Chalamet Hugh Grant Olivia Colman; King Paddington director; musical numbers; holiday release; Warner Bros"
+    },
+    "Dungeons and Dragons: Honor Among Thieves|||2023": {
+      "title": "Dungeons and Dragons: Honor Among Thieves",
+      "year": "2023",
+      "director": "Jonathan Goldstein and John Francis Daley",
+      "genre": "Fantasy/Adventure",
+      "rank": "85",
+      "synopsis": "A charming thief and a band of adventurers undertake a heist to retrieve a lost relic in this warmly received adaptation of the beloved tabletop game.",
+      "awards": "$208M on $150M budget (underperformed); RT 91 MC 72; Chris Pine Michelle Rodriguez Hugh Grant Rege-Jean Page; cult following; D&D fans pleased; fun ensemble; Paramount"
+    },
+    "Guardians of the Galaxy Vol. 3|||2023": {
+      "title": "Guardians of the Galaxy Vol. 3",
+      "year": "2023",
+      "director": "James Gunn",
+      "genre": "Action/Sci-Fi",
+      "rank": "86",
+      "synopsis": "The Guardians embark on a dangerous mission to protect Rocket in Gunns emotionally resonant MCU trilogy finale that bid farewell to the beloved team.",
+      "awards": "$846M worldwide; Golden Globe nom; SAG nom Stunt; RT 82 MC 64; Gunn final MCU film before DC; Rockets origin; Pratt Saldana; genuinely moving; best MCU Phase 5"
+    },
+    "Joy Ride|||2023": {
+      "title": "Joy Ride",
+      "year": "2023",
+      "director": "Adele Lim",
+      "genre": "Comedy",
+      "rank": "89",
+      "synopsis": "Four Asian-American friends travel to China on a wild trip that becomes an epic journey of self-discovery in Lims uproariously funny directorial debut.",
+      "awards": "RT 90 MC 64; Ashley Park Sherry Cola Stephanie Hsu Sabrina Wu; Lim Crazy Rich Asians writer debut; AAPI representation; raunchy; road trip; Lionsgate"
+    },
+    "Mission: Impossible - Dead Reckoning Part One|||2023": {
+      "title": "Mission: Impossible - Dead Reckoning Part One",
+      "year": "2023",
+      "director": "Christopher McQuarrie",
+      "genre": "Action/Thriller",
+      "rank": "101",
+      "synopsis": "Ethan Hunt races to prevent a dangerous AI weapon from falling into the wrong hands in McQuarries spectacular globe-trotting sequel with stunning practical stunts.",
+      "awards": "$571M worldwide; Oscar noms Sound VFX; BAFTA noms; SAG Stunt nom; Cruise Atwell Ferguson; train sequence; Cruise skydive motorcycle cliff jump; practical filmmaking ethos"
+    },
+    "Napoleon|||2023": {
+      "title": "Napoleon",
+      "year": "2023",
+      "director": "Ridley Scott",
+      "genre": "Biography/War",
+      "rank": "102",
+      "synopsis": "The rise and fall of Napoleon Bonaparte focusing on his volatile relationship with Josephine in Scotts polarizing historical epic.",
+      "awards": "Oscar 3 noms (Costume Production Design Sound); BAFTA 4 noms; $222M worldwide; Joaquin Phoenix Vanessa Kirby; Scott at 86; Apple TV+; battle sequences; divided critics; Waterloo; Sony theatrical"
+    },
+    "Blue Beetle|||2023": {
+      "title": "Blue Beetle",
+      "year": "2023",
+      "director": "Angel Manuel Soto",
+      "genre": "Action/Sci-Fi",
+      "rank": "106",
+      "synopsis": "A college graduate is chosen by an alien scarab to become the superhero Blue Beetle in Sotos culturally significant DC film featuring the first Latino superhero lead.",
+      "awards": "$131M on $120M budget (underperformed); RT 78 MC 61; Xolo Mariduena George Lopez; Soto; first Latino DC lead; Jaime Reyes; DCU surviving character; DC; Mariduena charming"
+    },
+    "No Hard Feelings|||2023": {
+      "title": "No Hard Feelings",
+      "year": "2023",
+      "director": "Gene Stupnitsky",
+      "genre": "Comedy",
+      "rank": "110",
+      "synopsis": "A woman is hired by wealthy helicopter parents to date their socially awkward son before he leaves for college in Stupnitskys raunchy R-rated comedy.",
+      "awards": "$87M worldwide; RT 72 MC 59; Jennifer Lawrence Andrew Barth Feldman; Stupnitsky Good Boys follow-up; Lawrence physical comedy; R-rated comedy revival; Sony; mid-budget win"
+    },
+    "Knock at the Cabin|||2023": {
+      "title": "Knock at the Cabin",
+      "year": "2023",
+      "director": "M. Night Shyamalan",
+      "genre": "Thriller/Horror",
+      "rank": "109",
+      "synopsis": "A family vacationing at a remote cabin is taken hostage by strangers who demand an impossible choice in Shyamalans taut chamber thriller based on Paul Tremblays novel.",
+      "awards": "$55M worldwide; RT 68 MC 63; Dave Bautista Rupert Grint; Shyamalan; Bautista unexpectedly great; home invasion; apocalyptic choice; Paul Tremblay Cabin at the End of the World; Universal"
+    },
+    "Ferrari|||2023": {
+      "title": "Ferrari",
+      "year": "2023",
+      "director": "Michael Mann",
+      "genre": "Drama/Biography",
+      "rank": "116",
+      "synopsis": "Enzo Ferrari navigates personal crisis and business collapse by betting everything on the deadly 1957 Mille Miglia race in Manns long-gestating passion project.",
+      "awards": "Oscar nom Sound; Golden Globe nom; Adam Driver Penelope Cruz Shailene Woodley; Mann Heat Collateral follow-up; Modena Italy; racing sequences; Driver dual role; STX"
+    },
+    "The Hunger Games: The Ballad of Songbirds and Snakes|||2023": {
+      "title": "The Hunger Games: The Ballad of Songbirds and Snakes",
+      "year": "2023",
+      "director": "Francis Lawrence",
+      "genre": "Action/Drama",
+      "rank": "123",
+      "synopsis": "The young Coriolanus Snow is assigned to mentor a tribute from the poorest district in this prequel revealing the origins of Panems tyrannical president.",
+      "awards": "$337M worldwide; RT 63 MC 55; Tom Blyth Rachel Zegler Viola Davis Peter Dinklage; Lawrence franchise return; Suzanne Collins prequel; young Snow; Lionsgate"
+    },
+    "Fast X|||2023": {
+      "title": "Fast X",
+      "year": "2023",
+      "director": "Louis Leterrier",
+      "genre": "Action",
+      "rank": "127",
+      "synopsis": "Dom Toretto faces the vengeful son of a former adversary in the tenth mainline installment of the globetrotting franchise.",
+      "awards": "$705M worldwide; RT 56 MC 56; Vin Diesel Jason Momoa; Leterrier replaced Justin Lin; Momoa scene-stealing villain; franchise 10th entry; 79% international; Rome Vatican; cliffhanger"
+    },
+    "The Marvels|||2023": {
+      "title": "The Marvels",
+      "year": "2023",
+      "director": "Nia DaCosta",
+      "genre": "Action/Sci-Fi",
+      "rank": "129",
+      "synopsis": "Captain Marvel Ms. Marvel and Monica Rambeau team up when their powers become entangled in DaCostas MCU sequel that became the franchises lowest-grossing film.",
+      "awards": "$206M worldwide (MCU lowest); RT 62 MC 50; Brie Larson Iman Vellani Teyonah Parris; DaCosta Candyman director; 105 minutes; shortest MCU; superhero fatigue nadir; Disney"
+    },
+    "Saltburn|||2023": {
+      "title": "Saltburn",
+      "year": "2023",
+      "director": "Emerald Fennell",
+      "genre": "Thriller/Drama",
+      "rank": "130",
+      "synopsis": "A student at Oxford becomes entranced by a charismatic aristocratic classmate and finaggles an invitation to his familys sprawling estate in Fennells provocative class satire.",
+      "awards": "BAFTA 5 noms; Golden Globe nom; Barry Keoghan Rosamund Pike Jacob Elordi; Fennell Promising Young Woman follow-up; bathtub scene viral; Keoghan extraordinary; social media cultural moment; Amazon"
+    },
+    "Shazam! Fury of the Gods|||2023": {
+      "title": "Shazam! Fury of the Gods",
+      "year": "2023",
+      "director": "David F. Sandberg",
+      "genre": "Action/Comedy",
+      "rank": "137",
+      "synopsis": "The Shazam family faces the vengeful daughters of Atlas in Sandbergs DCEU sequel that underperformed despite warm cast chemistry.",
+      "awards": "$134M on $125M budget (loss); RT 49 MC 47; Zachary Levi Helen Mirren Lucy Liu Rachel Zegler; Sandberg; DCEU declining; franchise fatigue; DC transition casualty"
+    },
+    "Aquaman and the Lost Kingdom|||2023": {
+      "title": "Aquaman and the Lost Kingdom",
+      "year": "2023",
+      "director": "James Wan",
+      "genre": "Action/Fantasy",
+      "rank": "142",
+      "synopsis": "Arthur Curry must forge an uneasy alliance with his half-brother to protect Atlantis from an ancient power in the final film of the DCEU era.",
+      "awards": "$440M worldwide; RT 33 MC 44; Jason Momoa Patrick Wilson Yahya Abdul-Mateen II; Wan; DCEU final film; franchise fatigue; December release; James Gunn DCU transition"
+    },
+    "Ant-Man and the Wasp: Quantumania|||2023": {
+      "title": "Ant-Man and the Wasp: Quantumania",
+      "year": "2023",
+      "director": "Peyton Reed",
+      "genre": "Action/Sci-Fi",
+      "rank": "139",
+      "synopsis": "The Ant-Man family is pulled into the Quantum Realm where they face Kang the Conqueror in this MCU Phase 5 opener that underwhelmed audiences and critics.",
+      "awards": "$476M worldwide; RT 46 MC 48; Paul Rudd Evangeline Lilly Jonathan Majors; MCU disappointment; Kang introduction; superhero fatigue evidence; Majors later dropped; Reed trilogy conclusion"
+    },
+    "Rebel Moon - Part One: A Child of Fire|||2023": {
+      "title": "Rebel Moon - Part One: A Child of Fire",
+      "year": "2023",
+      "director": "Zack Snyder",
+      "genre": "Sci-Fi/Action",
+      "rank": "151",
+      "synopsis": "A young woman on a peaceful colony recruits warriors to defend against a tyrannical army in Snyders ambitious Netflix space opera homage to Seven Samurai and Star Wars.",
+      "awards": "Netflix; RT 22 MC 34; Sofia Boutella Charlie Hunnam Djimon Hounsou Ed Skrein; Snyder; Star Wars homage; ambitious but critically savaged; directors cut later; Netflix exclusive"
+    },
+    "Rebel Moon - Part Two: The Scargiver|||2024": {
+      "title": "Rebel Moon - Part Two: The Scargiver",
+      "year": "2024",
+      "director": "Zack Snyder",
+      "genre": "Sci-Fi/Action",
+      "rank": "146",
+      "synopsis": "The rebels prepare to defend their village against the forces of the Motherworld in Snyders Netflix space saga conclusion.",
+      "awards": "Netflix; RT 15 MC 28; Sofia Boutella Ed Skrein; Snyder; Part Two of saga; directors cuts later; critically savaged even worse than Part One"
+    },
+    "Rebel Ridge|||2024": {
+      "title": "Rebel Ridge",
+      "year": "2024",
+      "director": "Jeremy Saulnier",
+      "genre": "Action/Thriller",
+      "rank": "65",
+      "synopsis": "An ex-Marine confronts corruption in a small town when local police seize his cash through civil forfeiture in Saulniers lean tense thriller.",
+      "awards": "Netflix; RT 95 MC 73; Aaron Pierre Don Johnson AnnaSophia Robb; Saulnier Blue Ruin Green Room follow-up; civil forfeiture; Pierre star-making; Netflix most-watched"
+    },
+    "Triangle of Sadness|||2022": {
+      "title": "Triangle of Sadness",
+      "year": "2022",
+      "director": "Ruben Ostlund",
+      "genre": "Comedy/Drama",
+      "rank": "1",
+      "synopsis": "A celebrity couple on a luxury cruise that goes horribly wrong in Ostlunds savage class satire about wealth beauty and survival.",
+      "awards": "Cannes Palme dOr (Ostlund second consecutive after The Square); Oscar noms Picture Director Screenplay; Harris Dickinson Charlbi Dean (died after filming); vomit scene; capsized hierarchy"
+    },
+    "All the Beauty and the Bloodshed|||2022": {
+      "title": "All the Beauty and the Bloodshed",
+      "year": "2022",
+      "director": "Laura Poitras",
+      "genre": "Documentary",
+      "rank": "2",
+      "synopsis": "Photographer Nan Goldins fight against the Sackler family and their role in the opioid crisis intercut with her art and life in Poitras riveting documentary.",
+      "awards": "Venice Golden Lion (rare documentary winner); Oscar nom Documentary; Spirit Documentary; RT 93 MC 84; Poitras Citizenfour follow-up; Sackler family; opioid crisis; art activism; P.A.I.N."
+    },
+    "The Fabelmans|||2022": {
+      "title": "The Fabelmans",
+      "year": "2022",
+      "director": "Steven Spielberg",
+      "genre": "Drama/Biography",
+      "rank": "3",
+      "synopsis": "A young man discovers a shattering family secret and explores how cinema helps him see the truth in Spielbergs deeply personal semi-autobiographical masterwork.",
+      "awards": "7 Oscar noms including Picture Director; TIFF Peoples Choice; Golden Globe Drama + Director; Williams LaBeouf Dano Rogen; Spielberg most personal film; post-WWII Arizona"
+    },
+    "Tar|||2022": {
+      "title": "Tar",
+      "year": "2022",
+      "director": "Todd Field",
+      "genre": "Drama",
+      "rank": "4",
+      "synopsis": "A world-renowned conductor faces a reckoning with power accountability and legacy in Fields towering character study marking his return after 16 years away.",
+      "awards": "6 Oscar noms including Picture Director Actress Screenplay Cinematography Editing; Venice Volpi Actress (Blanchett); BAFTA Actress; Golden Globe Actress Drama; Blanchett career-best; Field first film since Little Children 2006"
+    },
+    "Joyland|||2022": {
+      "title": "Joyland",
+      "year": "2022",
+      "director": "Saim Sadiq",
+      "genre": "Drama",
+      "rank": "7",
+      "synopsis": "A Pakistani family faces upheaval when its youngest son falls for a transgender performer in Sadiqs groundbreaking debut.",
+      "awards": "Cannes Un Certain Regard Jury Prize + Queer Palme; Spirit Best International; RT 92 MC 82; Pakistan first Cannes; banned briefly; transgender love; LGBTQ Pakistan"
+    },
+    "Everything Everywhere All at Once|||2022": {
+      "title": "Everything Everywhere All at Once",
+      "year": "2022",
+      "director": "Daniel Kwan and Daniel Scheinert",
+      "genre": "Sci-Fi/Comedy",
+      "rank": "9",
+      "synopsis": "An aging Chinese immigrant is swept up in an insane adventure where she alone can save existence by exploring other universes in the Daniels multiverse masterpiece.",
+      "awards": "7 Oscars (Picture Director Actress Supporting Actor Supporting Actress Original Screenplay Editing); SAG Ensemble + all acting; Spirit 7 wins (record); Golden Globe Comedy Actress; Yeoh first Asian Best Actress; Quan comeback"
+    },
+    "Stars at Noon|||2022": {
+      "title": "Stars at Noon",
+      "year": "2022",
+      "director": "Claire Denis",
+      "genre": "Drama/Thriller",
+      "rank": "12",
+      "synopsis": "An American journalist stranded in Nicaragua becomes entangled with a mysterious Englishman in Denis languid sensual political romance.",
+      "awards": "Cannes Grand Prix (shared with Close); RT 71 MC 66; Qualley Alwyn; Denis High Life follow-up; Nicaragua; political thriller; sensual; Denis languor; divisive Cannes winner"
+    },
+    "The Banshees of Inisherin|||2022": {
+      "title": "The Banshees of Inisherin",
+      "year": "2022",
+      "director": "Martin McDonagh",
+      "genre": "Drama/Comedy",
+      "rank": "16",
+      "synopsis": "A man on a remote Irish island is devastated when his lifelong friend abruptly ends their relationship in McDonaghs darkly comic parable about friendship grief and stubbornness.",
+      "awards": "9 Oscar noms; Venice Screenplay + Volpi Actor (Farrell); Golden Globe Comedy + Screenplay + Actor; BAFTA British Film + Supporting Actor (Keoghan) + Supporting Actress (Condon) + Screenplay; Farrell Gleeson Keoghan Condon"
+    },
+    "Puss in Boots: The Last Wish|||2022": {
+      "title": "Puss in Boots: The Last Wish",
+      "year": "2022",
+      "director": "Joel Crawford",
+      "genre": "Animation/Adventure",
+      "rank": "27",
+      "synopsis": "Puss discovers he has burned through eight of his nine lives and embarks on a quest to find the mythical Last Wish in Crawfords stylistically daring sequel.",
+      "awards": "Oscar nom Animated; $484M worldwide; RT 93 MC 84; Banderas; Spider-Verse animation influence; Death (wolf) terrifying; hand-painted style; existential themes; surprise critical hit"
+    },
+    "Emily the Criminal|||2022": {
+      "title": "Emily the Criminal",
+      "year": "2022",
+      "director": "John Patton Ford",
+      "genre": "Crime/Drama",
+      "rank": "34",
+      "synopsis": "A young woman saddled with student debt gets involved in a credit card scam in Fords lean gripping debut.",
+      "awards": "Spirit nom; RT 84 MC 71; Aubrey Plaza career-best; Ford debut; student debt; gig economy; Plaza transformation; Theo Rossi; underground economy; sharp social commentary"
+    },
+    "Nope|||2022": {
+      "title": "Nope",
+      "year": "2022",
+      "director": "Jordan Peele",
+      "genre": "Sci-Fi/Horror",
+      "rank": "31",
+      "synopsis": "The residents of a California gulch discover an uncanny presence in the skies above them in Peeles ambitious UFO thriller about spectacle and exploitation.",
+      "awards": "Oscar nom VFX; $171M worldwide; RT 82 MC 77; Peele Get Out Us follow-up; Kaluuya Palmer Yeun; spectacle critique; Gordy the chimp; Hollywood horse wranglers"
+    },
+    "Aftersun|||2022": {
+      "title": "Aftersun",
+      "year": "2022",
+      "director": "Charlotte Wells",
+      "genre": "Drama",
+      "rank": "41",
+      "synopsis": "A young woman reflects on a holiday she took with her father twenty years earlier in Wells devastating debut that excavates memory grief and unspoken pain.",
+      "awards": "Oscar nom Actor (Mescal); Spirit nom; BAFTA Outstanding British Film nom; Mescal extraordinary; Wells directorial debut; A24; Frankie Corio child performance; father-daughter; Turkish resort; one of decades best debuts"
+    },
+    "Glass Onion: A Knives Out Mystery|||2022": {
+      "title": "Glass Onion: A Knives Out Mystery",
+      "year": "2022",
+      "director": "Rian Johnson",
+      "genre": "Mystery/Comedy",
+      "rank": "58",
+      "synopsis": "Detective Benoit Blanc travels to Greece to peel back layers of a mystery involving a tech billionaire and his friends in Johnsons wickedly entertaining sequel.",
+      "awards": "RT 92 MC 80; Netflix; Craig Bautista Janney Monae Hudson Odom; Johnson Knives Out follow-up; tech billionaire satire; Monae extraordinary dual role; Netflix limited theatrical"
+    },
+    "The Eternal Daughter|||2022": {
+      "title": "The Eternal Daughter",
+      "year": "2022",
+      "director": "Joanna Hogg",
+      "genre": "Drama/Horror",
+      "rank": "57",
+      "synopsis": "A filmmaker and her elderly mother confront secrets when they return to a country house in Hoggs eerie atmospheric chamber piece.",
+      "awards": "Venice Competition; RT 77 MC 69; Tilda Swinton dual role; Hogg Souvenir trilogy conclusion; Welsh hotel; ghost story; mother-daughter; Swinton plays both; atmospheric restraint"
+    },
+    "The Batman|||2022": {
+      "title": "The Batman",
+      "year": "2022",
+      "director": "Matt Reeves",
+      "genre": "Action/Crime",
+      "rank": "64",
+      "synopsis": "Batman ventures into Gothams underworld when a sadistic killer leaves cryptic clues targeting the citys elite in Reeves noir-inflected detective thriller.",
+      "awards": "$770M worldwide; RT 84 MC 72; Pattinson Kravitz Dano Farrell Wright Turturro; Reeves; noir detective Batman; Riddler; Zodiac influence; three hours; Pattinson redefines; Kravitz Catwoman"
+    },
+    "Prey|||2022": {
+      "title": "Prey",
+      "year": "2022",
+      "director": "Dan Trachtenberg",
+      "genre": "Action/Sci-Fi",
+      "rank": "66",
+      "synopsis": "A young Comanche warrior fights to protect her tribe from an alien predator in Trachtenbergs thrilling prequel that revitalized the Predator franchise.",
+      "awards": "Hulu; RT 92 MC 71; Amber Midthunder; 10 Cloverfield Lane follow-up; Comanche setting 1719; Indigenous representation; Midthunder star-making; best Predator since original; Naru"
+    },
+    "The Menu|||2022": {
+      "title": "The Menu",
+      "year": "2022",
+      "director": "Mark Mylod",
+      "genre": "Horror/Comedy",
+      "rank": "78",
+      "synopsis": "A young couple travels to a remote island restaurant where the chef has prepared a lavish menu with shocking surprises in Mylods culinary class satire.",
+      "awards": "RT 85 MC 74; $79M worldwide; Fiennes Taylor-Joy Hoult; Mylod Succession director; culinary horror; Fiennes magnetic; Taylor-Joy surrogate; cheeseburger; Searchlight"
+    },
+    "Kimi|||2022": {
+      "title": "Kimi",
+      "year": "2022",
+      "director": "Steven Soderbergh",
+      "genre": "Thriller",
+      "rank": "82",
+      "synopsis": "An agoraphobic tech worker discovers evidence of a crime and must venture outside to report it in Soderberghs lean pandemic-era thriller.",
+      "awards": "RT 81 MC 72; HBO Max; Kravitz; Soderbergh prolific; pandemic setting; tech surveillance; agoraphobia; Kravitz star turn; 89 minutes; lean efficient"
+    },
+    "Watcher|||2022": {
+      "title": "Watcher",
+      "year": "2022",
+      "director": "Cory Finley",
+      "genre": "Horror/Thriller",
+      "rank": "88",
+      "synopsis": "A woman who has just moved to Bucharest suspects a stranger watching from across the street may be a serial killer in Finleys paranoia thriller.",
+      "awards": "RT 78 MC 70; Maika Monroe; Finley Bad Education follow-up; Bucharest; female paranoia; Rear Window echoes; gaslighting; Monroe star-making dramatic turn; slow-burn"
+    },
+    "The Wonder|||2022": {
+      "title": "The Wonder",
+      "year": "2022",
+      "director": "Sebastian Lelio",
+      "genre": "Drama/Mystery",
+      "rank": "94",
+      "synopsis": "A nurse observes an apparent miracle in 1862 Ireland: a girl who hasnt eaten for months but remains healthy in Lelios Netflix adaptation.",
+      "awards": "RT 76 MC 68; Pugh; Lelio A Fantastic Woman follow-up; Netflix; 1862 Ireland; fasting girl; science vs faith; Donoghue novel; meta-narrative framing"
+    },
+    "The Lost City|||2022": {
+      "title": "The Lost City",
+      "year": "2022",
+      "director": "Aaron Nee and Adam Nee",
+      "genre": "Action/Comedy",
+      "rank": "100",
+      "synopsis": "A reclusive novelist is kidnapped by a billionaire and must be rescued by her books cover model in this breezy adventure comedy.",
+      "awards": "$190M worldwide; RT 79 MC 60; Bullock Tatum Radcliffe; Romancing the Stone homage; Bullock comeback; jungle adventure; Pitt cameo; crowd-pleasing"
+    },
+    "Doctor Strange in the Multiverse of Madness|||2022": {
+      "title": "Doctor Strange in the Multiverse of Madness",
+      "year": "2022",
+      "director": "Sam Raimi",
+      "genre": "Action/Horror",
+      "rank": "102",
+      "synopsis": "Doctor Strange traverses dangerous alternate realities in Raimis horror-inflected MCU sequel.",
+      "awards": "$955M worldwide; RT 67 MC 68; Cumberbatch Olsen; Raimi return (Spider-Man director); Scarlet Witch; America Chavez; Raimi Evil Dead touches; multiverse"
+    },
+    "Bullet Train|||2022": {
+      "title": "Bullet Train",
+      "year": "2022",
+      "director": "David Leitch",
+      "genre": "Action/Comedy",
+      "rank": "106",
+      "synopsis": "Five assassins aboard a Japanese bullet train discover their missions are all connected in Leitchs stylish ensemble action comedy.",
+      "awards": "$239M worldwide; RT 74 MC 59; Pitt Taylor-Joy Tyree Henry King; Leitch John Wick co-director; Isaka novel; Japanese setting; colorful assassins; Pitt charm"
+    },
+    "The Whale|||2022": {
+      "title": "The Whale",
+      "year": "2022",
+      "director": "Darren Aronofsky",
+      "genre": "Drama",
+      "rank": "114",
+      "synopsis": "A reclusive morbidly obese English teacher attempts to reconnect with his estranged daughter in Aronofskys chamber drama featuring Frasers remarkable comeback.",
+      "awards": "Oscar Actor (Fraser comeback) + Makeup; SAG Actor; TIFF Tribute; Fraser 20-year journey back; Samuel D. Hunter play; single apartment; Sadie Sink Hong Chau"
+    },
+    "Thor: Love and Thunder|||2022": {
+      "title": "Thor: Love and Thunder",
+      "year": "2022",
+      "director": "Taika Waititi",
+      "genre": "Action/Comedy",
+      "rank": "118",
+      "synopsis": "Thor enlists help to fight Gorr the God Butcher in Waititis colorful if overstuffed MCU sequel.",
+      "awards": "$760M worldwide; RT 64 MC 58; Hemsworth Portman Bale Thompson; Waititi Ragnarok follow-up; Gorr (Bale); too much comedy; Portman Mighty Thor; divisive MCU entry"
+    },
+    "Top Gun: Maverick|||2022": {
+      "title": "Top Gun: Maverick",
+      "year": "2022",
+      "director": "Joseph Kosinski",
+      "genre": "Action/Drama",
+      "rank": "126",
+      "synopsis": "Pete Mitchell confronts his past while training elite graduates for a dangerous mission in Kosinskis spectacular legacy sequel that revitalized theatrical cinema.",
+      "awards": "Oscar Sound; 6 noms including Picture; $1.49B worldwide (highest-grossing 2022); SAG Stunt Ensemble; Cruise career-best box office; practical aerial combat in real jets; 36 years after original"
+    },
+    "Spiderhead|||2022": {
+      "title": "Spiderhead",
+      "year": "2022",
+      "director": "Joseph Kosinski",
+      "genre": "Sci-Fi/Thriller",
+      "rank": "129",
+      "synopsis": "Inmates test emotion-altering drugs in exchange for reduced sentences in Kosinskis Netflix George Saunders adaptation.",
+      "awards": "Netflix; RT 42 MC 47; Hemsworth Teller; Kosinski Top Gun year; Saunders short story; prison experiment; Hemsworth villain; middling Netflix thriller"
+    },
+    "Fantastic Beasts: The Secrets of Dumbledore|||2022": {
+      "title": "Fantastic Beasts: The Secrets of Dumbledore",
+      "year": "2022",
+      "director": "David Yates",
+      "genre": "Fantasy/Adventure",
+      "rank": "127",
+      "synopsis": "Dumbledore relies on Newt Scamander to lead a team against Grindelwald in this Wizarding World prequel installment.",
+      "awards": "$407M worldwide (underperformed); RT 46 MC 49; Law Mikkelsen Redmayne; Mikkelsen replaced Depp; franchise fatigue; future uncertain; Yates sixth Wizarding World"
+    },
+    "Uncharted|||2022": {
+      "title": "Uncharted",
+      "year": "2022",
+      "director": "Ruben Fleischer",
+      "genre": "Action/Adventure",
+      "rank": "132",
+      "synopsis": "Nathan Drake is recruited by treasure hunter Victor Sullivan to recover Magellans fortune in this video game adaptation.",
+      "awards": "$401M worldwide; RT 40 MC 45; Holland Wahlberg Banderas; Fleischer; video game adaptation; Holland; globe-trotting; treasure hunt; better commercial than critical"
+    },
+    "Babylon|||2022": {
+      "title": "Babylon",
+      "year": "2022",
+      "director": "Damien Chazelle",
+      "genre": "Drama/Comedy",
+      "rank": "135",
+      "synopsis": "A tale of outsized ambition tracing the rise and fall of characters during early Hollywoods era of unbridled decadence in Chazelles polarizing epic.",
+      "awards": "Oscar noms Costume + Production Design + Score; $63M on $78M budget (major flop); Robbie Pitt Calva; Chazelle La La Land follow-up; 1920s Hollywood; three hours; deeply divisive"
+    },
+    "Black Panther: Wakanda Forever|||2022": {
+      "title": "Black Panther: Wakanda Forever",
+      "year": "2022",
+      "director": "Ryan Coogler",
+      "genre": "Action/Drama",
+      "rank": "136",
+      "synopsis": "Wakanda fights to protect its nation in the wake of King TChallas death and faces a new underwater kingdom threat in Cooglers emotional sequel.",
+      "awards": "$859M worldwide; Oscar nom Supporting Actress (Bassett first MCU acting nom) + Costume + VFX + Makeup + Song; Boseman tribute; Namor; Riri Williams; grief as theme"
+    },
+    "Amsterdam|||2022": {
+      "title": "Amsterdam",
+      "year": "2022",
+      "director": "David O. Russell",
+      "genre": "Comedy/Crime",
+      "rank": "139",
+      "synopsis": "Three friends witness a murder and uncover one of the most outrageous plots in American history in Russells star-studded period caper.",
+      "awards": "RT 33 MC 48; $31M on $80M budget (major flop); Bale Robbie Washington; Russell Joy follow-up; 1930s conspiracy; massive ensemble; critically reviled; star-studded disaster"
+    },
+    "Jurassic World Dominion|||2022": {
+      "title": "Jurassic World Dominion",
+      "year": "2022",
+      "director": "Colin Trevorrow",
+      "genre": "Action/Sci-Fi",
+      "rank": "142",
+      "synopsis": "Dinosaurs live alongside humans as an ancient threat reshapes everything in this franchise conclusion reuniting original and new casts.",
+      "awards": "$1.001B worldwide; RT 30 MC 38; Pratt Howard Neill Dern Goldblum; original trio returns; franchise finale; critically savaged; $1B despite terrible reviews"
+    },
+    "Enola Holmes 2|||2022": {
+      "title": "Enola Holmes 2",
+      "year": "2022",
+      "director": "",
+      "genre": "Drama",
+      "rank": "153",
+      "synopsis": "Featured on LB 2020s list.",
+      "awards": ""
+    },
+    "Glass Onion|||2022": {
+      "title": "Glass Onion",
+      "year": "2022",
+      "director": "",
+      "genre": "Drama",
+      "rank": "157",
+      "synopsis": "Featured on LB 2020s list.",
+      "awards": ""
+    },
+    "Buried in Barstow|||2022": {
+      "title": "Buried in Barstow",
+      "year": "2022",
+      "director": "Howard Deutch",
+      "genre": "Action/Thriller",
+      "rank": "173",
+      "synopsis": "A tough Mojave Desert diner owner concealing a past as a professional assassin is forced to return to violence when her dangerous former world catches up with her in this slick Lifetime thriller.",
+      "awards": "Lifetime/Peacock; Angie Harmon star vehicle; Deutch director; Mojave Desert setting; former-assassin genre; sequel Road to Vengeance followed same year; strong female action lead; cult Lifetime following; must-have list"
+    },
+    "X|||2022": {
+      "title": "X",
+      "year": "2022",
+      "director": "Ti West",
+      "genre": "Horror",
+      "rank": "81",
+      "synopsis": "A group of young filmmakers making an adult film in rural Texas are discovered by their reclusive elderly hosts in Wests 1970s horror homage.",
+      "awards": "RT 85 MC 72; A24; Mia Goth Snow Cudi Ortega; West comeback; 1979 Texas; slasher homage; Texas Chain Saw echoes; Goth dual role; launched trilogy"
+    }
+  },
+  "rankOverrides": {
+    "The Godfather Part II|||1974": "1",
+    "The Godfather|||1972": "2"
+  }
+}

@@ -388,29 +388,14 @@
                         </div>
                     </div>
                 </div>
-                <!-- Download -->
+                <!-- Download current year CSV -->
                 <div class="bg-[#0d0d0d] border border-[#1e1e1e] rounded-lg p-4">
                     <div class="flex items-start gap-3">
                         <svg class="mt-0.5 shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         <div class="flex-1">
-                            <p class="text-sm text-gray-200 font-medium mb-1">Download user_data.json</p>
-                            <p class="text-[11px] text-gray-500 mb-3">Save all your favorites, watchlist, ratings and rank edits as a portable file.</p>
-                            <button id="dataModalDownload" class="px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-gray-300 text-xs font-medium hover:text-[#c9a84c] hover:border-[#c9a84c]/40 transition-colors">Download user_data.json</button>
-                        </div>
-                    </div>
-                </div>
-                <!-- Import -->
-                <div class="bg-[#0d0d0d] border border-[#1e1e1e] rounded-lg p-4">
-                    <div class="flex items-start gap-3">
-                        <svg class="mt-0.5 shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 5 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        <div class="flex-1">
-                            <p class="text-sm text-gray-200 font-medium mb-1">Import user_data.json</p>
-                            <p class="text-[11px] text-gray-500 mb-3">Load data from a user_data.json file (e.g. from another machine).</p>
-                            <label class="cursor-pointer px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-gray-300 text-xs font-medium hover:text-[#c9a84c] hover:border-[#c9a84c]/40 transition-colors inline-block">
-                                Choose file…
-                                <input id="importDataFile" type="file" accept=".json" class="hidden">
-                            </label>
-                            <span id="dataModalImportStatus" class="text-[11px] ml-2"></span>
+                            <p class="text-sm text-gray-200 font-medium mb-1">Download current year as CSV</p>
+                            <p class="text-[11px] text-gray-500 mb-3">Download the currently loaded year's film list including your favorites, watchlist, ratings and rank edits.</p>
+                            <button id="dataModalDownloadCsv" class="px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-gray-300 text-xs font-medium hover:text-[#c9a84c] hover:border-[#c9a84c]/40 transition-colors">Download CSV</button>
                         </div>
                     </div>
                 </div>
@@ -608,22 +593,18 @@
 
         function saveFavorites() {
             try { localStorage.setItem('cv_favorites', JSON.stringify([...state.favorites])); } catch { /* quota exceeded */ }
-            scheduleSaveUserDataFile();
         }
 
         function saveWatchlist() {
             try { localStorage.setItem('cv_watchlist', JSON.stringify([...state.watchlist])); } catch { /* quota exceeded */ }
-            scheduleSaveUserDataFile();
         }
 
         function saveWatched() {
             try { localStorage.setItem('cv_watched', JSON.stringify(state.watched)); } catch { /* quota exceeded */ }
-            scheduleSaveUserDataFile();
         }
 
         function saveFilmStore() {
             try { localStorage.setItem('cv_filmStore', JSON.stringify(state.filmStore)); } catch { /* quota exceeded */ }
-            scheduleSaveUserDataFile();
         }
 
         function savePosterCache() {
@@ -644,67 +625,7 @@
 
         function saveRankOverrides() {
             try { localStorage.setItem('cv_rank_overrides', JSON.stringify(state.rankOverrides)); } catch { /* quota exceeded */ }
-            scheduleSaveUserDataFile();
-        }
-
-        // ════════════════════════════════════════════════
-        //  USER DATA FILE (cross-machine portability)
-        // ════════════════════════════════════════════════
-        let _saveUserDataTimer = null;
-        let _suppressFileSync = false;
-
-        function scheduleSaveUserDataFile() {
-            if (_suppressFileSync || !state.dirHandle) return;
-            clearTimeout(_saveUserDataTimer);
-            _saveUserDataTimer = setTimeout(() => saveUserDataFile().catch(() => {}), 600);
-        }
-        async function saveUserDataFile() {
-            if (!state.dirHandle) return;
-            try {
-                const data = {
-                    version: 1,
-                    favorites: [...state.favorites],
-                    watchlist: [...state.watchlist],
-                    watched: state.watched,
-                    filmStore: state.filmStore,
-                    rankOverrides: state.rankOverrides,
-                };
-                const fileHandle = await state.dirHandle.getFileHandle('user_data.json', { create: true });
-                const writable = await fileHandle.createWritable();
-                await writable.write(JSON.stringify(data, null, 2));
-                await writable.close();
-            } catch { /* silently ignore — folder may not be available */ }
-        }
-
-        async function loadUserDataFile() {
-            if (!state.dirHandle) return;
-            try {
-                const fileHandle = await state.dirHandle.getFileHandle('user_data.json', { create: false });
-                const file = await fileHandle.getFile();
-                const text = await file.text();
-                const data = JSON.parse(text);
-                // Merge favorites: union of localStorage set and file set
-                for (const k of (data.favorites || [])) state.favorites.add(k);
-                // Merge watchlist: union
-                for (const k of (data.watchlist || [])) state.watchlist.add(k);
-                // Merge watched: file takes priority
-                state.watched = Object.assign({}, state.watched, data.watched || {});
-                // Merge filmStore: file takes priority
-                state.filmStore = Object.assign({}, state.filmStore, data.filmStore || {});
-                // Merge rankOverrides: file takes priority
-                state.rankOverrides = Object.assign({}, state.rankOverrides, data.rankOverrides || {});
-                // Sync merged data back to localStorage only — do NOT trigger another file write
-                _suppressFileSync = true;
-                try {
-                    saveFavorites();
-                    saveWatchlist();
-                    saveWatched();
-                    saveFilmStore();
-                    saveRankOverrides();
-                } finally {
-                    _suppressFileSync = false;
-                }
-            } catch { /* file doesn't exist or parse error — silently continue */ }
+            scheduleCSVUpdate(state.year);
         }
 
         function loadExtraYears() {
@@ -767,6 +688,20 @@
                 if (customForYear.length > 0) {
                     state.films = [...state.films, ...customForYear];
                 }
+                // Read user state from CSV columns (Favorite, Watchlist, Rating, RatingTimestamp, RankOverride)
+                state.films.forEach(f => {
+                    const key = filmKey(f);
+                    if (f.Favorite === '1') state.favorites.add(key);
+                    if (f.Watchlist === '1') state.watchlist.add(key);
+                    if (f.Rating) {
+                        if (!state.watched[key]) {
+                            state.watched[key] = { rating: parseInt(f.Rating, 10), timestamp: f.RatingTimestamp || new Date().toISOString() };
+                        }
+                    }
+                    if (f.RankOverride && !state.rankOverrides[key]) {
+                        state.rankOverrides[key] = f.RankOverride;
+                    }
+                });
                 state.genreFilter = null;
                 populateGenreSelect();
                 hideSkeletons();
@@ -1277,6 +1212,7 @@
                 addToStore(key, film);
             }
             saveFavorites();
+            scheduleCSVUpdate(state.year);
             refreshCard(film);
         }
 
@@ -1290,6 +1226,7 @@
                 addToStore(key, film);
             }
             saveWatchlist();
+            scheduleCSVUpdate(state.year);
             refreshCard(film);
         }
 
@@ -1311,6 +1248,7 @@
             state.watched[key] = { rating, timestamp: new Date().toISOString() };
             addToStore(key, film);
             saveWatched();
+            scheduleCSVUpdate(state.year);
         }
 
         function removeWatched(film) {
@@ -1318,6 +1256,7 @@
             delete state.watched[key];
             removeFromStore(key);
             saveWatched();
+            scheduleCSVUpdate(state.year);
         }
 
         function removeFromStore(key) {
@@ -1732,13 +1671,22 @@
         function downloadYearCsv() {
             const films = state.films;
             if (films.length === 0) return;
-            const headers = ['Rank', 'Title', 'Year', 'Director', 'Primary_Genre', 'Synopsis', 'Major_Awards', 'Key_Sources'];
-            const csvRow = (row) => headers.map(h => {
-                const v = (row[h] != null ? String(row[h]) : '').replace(/\r?\n/g, ' ');
-                return (v.includes(',') || v.includes('"')) ? `"${v.replace(/"/g, '""')}"` : v;
-            }).join(',');
+            const headers = ['Rank', 'Title', 'Year', 'Director', 'Primary_Genre', 'Synopsis', 'Major_Awards', 'Key_Sources', 'Favorite', 'Watchlist', 'Rating', 'RatingTimestamp', 'RankOverride'];
+            const csvRow = (film) => {
+                const key = filmKey(film);
+                const watchedData = state.watched[key];
+                const row = {
+                    ...film,
+                    Favorite: state.favorites.has(key) ? '1' : '',
+                    Watchlist: state.watchlist.has(key) ? '1' : '',
+                    Rating: watchedData ? String(watchedData.rating) : '',
+                    RatingTimestamp: watchedData ? watchedData.timestamp : '',
+                    RankOverride: state.rankOverrides[key] || '',
+                };
+                return headers.map(h => csvEscape(row[h] != null ? String(row[h]) : '')).join(',');
+            };
             const lines = [headers.join(','), ...films.map(csvRow)].join('\r\n');
-            const blob = new Blob([lines], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob([lines + '\r\n'], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -1812,7 +1760,6 @@
                 if (perm === 'granted') {
                     state.dirHandle = handle;
                     updateFolderAccessBtn(true);
-                    await loadUserDataFile();     // merge file → state (no write — avoids live-server reload loop)
                 }
             } catch { /* silently ignore — API not available or permission denied */ }
         }
@@ -1824,7 +1771,7 @@
                 const fileHandle = await state.dirHandle.getFileHandle(fileName, { create: true });
                 const file = await fileHandle.getFile();
                 const existing = await file.text();
-                const headers = ['Rank', 'Title', 'Year', 'Director', 'Primary_Genre', 'Synopsis', 'Major_Awards', 'Key_Sources'];
+                const headers = ['Rank', 'Title', 'Year', 'Director', 'Primary_Genre', 'Synopsis', 'Major_Awards', 'Key_Sources', 'Favorite', 'Watchlist', 'Rating', 'RatingTimestamp', 'RankOverride'];
                 const row = headers.map(h => csvEscape(film[h] != null ? String(film[h]) : '')).join(',');
                 const newContent = existing.trim()
                     ? existing.trimEnd() + '\r\n' + row + '\r\n'
@@ -1836,6 +1783,44 @@
             } catch (err) {
                 console.warn('CineVault: Failed to write CSV:', err);
                 return false;
+            }
+        }
+
+        // ════════════════════════════════════════════════
+        //  CSV UPDATE (persist user state into CSV columns)
+        // ════════════════════════════════════════════════
+        const _csvUpdateTimers = {};
+        function scheduleCSVUpdate(year) {
+            if (!state.dirHandle) return;
+            clearTimeout(_csvUpdateTimers[year]);
+            _csvUpdateTimers[year] = setTimeout(() => updateYearCSV(year).catch(() => {}), 800);
+        }
+
+        async function updateYearCSV(year) {
+            if (!state.dirHandle) return;
+            if (state.year !== year) return;
+            try {
+                const headers = ['Rank', 'Title', 'Year', 'Director', 'Primary_Genre', 'Synopsis', 'Major_Awards', 'Key_Sources', 'Favorite', 'Watchlist', 'Rating', 'RatingTimestamp', 'RankOverride'];
+                const csvRow = (film) => {
+                    const key = filmKey(film);
+                    const watchedData = state.watched[key];
+                    const row = {
+                        ...film,
+                        Favorite: state.favorites.has(key) ? '1' : '',
+                        Watchlist: state.watchlist.has(key) ? '1' : '',
+                        Rating: watchedData ? String(watchedData.rating) : '',
+                        RatingTimestamp: watchedData ? watchedData.timestamp : '',
+                        RankOverride: state.rankOverrides[key] || '',
+                    };
+                    return headers.map(h => csvEscape(row[h] != null ? String(row[h]) : '')).join(',');
+                };
+                const lines = [headers.join(','), ...state.films.map(csvRow)].join('\r\n');
+                const fileHandle = await state.dirHandle.getFileHandle(`films_${year}.csv`, { create: false });
+                const writable = await fileHandle.createWritable();
+                await writable.write(lines + '\r\n');
+                await writable.close();
+            } catch (err) {
+                console.warn('CineVault: Failed to update CSV:', err);
             }
         }
 
@@ -2196,7 +2181,7 @@
                 folderBtn.textContent = '✓ Folder connected';
                 folderBtn.classList.add('text-green-400', 'border-green-800');
                 folderBtn.classList.remove('text-[#c9a84c]', 'border-[#c9a84c]/30');
-                folderDesc.textContent = 'Your data is being saved automatically to the connected folder.';
+                folderDesc.textContent = 'When connected, all favorites, watchlist ratings and rank edits are saved directly into your CSV files.';
             } else {
                 folderBtn.textContent = 'Connect folder…';
                 folderBtn.classList.remove('text-green-400', 'border-green-800');
@@ -2215,61 +2200,16 @@
                 state.dirHandle = handle;
                 await saveDirHandle(handle);
                 updateFolderAccessBtn(true);
-                await loadUserDataFile();          // merge any existing file data
-                await saveUserDataFile();           // write current full state to file
                 openDataModal();                    // refresh modal state
             } catch (err) {
                 if (err.name !== 'AbortError') console.warn('CineVault: Folder access error:', err);
-            }
-        }
-        function downloadUserDataJson() {
-            const data = {
-                version: 1,
-                favorites: [...state.favorites],
-                watchlist: [...state.watchlist],
-                watched: state.watched,
-                filmStore: state.filmStore,
-                rankOverrides: state.rankOverrides,
-            };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'user_data.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-        async function importUserDataFromFile(file) {
-            const statusEl = document.getElementById('dataModalImportStatus');
-            try {
-                const text = await file.text();
-                const data = JSON.parse(text);
-                for (const k of (data.favorites || [])) state.favorites.add(k);
-                for (const k of (data.watchlist || [])) state.watchlist.add(k);
-                state.watched = Object.assign({}, state.watched, data.watched || {});
-                state.filmStore = Object.assign({}, state.filmStore, data.filmStore || {});
-                state.rankOverrides = Object.assign({}, state.rankOverrides, data.rankOverrides || {});
-                saveFavorites(); saveWatchlist(); saveWatched(); saveFilmStore(); saveRankOverrides();
-                applyFilters();
-                statusEl.textContent = '✓ Imported';
-                statusEl.className = 'text-[11px] ml-2 text-green-400';
-            } catch {
-                statusEl.textContent = '✗ Invalid file';
-                statusEl.className = 'text-[11px] ml-2 text-red-400';
             }
         }
         document.getElementById('folderAccessBtn').addEventListener('click', openDataModal);
         document.getElementById('dataModalClose').addEventListener('click', closeDataModal);
         document.getElementById('dataModalBackdrop').addEventListener('click', closeDataModal);
         document.getElementById('dataModalFolderBtn').addEventListener('click', connectFolder);
-        document.getElementById('dataModalDownload').addEventListener('click', downloadUserDataJson);
-        document.getElementById('importDataFile').addEventListener('change', e => {
-            const file = e.target.files[0];
-            if (file) importUserDataFromFile(file);
-            e.target.value = ''; // reset so same file can be re-imported
-        });
+        document.getElementById('dataModalDownloadCsv').addEventListener('click', downloadYearCsv);
         $('#addFilmBackdrop').addEventListener('click', closeAddFilmModal);
         $('#addFilmFetch').addEventListener('click', fetchFilmDataFromUrl);
         $('#addFilmUrl').addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchFilmDataFromUrl(); });
