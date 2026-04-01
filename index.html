@@ -399,6 +399,18 @@
                         </div>
                     </div>
                 </div>
+                <!-- Migrate user_data.json (shown when folder connected) -->
+                <div id="dataMigrateSection" class="hidden bg-[#0d0d0d] border border-[#1e1e1e] rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="mt-0.5 shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-200 font-medium mb-1">Migrate user_data.json → CSVs</p>
+                            <p class="text-[11px] text-gray-500 mb-3">A user_data.json file was found. Click to write all your favorites, watchlist and ratings into the CSV files, then delete the JSON file.</p>
+                            <button id="dataMigrateBtn" class="px-3 py-1.5 rounded-md bg-[#c9a84c]/10 border border-[#c9a84c]/30 text-[#c9a84c] text-xs font-medium hover:bg-[#c9a84c]/20 transition-colors">Migrate now</button>
+                            <span id="dataMigrateStatus" class="text-[11px] ml-2"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1697,6 +1709,93 @@
             URL.revokeObjectURL(url);
         }
 
+        async function migrateUserDataJson() {
+            const btn = document.getElementById('dataMigrateBtn');
+            const status = document.getElementById('dataMigrateStatus');
+            btn.disabled = true;
+            status.textContent = 'Migrating…';
+            status.className = 'text-[11px] ml-2 text-gray-400';
+            try {
+                // 1. Read + parse user_data.json
+                const jfh = await state.dirHandle.getFileHandle('user_data.json', { create: false });
+                const jfile = await jfh.getFile();
+                const data = JSON.parse(await jfile.text());
+
+                // 2. Merge into live state and localStorage
+                for (const k of (data.favorites || [])) state.favorites.add(k);
+                for (const k of (data.watchlist || [])) state.watchlist.add(k);
+                state.watched = Object.assign({}, state.watched, data.watched || {});
+                state.rankOverrides = Object.assign({}, state.rankOverrides, data.rankOverrides || {});
+                saveFavorites(); saveWatchlist(); saveWatched(); saveRankOverrides();
+
+                // 3. Group filmKeys by CSV file key (yearToFileKey maps e.g. 1987→"1980s")
+                const allKeys = new Set([
+                    ...(data.favorites || []),
+                    ...(data.watchlist || []),
+                    ...Object.keys(data.watched || {}),
+                    ...Object.keys(data.rankOverrides || {})
+                ]);
+                const byFileKey = {};
+                for (const key of allKeys) {
+                    const parts = key.split('|||');
+                    if (parts.length < 2) continue;
+                    const yr = parseInt(parts[parts.length - 1], 10);
+                    if (isNaN(yr)) continue;
+                    const fk = yearToFileKey(yr);
+                    if (!byFileKey[fk]) byFileKey[fk] = new Set();
+                    byFileKey[fk].add(key);
+                }
+
+                // 4. For each affected CSV: read → update rows with user-state columns → write back
+                const csvHeaders = ['Rank','Title','Year','Director','Primary_Genre','Synopsis','Major_Awards','Key_Sources','Favorite','Watchlist','Rating','RatingTimestamp','RankOverride'];
+                for (const [fk, keys] of Object.entries(byFileKey)) {
+                    try {
+                        const fh = await state.dirHandle.getFileHandle(`films_${fk}.csv`, { create: false });
+                        const f = await fh.getFile();
+                        const parsed = Papa.parse(await f.text(), { header: true, skipEmptyLines: true });
+                        const rows = parsed.data.map(row => {
+                            const k = filmKey(row);
+                            if (!keys.has(k)) return row;
+                            const wd = state.watched[k];
+                            return {
+                                ...row,
+                                Favorite: state.favorites.has(k) ? '1' : (row.Favorite || ''),
+                                Watchlist: state.watchlist.has(k) ? '1' : (row.Watchlist || ''),
+                                Rating: wd ? String(wd.rating) : (row.Rating || ''),
+                                RatingTimestamp: wd ? wd.timestamp : (row.RatingTimestamp || ''),
+                                RankOverride: state.rankOverrides[k] != null ? String(state.rankOverrides[k]) : (row.RankOverride || ''),
+                            };
+                        });
+                        const lines = [
+                            csvHeaders.join(','),
+                            ...rows.map(r => csvHeaders.map(h => csvEscape(r[h] != null ? String(r[h]) : '')).join(','))
+                        ].join('\r\n') + '\r\n';
+                        const writable = await fh.createWritable();
+                        await writable.write(lines);
+                        await writable.close();
+                    } catch (e) {
+                        console.warn(`Migration: could not update films_${fk}.csv:`, e);
+                    }
+                }
+
+                // 5. Delete user_data.json
+                await state.dirHandle.removeEntry('user_data.json');
+
+                // 6. Refresh current year view if it had data
+                const curFk = yearToFileKey(parseInt(state.year, 10));
+                if (byFileKey[curFk]) applyFilters();
+
+                status.textContent = '✓ Migration complete';
+                status.className = 'text-[11px] ml-2 text-green-400';
+                document.getElementById('dataMigrateSection').classList.add('hidden');
+            } catch (e) {
+                console.error('Migration error:', e);
+                status.textContent = '✗ Failed: ' + e.message;
+                status.className = 'text-[11px] ml-2 text-red-400';
+                btn.disabled = false;
+            }
+        }
+
         // ════════════════════════════════════════════════
         //  YEAR SELECT POPULATION
         // ════════════════════════════════════════════════
@@ -2188,6 +2287,15 @@
                 folderBtn.classList.add('text-[#c9a84c]', 'border-[#c9a84c]/30');
                 folderDesc.textContent = 'Grant access to your film_lists folder. Favorites, watchlist, ratings and custom films will be saved automatically.';
             }
+            // Show migration section if user_data.json exists in connected folder
+            const migrateSection = document.getElementById('dataMigrateSection');
+            if (state.dirHandle) {
+                state.dirHandle.getFileHandle('user_data.json', { create: false })
+                    .then(() => migrateSection.classList.remove('hidden'))
+                    .catch(() => migrateSection.classList.add('hidden'));
+            } else {
+                migrateSection.classList.add('hidden');
+            }
             modal.classList.add('open');
         }
         function closeDataModal() {
@@ -2210,6 +2318,7 @@
         document.getElementById('dataModalBackdrop').addEventListener('click', closeDataModal);
         document.getElementById('dataModalFolderBtn').addEventListener('click', connectFolder);
         document.getElementById('dataModalDownloadCsv').addEventListener('click', downloadYearCsv);
+        document.getElementById('dataMigrateBtn').addEventListener('click', migrateUserDataJson);
         $('#addFilmBackdrop').addEventListener('click', closeAddFilmModal);
         $('#addFilmFetch').addEventListener('click', fetchFilmDataFromUrl);
         $('#addFilmUrl').addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchFilmDataFromUrl(); });
