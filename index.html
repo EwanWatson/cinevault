@@ -152,6 +152,22 @@
         /* ── Collection Overlay ── */
         #collectionOverlay { display: none; }
         #collectionOverlay.cv-open { display: flex; flex-direction: column; }
+
+        /* ── Rank edit input ── */
+        .rank-edit-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #c9a84c;
+            font-size: 10px;
+            font-weight: 600;
+            width: 2.5rem;
+            text-align: center;
+            -moz-appearance: textfield;
+            padding: 0;
+        }
+        .rank-edit-input::-webkit-outer-spin-button,
+        .rank-edit-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="text-gray-300 min-h-screen">
@@ -446,6 +462,7 @@
             genreFilter: null,   // null | genre string
             customFilms: {},     // { year: [film, ...] } — user-added films
             collectionViewFilms: null, // flat array currently displayed in collection overlay
+            rankOverrides: {},         // filmKey → overridden rank string
         };
 
         // ════════════════════════════════════════════════
@@ -533,6 +550,14 @@
 
         function saveCustomFilms() {
             try { localStorage.setItem('cv_custom_films', JSON.stringify(state.customFilms)); } catch { /* quota exceeded */ }
+        }
+
+        function loadRankOverrides() {
+            try { state.rankOverrides = JSON.parse(localStorage.getItem('cv_rank_overrides') || '{}'); } catch { state.rankOverrides = {}; }
+        }
+
+        function saveRankOverrides() {
+            try { localStorage.setItem('cv_rank_overrides', JSON.stringify(state.rankOverrides)); } catch { /* quota exceeded */ }
         }
 
         // ════════════════════════════════════════════════
@@ -735,7 +760,7 @@
             const isFav = state.favorites.has(key);
             const isWl = state.watchlist.has(key);
             const posterUrl = state.posterCache[key];
-            const rank = film.Rank || '';
+            const rank = state.rankOverrides[key] || film.Rank || '';
             const genre = (film.Primary_Genre || '').split('/')[0].trim();
             const isWatched = !!state.watched[key];
             const watchedData = state.watched[key] || null;
@@ -762,7 +787,7 @@
                     </div>
 
                     <!-- Rank badge -->
-                    ${rank ? `<span class="absolute top-2 left-2 bg-black/70 text-[#c9a84c] text-[10px] font-semibold px-1.5 py-0.5 rounded-md border border-[#c9a84c]/20 backdrop-blur-sm">#${esc(rank)}</span>` : ''}
+                    ${rank ? `<span class="rank-badge absolute top-2 left-2 bg-black/70 text-[#c9a84c] text-[10px] font-semibold px-1.5 py-0.5 rounded-md border border-[#c9a84c]/20 backdrop-blur-sm cursor-pointer select-none" title="Click to edit rank">#${esc(rank)}</span>` : ''}
                     ${film._custom ? `<span class="absolute bottom-2 left-2 bg-[#c9a84c]/20 text-[#c9a84c] text-[8px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded backdrop-blur-sm border border-[#c9a84c]/30">custom</span>` : ''}
 
                     <!-- Action buttons overlay -->
@@ -954,7 +979,7 @@
                 <!-- Details -->
                 <div class="p-5 md:p-6 flex-1 min-w-0">
                     <div class="flex items-start gap-3 mb-4">
-                        ${film.Rank ? `<span class="shrink-0 bg-[#c9a84c]/10 text-[#c9a84c] text-xs font-bold px-2 py-1 rounded-md border border-[#c9a84c]/20">#${esc(film.Rank)}</span>` : ''}
+                        ${(state.rankOverrides[key] || film.Rank) ? `<span class="shrink-0 bg-[#c9a84c]/10 text-[#c9a84c] text-xs font-bold px-2 py-1 rounded-md border border-[#c9a84c]/20">#${esc(state.rankOverrides[key] || film.Rank)}</span>` : ''}
                         <div>
                             <h2 class="font-display text-xl text-white leading-tight">${esc(film.Title)}</h2>
                             <p class="text-sm text-gray-400 mt-0.5">${esc(film.Director || 'Unknown')} · <span class="text-gray-500">${esc(film.Year || '')}</span></p>
@@ -1675,6 +1700,46 @@
         }
 
         // ════════════════════════════════════════════════
+        //  RANK EDITING
+        // ════════════════════════════════════════════════
+        function startRankEdit(film, badgeEl) {
+            if (badgeEl.querySelector('input')) return; // already editing
+            const key = filmKey(film);
+            const currentRank = state.rankOverrides[key] || film.Rank || '';
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'rank-edit-input';
+            input.value = currentRank;
+            input.min = '1';
+
+            let committed = false;
+            function commit() {
+                if (committed) return;
+                committed = true;
+                const val = input.value.trim();
+                const num = parseInt(val, 10);
+                if (val && !isNaN(num) && num > 0) {
+                    state.rankOverrides[key] = String(num);
+                    saveRankOverrides();
+                }
+                badgeEl.textContent = '#' + (state.rankOverrides[key] || film.Rank || '');
+            }
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); commit(); }
+                if (e.key === 'Escape') {
+                    committed = true;
+                    badgeEl.textContent = '#' + (state.rankOverrides[key] || film.Rank || '');
+                }
+            });
+            input.addEventListener('blur', commit);
+
+            badgeEl.textContent = '';
+            badgeEl.appendChild(input);
+            requestAnimationFrame(() => { input.focus(); input.select(); });
+        }
+
+        // ════════════════════════════════════════════════
         //  EVENT LISTENERS
         // ════════════════════════════════════════════════
 
@@ -1757,6 +1822,8 @@
                 toggleWatchlist(film);
             } else if (e.target.closest('.btn-rate')) {
                 showRatingPicker(film, e.target.closest('.btn-rate'));
+            } else if (e.target.closest('.rank-badge')) {
+                startRankEdit(film, e.target.closest('.rank-badge'));
             } else if (e.target.closest('.btn-info')) {
                 openModal(film);
             }
@@ -1857,6 +1924,8 @@
                 renderCollectionGrid();
             } else if (e.target.closest('.btn-rate')) {
                 showRatingPicker(film, e.target.closest('.btn-rate'));
+            } else if (e.target.closest('.rank-badge')) {
+                startRankEdit(film, e.target.closest('.rank-badge'));
             } else if (e.target.closest('.btn-info')) {
                 openModal(film);
             }
@@ -1868,6 +1937,7 @@
         function init() {
             loadPersisted();
             loadCustomFilms();
+            loadRankOverrides();
 
             // Populate year selector
             YEARS.forEach(y => {

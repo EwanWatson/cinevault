@@ -37,6 +37,6 @@
 
 ## Round 3 — New Features & Data Fixes
 - [x] **Task 7.1**: Dedicated Favorites & Watchlist Collection Page
-- [ ] **Task 7.2**: Edit Film Rankings via UI
-- [ ] **Task 7.3**: Fix Mean Girls Data (remove 2024 duplicate, already exists in 2004)
+- [x] **Task 7.2**: Edit Film Rankings via UI
+- [x] **Task 7.3**: Fix Mean Girls Data (remove 2024 duplicate, already exists in 2004)
 - [ ] **Task 7.4**: Write Custom Films Directly to CSV (File System Access API) + Auto-create New Year CSVs
