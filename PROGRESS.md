@@ -2,8 +2,8 @@
 
 ## Feature 1 — Watched & Star-Rating System
 - [x] **Task 1.1**: Watched State & localStorage Persistence
-- [ ] **Task 1.2**: Star-Rating Picker UI Component
-- [ ] **Task 1.3**: Display Rating on Film Cards
+- [x] **Task 1.2**: Star-Rating Picker UI Component
+- [x] **Task 1.3**: Display Rating on Film Cards
 - [ ] **Task 1.4**: Display Rating in Modal
 - [ ] **Task 1.5**: Year Progress Bar
 

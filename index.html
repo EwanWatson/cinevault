@@ -110,6 +110,14 @@
         .ext-link { transition: color 0.15s ease; }
         .ext-link:hover { color: #c9a84c !important; }
 
+        /* ── Rating picker ── */
+        #ratingPicker { user-select: none; }
+        @keyframes picker-in {
+            from { opacity: 0; transform: scale(0.92) translateY(-4px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        #ratingPicker:not(.hidden) { animation: picker-in 0.12s ease; }
+
         /* ── Responsive grid ── */
         .film-grid {
             display: grid;
@@ -207,6 +215,9 @@
             <p id="emptyTitle" class="text-gray-500 text-base mt-4">No films found</p>
             <p id="emptySub" class="text-gray-600 text-sm mt-1">Try adjusting your search or changing the year.</p>
         </div>
+
+        <!-- Rating picker (singleton popover) -->
+        <div id="ratingPicker" class="fixed z-[60] hidden bg-[#1c1c1c] border border-[#2e2e2e] rounded-xl shadow-2xl p-3" style="min-width:208px"></div>
 
         <!-- Error state -->
         <div id="errorState" class="hidden flex flex-col items-center justify-center py-24 text-center">
@@ -471,6 +482,8 @@
             const posterUrl = state.posterCache[key];
             const rank = film.Rank || '';
             const genre = (film.Primary_Genre || '').split('/')[0].trim();
+            const isWatched = !!state.watched[key];
+            const watchedData = state.watched[key] || null;
 
             return `
             <div class="film-card bg-[#111] rounded-lg overflow-hidden border border-[#1a1a1a] cursor-default" data-idx="${idx}">
@@ -504,6 +517,9 @@
                         <button class="action-btn btn-watchlist w-7 h-7 flex items-center justify-center rounded-full ${isWl ? 'bg-blue-500/20 text-blue-400' : 'bg-black/50 text-gray-400 hover:text-blue-400'} backdrop-blur-sm" title="${isWl ? 'Remove from Watchlist' : 'Add to Watchlist'}">
                             <svg width="14" height="14" viewBox="0 0 24 24" ${isWl ? 'fill="currentColor"' : 'fill="none"'} stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                         </button>
+                        <button class="action-btn btn-rate w-7 h-7 flex items-center justify-center rounded-full ${isWatched ? 'bg-[#c9a84c]/20 text-[#c9a84c]' : 'bg-black/50 text-gray-400 hover:text-[#c9a84c]'} backdrop-blur-sm" title="${isWatched ? 'Re-rate film' : 'Rate film'}">
+                            <svg width="13" height="13" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="${isWatched ? '#c9a84c' : 'none'}" stroke="${isWatched ? '#c9a84c' : 'currentColor'}" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                        </button>
                     </div>
                 </div>
 
@@ -515,6 +531,7 @@
                         ${genre ? `<span class="text-[9px] uppercase tracking-wider text-gray-500 bg-[#1a1a1a] px-1.5 py-0.5 rounded">${esc(genre)}</span>` : ''}
                         <span class="text-[9px] text-gray-600">${esc(film.Year || '')}</span>
                     </div>
+                    ${watchedData ? `<div class="flex items-center gap-0.5 mt-1.5">${starsHTML(watchedData.rating, 10)}<span class="text-[9px] text-gray-600 ml-1">${watchedData.rating}/5</span></div>` : ''}
                     <!-- Quick links -->
                     <div class="flex items-center gap-2 mt-2 pt-2 border-t border-[#1a1a1a]">
                         <a href="${imdbUrl(film.Title, film.Year)}" target="_blank" rel="noopener" class="ext-link text-[10px] font-semibold text-yellow-600/70 hover:text-yellow-500 tracking-wide">IMDb</a>
@@ -812,6 +829,107 @@
         }
 
         // ════════════════════════════════════════════════
+        //  STAR RATING HELPERS
+        // ════════════════════════════════════════════════
+        function starsHTML(rating, size = 11) {
+            return [1,2,3,4,5].map(n => {
+                const on = n <= rating;
+                return `<svg width="${size}" height="${size}" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="${on ? '#c9a84c' : 'none'}" stroke="${on ? '#c9a84c' : '#444'}" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
+            }).join('');
+        }
+
+        // ════════════════════════════════════════════════
+        //  RATING PICKER
+        // ════════════════════════════════════════════════
+        let pickerFilm = null;
+
+        function showRatingPicker(film, anchorEl) {
+            pickerFilm = film;
+            const key = filmKey(film);
+            const watchedData = state.watched[key] || null;
+            const currentRating = watchedData ? watchedData.rating : 0;
+
+            const picker = document.getElementById('ratingPicker');
+            picker.innerHTML = `
+                <p class="text-[9px] uppercase tracking-widest text-gray-600 mb-2">Your rating</p>
+                <div id="pickerStars" class="flex items-center gap-0.5">
+                    ${[1,2,3,4,5].map(n => `
+                    <button class="picker-star flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[#c9a84c]/10 transition-colors" data-rating="${n}" title="${n} star${n > 1 ? 's' : ''}">
+                        <svg width="22" height="22" viewBox="0 0 24 24"><path class="sp" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="${n <= currentRating ? '#c9a84c' : 'none'}" stroke="${n <= currentRating ? '#c9a84c' : '#555'}" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                    </button>`).join('')}
+                </div>
+                ${watchedData ? `<button class="picker-clear w-full mt-2 pt-1.5 border-t border-[#252525] text-[10px] text-gray-600 hover:text-red-400 transition-colors text-center">✕ Remove rating</button>` : ''}
+            `;
+
+            const stars = picker.querySelectorAll('.picker-star');
+            const pickerStars = picker.querySelector('#pickerStars');
+
+            stars.forEach((btn, i) => {
+                btn.addEventListener('mouseenter', () => {
+                    stars.forEach((b, j) => {
+                        const p = b.querySelector('.sp');
+                        if (j <= i) { p.setAttribute('fill', '#c9a84c'); p.setAttribute('stroke', '#c9a84c'); }
+                        else        { p.setAttribute('fill', 'none');     p.setAttribute('stroke', '#555'); }
+                    });
+                });
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleWatched(pickerFilm, parseInt(btn.dataset.rating));
+                    hideRatingPicker();
+                    refreshCard(pickerFilm);
+                });
+            });
+
+            pickerStars?.addEventListener('mouseleave', () => {
+                stars.forEach((b, j) => {
+                    const p = b.querySelector('.sp');
+                    if (j < currentRating) { p.setAttribute('fill', '#c9a84c'); p.setAttribute('stroke', '#c9a84c'); }
+                    else                   { p.setAttribute('fill', 'none');     p.setAttribute('stroke', '#555'); }
+                });
+            });
+
+            picker.querySelector('.picker-clear')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                removeWatched(pickerFilm);
+                hideRatingPicker();
+                refreshCard(pickerFilm);
+            });
+
+            // Show offscreen first to measure, then position
+            picker.style.visibility = 'hidden';
+            picker.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                const rect = anchorEl.getBoundingClientRect();
+                const pw = picker.offsetWidth || 208;
+                const ph = picker.offsetHeight || 100;
+                let top  = rect.bottom + 6;
+                let left = rect.left + rect.width / 2 - pw / 2;
+                left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+                if (top + ph > window.innerHeight - 8) top = rect.top - ph - 6;
+                picker.style.top  = `${top}px`;
+                picker.style.left = `${left}px`;
+                picker.style.visibility = '';
+            });
+        }
+
+        function hideRatingPicker() {
+            document.getElementById('ratingPicker').classList.add('hidden');
+            pickerFilm = null;
+        }
+
+        function refreshCard(film) {
+            const key = filmKey(film);
+            const idx = state.films.findIndex(f => filmKey(f) === key);
+            updateStatus();
+            if (idx === -1) return;
+            const card = grid.querySelector(`[data-idx="${idx}"]`);
+            if (!card) return;
+            const temp = document.createElement('div');
+            temp.innerHTML = createCardHTML(film, idx);
+            card.replaceWith(temp.firstElementChild);
+        }
+
+        // ════════════════════════════════════════════════
         //  EXPORT
         // ════════════════════════════════════════════════
         function exportCollection() {
@@ -898,6 +1016,8 @@
                 toggleFavorite(film);
             } else if (e.target.closest('.btn-watchlist')) {
                 toggleWatchlist(film);
+            } else if (e.target.closest('.btn-rate')) {
+                showRatingPicker(film, e.target.closest('.btn-rate'));
             } else if (e.target.closest('.btn-info')) {
                 openModal(film);
             }
@@ -907,8 +1027,23 @@
         $('#modalClose').addEventListener('click', closeModal);
         $('#modalBackdrop').addEventListener('click', closeModal);
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-                closeModal();
+            if (e.key === 'Escape') {
+                const picker = document.getElementById('ratingPicker');
+                if (!picker.classList.contains('hidden')) {
+                    hideRatingPicker();
+                } else if (!modal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            }
+        });
+
+        // Close picker when clicking outside
+        document.addEventListener('click', (e) => {
+            const picker = document.getElementById('ratingPicker');
+            if (!picker.classList.contains('hidden') &&
+                !picker.contains(e.target) &&
+                !e.target.closest('.btn-rate')) {
+                hideRatingPicker();
             }
         });
 
