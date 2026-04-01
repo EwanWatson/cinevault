@@ -486,6 +486,7 @@
             state.filteredFilms = films;
             renderGrid();
             updateStatus();
+            renderStats();
         }
 
         function updateStatus() {
@@ -1210,6 +1211,171 @@
                 applyStatsPanel(next);
                 localStorage.setItem('cv_statsOpen', String(next));
             });
+        }
+
+        // ════════════════════════════════════════════════
+        //  STATS CHARTS (Tasks 2.2 & 2.3)
+        // ════════════════════════════════════════════════
+        const chartInstances = { genre: null, director: null, quality: null };
+
+        const CHART_PALETTE = [
+            '#c9a84c', // gold
+            '#5b7fa6', // muted blue
+            '#7a9e7e', // muted green
+            '#9b6a7a', // muted mauve
+            '#7a6aab', // muted purple
+            '#a87a5b', // muted terracotta
+            '#5ba0a0', // muted teal
+            '#a0a05b', // muted olive
+            '#a05b7a', // muted rose
+            '#5b8a7a', // muted seafoam
+        ];
+
+        Chart.defaults.color = '#9ca3af';
+        Chart.defaults.borderColor = '#1f2937';
+
+        function calcGenreCounts(films) {
+            const counts = {};
+            films.forEach(f => {
+                const genre = (f.Primary_Genre || '').split('/')[0].trim();
+                if (!genre) return;
+                counts[genre] = (counts[genre] || 0) + 1;
+            });
+            return Object.entries(counts)
+                .map(([genre, count]) => ({ genre, count }))
+                .sort((a, b) => b.count - a.count);
+        }
+
+        function renderGenreChart() {
+            const ctx = document.getElementById('chartGenre');
+            if (!ctx) return;
+            if (chartInstances.genre) { chartInstances.genre.destroy(); chartInstances.genre = null; }
+
+            const data = calcGenreCounts(state.films);
+            if (data.length === 0) return;
+
+            chartInstances.genre = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.genre),
+                    datasets: [{
+                        data: data.map(d => d.count),
+                        backgroundColor: data.map((_, i) => CHART_PALETTE[i % CHART_PALETTE.length]),
+                        borderColor: '#0e0e0e',
+                        borderWidth: 2,
+                        hoverOffset: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: window.innerWidth >= 768 ? 'right' : 'bottom',
+                            labels: {
+                                color: '#9ca3af',
+                                boxWidth: 12,
+                                padding: 10,
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` ${ctx.label}: ${ctx.parsed} film${ctx.parsed !== 1 ? 's' : ''}`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function calcDirectorLeaderboard(films) {
+            const trackedKeys = new Set([
+                ...state.favorites,
+                ...state.watchlist,
+                ...Object.keys(state.watched),
+            ]);
+
+            const counts = {};
+            const countedKeys = new Set();
+
+            films.forEach(f => {
+                const key = filmKey(f);
+                if (!trackedKeys.has(key)) return;
+                const director = (f.Director || '').trim();
+                if (!director || director.toLowerCase() === 'unknown') return;
+                counts[director] = (counts[director] || 0) + 1;
+                countedKeys.add(key);
+            });
+
+            Object.entries(state.filmStore).forEach(([key, data]) => {
+                if (!trackedKeys.has(key) || countedKeys.has(key)) return;
+                const director = (data.director || '').trim();
+                if (!director || director.toLowerCase() === 'unknown') return;
+                counts[director] = (counts[director] || 0) + 1;
+            });
+
+            return Object.entries(counts)
+                .map(([director, count]) => ({ director, count }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 10);
+        }
+
+        function renderDirectorChart() {
+            const ctx = document.getElementById('chartDirector');
+            if (!ctx) return;
+            if (chartInstances.director) { chartInstances.director.destroy(); chartInstances.director = null; }
+
+            const data = calcDirectorLeaderboard(state.films);
+            if (data.length === 0) return;
+
+            // Reverse so the highest-count director appears at the top
+            const labels = data.map(d => d.director).reverse();
+            const values = data.map(d => d.count).reverse();
+
+            chartInstances.director = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: '#c9a84c',
+                        borderColor: '#c9a84c',
+                        borderWidth: 0,
+                        borderRadius: 3,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` ${ctx.parsed.x} film${ctx.parsed.x !== 1 ? 's' : ''}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: '#1a1a1a' },
+                            ticks: { color: '#6b7280', font: { size: 10 }, stepSize: 1 },
+                            border: { color: '#1a1a1a' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#e5e7eb', font: { size: 11 } },
+                            border: { color: '#1a1a1a' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderStats() {
+            const statsEmpty = document.getElementById('statsEmptyState');
+            if (statsEmpty) statsEmpty.classList.toggle('hidden', state.films.length > 0);
+            renderGenreChart();
+            renderDirectorChart();
         }
 
         // ════════════════════════════════════════════════

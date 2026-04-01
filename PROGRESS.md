@@ -9,8 +9,8 @@
 
 ## Feature 2 — Stats Dashboard
 - [x] **Task 2.1**: Add Chart.js CDN & Collapsible Panel Skeleton
-- [ ] **Task 2.2**: Genre Breakdown Doughnut Chart
-- [ ] **Task 2.3**: Director Leaderboard Bar Chart
+- [x] **Task 2.2**: Genre Breakdown Doughnut Chart
+- [x] **Task 2.3**: Director Leaderboard Bar Chart
 - [ ] **Task 2.4**: Quality Heatmap / Comparison Chart
 - [ ] **Task 2.5**: "All Time" Stats Aggregation
 - [ ] **Task 2.6**: Stats Panel — Empty States & Polish
