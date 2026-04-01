@@ -755,8 +755,15 @@
 
                 const result = Papa.parse(text, { header: true, skipEmptyLines: true });
                 state.films = result.data.filter(r => r.Title && r.Title.trim());
-                // Merge custom films for this year
-                const customForYear = state.customFilms[year] || [];
+                // Merge custom films for this year, deduplicating against what's already in the CSV.
+                // Films added before the CSV-write bug fix may exist in both places.
+                const csvTitles = new Set(state.films.map(f => f.Title.toLowerCase().trim()));
+                const customForYear = (state.customFilms[year] || []).filter(f => {
+                    const key = f.Title.toLowerCase().trim();
+                    if (csvTitles.has(key)) return false; // already in CSV — skip
+                    csvTitles.add(key);
+                    return true;
+                });
                 if (customForYear.length > 0) {
                     state.films = [...state.films, ...customForYear];
                 }
