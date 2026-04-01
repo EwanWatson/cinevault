@@ -153,6 +153,9 @@
         #collectionOverlay { display: none; }
         #collectionOverlay.cv-open { display: flex; flex-direction: column; }
 
+        /* ── Folder access button active state ── */
+        #folderAccessBtn.csv-active { color: #c9a84c; border-color: rgba(201, 168, 76, 0.5); }
+
         /* ── Rank edit input ── */
         .rank-edit-input {
             background: transparent;
@@ -243,6 +246,12 @@
             <button id="addFilmBtn" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#2a2a2a] text-xs text-gray-400 hover:text-[#c9a84c] hover:border-[#c9a84c]/50 transition-colors" title="Add a film via IMDB or Rotten Tomatoes link">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
                 Add Film
+            </button>
+
+            <!-- Folder Access (CSV write) -->
+            <button id="folderAccessBtn" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#2a2a2a] text-xs text-gray-400 hover:text-[#c9a84c] hover:border-[#c9a84c]/50 transition-colors" title="Grant folder access to save films to CSV">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                CSV
             </button>
         </div>
 
@@ -347,6 +356,7 @@
                             Add to <span id="addFilmYear"></span>
                         </button>
                     </div>
+                    <p id="addFilmCsvNote" class="text-[10px] text-gray-600 text-center mt-2"></p>
                 </div>
             </div>
         </div>
@@ -463,6 +473,7 @@
             customFilms: {},     // { year: [film, ...] } — user-added films
             collectionViewFilms: null, // flat array currently displayed in collection overlay
             rankOverrides: {},         // filmKey → overridden rank string
+            dirHandle: null,           // FileSystemDirectoryHandle (in-memory only)
         };
 
         // ════════════════════════════════════════════════
@@ -496,6 +507,11 @@
             const d = document.createElement('div');
             d.textContent = str || '';
             return d.innerHTML;
+        }
+
+        function csvEscape(val) {
+            const s = (val != null ? String(val) : '').replace(/\r?\n/g, ' ');
+            return (s.includes(',') || s.includes('"')) ? `"${s.replace(/"/g, '""')}"` : s;
         }
 
         function imdbUrl(title, year) {
@@ -558,6 +574,24 @@
 
         function saveRankOverrides() {
             try { localStorage.setItem('cv_rank_overrides', JSON.stringify(state.rankOverrides)); } catch { /* quota exceeded */ }
+        }
+
+        function loadExtraYears() {
+            try {
+                const extras = JSON.parse(localStorage.getItem('cv_extra_years') || '[]');
+                extras.forEach(y => { if (!YEARS.includes(y)) YEARS.push(y); });
+                YEARS.sort((a, b) => {
+                    if (a === '1980s') return -1;
+                    if (b === '1980s') return 1;
+                    return a.localeCompare(b);
+                });
+            } catch { /* ignore corrupt data */ }
+        }
+
+        function saveExtraYears() {
+            const baseSet = new Set(['1980s', ...Array.from({ length: 36 }, (_, i) => String(1990 + i))]);
+            const extras = YEARS.filter(y => !baseSet.has(y));
+            try { localStorage.setItem('cv_extra_years', JSON.stringify(extras)); } catch { /* quota exceeded */ }
         }
 
         // ════════════════════════════════════════════════
@@ -1352,6 +1386,13 @@
             $('#addFilmPreview').classList.add('hidden');
             $('#addFilmConfirm').classList.add('hidden');
             $('#addFilmYear').textContent = state.year;
+            const csvNote = document.getElementById('addFilmCsvNote');
+            if (csvNote) {
+                csvNote.textContent = state.dirHandle
+                    ? '✓ Will save directly to CSV'
+                    : 'Will save to CSV if folder access is granted';
+                csvNote.className = `text-[10px] text-center mt-2 ${state.dirHandle ? 'text-[#c9a84c]' : 'text-gray-600'}`;
+            }
             const afModal = $('#addFilmModal');
             afModal.classList.remove('hidden');
             requestAnimationFrame(() => {
@@ -1488,6 +1529,19 @@
                 return;
             }
 
+            // Auto-add year to dropdown if it doesn't exist yet
+            if (!YEARS.includes(year)) {
+                YEARS.push(year);
+                YEARS.sort((a, b) => {
+                    if (a === '1980s') return -1;
+                    if (b === '1980s') return 1;
+                    return a.localeCompare(b);
+                });
+                saveExtraYears();
+                populateYearSelect();
+                yearSelect.value = year;
+            }
+
             if (!state.customFilms[year]) state.customFilms[year] = [];
             state.customFilms[year].push(pendingFilm);
             saveCustomFilms();
@@ -1502,6 +1556,10 @@
             state.films.push(pendingFilm);
             populateGenreSelect();
             applyFilters();
+
+            // Write to CSV file on disk (non-blocking; falls back gracefully if no folder access)
+            appendFilmToCSV(pendingFilm, year);
+
             closeAddFilmModal();
         }
 
@@ -1523,6 +1581,95 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+
+        // ════════════════════════════════════════════════
+        //  YEAR SELECT POPULATION
+        // ════════════════════════════════════════════════
+        function populateYearSelect() {
+            yearSelect.innerHTML = '';
+            YEARS.forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                yearSelect.appendChild(opt);
+            });
+        }
+
+        // ════════════════════════════════════════════════
+        //  FILE SYSTEM ACCESS API (CSV WRITING)
+        // ════════════════════════════════════════════════
+
+        // IndexedDB helpers — persist the directory handle across page reloads
+        async function saveDirHandle(handle) {
+            return new Promise((res, rej) => {
+                const req = indexedDB.open('cv_db', 1);
+                req.onupgradeneeded = e => e.target.result.createObjectStore('handles');
+                req.onsuccess = e => {
+                    const tx = e.target.result.transaction('handles', 'readwrite');
+                    tx.objectStore('handles').put(handle, 'dir');
+                    tx.oncomplete = () => res();
+                    tx.onerror = () => rej();
+                };
+                req.onerror = () => rej();
+            });
+        }
+
+        async function loadDirHandle() {
+            return new Promise((res) => {
+                const req = indexedDB.open('cv_db', 1);
+                req.onupgradeneeded = e => e.target.result.createObjectStore('handles');
+                req.onsuccess = e => {
+                    const tx = e.target.result.transaction('handles', 'readonly');
+                    const get = tx.objectStore('handles').get('dir');
+                    get.onsuccess = () => res(get.result || null);
+                    get.onerror = () => res(null);
+                };
+                req.onerror = () => res(null);
+            });
+        }
+
+        function updateFolderAccessBtn(active) {
+            const btn = document.getElementById('folderAccessBtn');
+            if (!btn) return;
+            btn.classList.toggle('csv-active', active);
+            btn.title = active
+                ? 'Folder access granted — CSV saves active'
+                : 'Grant folder access to save films to CSV';
+        }
+
+        async function tryRestoreDirHandle() {
+            try {
+                const handle = await loadDirHandle();
+                if (!handle) return;
+                const perm = await handle.requestPermission({ mode: 'readwrite' });
+                if (perm === 'granted') {
+                    state.dirHandle = handle;
+                    updateFolderAccessBtn(true);
+                }
+            } catch { /* silently ignore — API not available or permission denied */ }
+        }
+
+        async function appendFilmToCSV(film, year) {
+            if (!state.dirHandle) return false;
+            try {
+                const fileName = `films_${year}.csv`;
+                const fileHandle = await state.dirHandle.getFileHandle(fileName, { create: true });
+                const file = await fileHandle.getFile();
+                const existing = await file.text();
+                const headers = ['Rank', 'Title', 'Year', 'Director', 'Primary_Genre', 'Synopsis', 'Major_Awards', 'Key_Sources'];
+                const row = headers.map(h => csvEscape(film[h] != null ? String(film[h]) : '')).join(',');
+                const newContent = existing.trim()
+                    ? existing.trimEnd() + '\r\n' + row + '\r\n'
+                    : headers.join(',') + '\r\n' + row + '\r\n';
+                const writable = await fileHandle.createWritable();
+                await writable.write(newContent);
+                await writable.close();
+                return true;
+            } catch (err) {
+                console.warn('CineVault: Failed to write CSV:', err);
+                return false;
+            }
         }
 
         // ════════════════════════════════════════════════
@@ -1863,6 +2010,22 @@
         // Add Film modal
         $('#addFilmBtn').addEventListener('click', openAddFilmModal);
         $('#addFilmClose').addEventListener('click', closeAddFilmModal);
+
+        // Folder access button
+        document.getElementById('folderAccessBtn').addEventListener('click', async () => {
+            if (!window.showDirectoryPicker) {
+                alert('Your browser does not support the File System Access API.\nUse Chrome or Edge to enable CSV write support.');
+                return;
+            }
+            try {
+                const handle = await window.showDirectoryPicker({ mode: 'readwrite', startIn: 'documents' });
+                state.dirHandle = handle;
+                await saveDirHandle(handle);
+                updateFolderAccessBtn(true);
+            } catch (err) {
+                if (err.name !== 'AbortError') console.warn('CineVault: Folder access error:', err);
+            }
+        });
         $('#addFilmBackdrop').addEventListener('click', closeAddFilmModal);
         $('#addFilmFetch').addEventListener('click', fetchFilmDataFromUrl);
         $('#addFilmUrl').addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchFilmDataFromUrl(); });
@@ -1938,14 +2101,10 @@
             loadPersisted();
             loadCustomFilms();
             loadRankOverrides();
+            loadExtraYears(); // merge any extra/custom years before building the dropdown
 
             // Populate year selector
-            YEARS.forEach(y => {
-                const opt = document.createElement('option');
-                opt.value = y;
-                opt.textContent = y;
-                yearSelect.appendChild(opt);
-            });
+            populateYearSelect();
 
             let startYear = CONFIG.defaultYear;
             try {
@@ -1954,6 +2113,8 @@
             } catch {}
             yearSelect.value = startYear;
             loadYear(startYear);
+
+            tryRestoreDirHandle(); // async — restores folder access handle in background
         }
 
         init();
