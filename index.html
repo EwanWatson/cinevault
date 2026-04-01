@@ -639,12 +639,13 @@
             if (genreLabel) descParts.push(genreLabel);
             const desc = descParts.join(' ');
 
+            const anyFilter = desc || state.searchQuery;
             if (state.searchQuery && desc) {
-                statusText.textContent = `${shown} of ${total} ${desc} films matching "${state.searchQuery}"`;
+                statusText.textContent = `${shown} ${desc} film${shown !== 1 ? 's' : ''} matching "${state.searchQuery}"`;
             } else if (state.searchQuery) {
-                statusText.textContent = `${shown} of ${total} films matching "${state.searchQuery}"`;
+                statusText.textContent = `${shown} film${shown !== 1 ? 's' : ''} matching "${state.searchQuery}"`;
             } else if (desc) {
-                statusText.textContent = `${shown} of ${total} ${desc} film${shown !== 1 ? 's' : ''}`;
+                statusText.textContent = `${shown} ${desc} film${shown !== 1 ? 's' : ''}`;
             } else {
                 statusText.textContent = `${total} film${total !== 1 ? 's' : ''}`;
             }
@@ -695,12 +696,24 @@
                 grid.innerHTML = '';
                 if (state.films.length > 0) {
                     emptyState.classList.remove('hidden');
-                    if (state.viewMode !== 'all') {
+                    const hasActiveFilter = state.watchedFilter || state.genreFilter || state.searchQuery;
+                    if (state.viewMode !== 'all' && !hasActiveFilter) {
+                        // Pure view-mode empty — no sub-filters active
                         $('#emptyTitle').textContent = state.viewMode === 'favorites' ? 'No favorites yet' : 'Watchlist is empty';
                         $('#emptySub').textContent = 'Tap the heart or bookmark icon on any film card.';
                     } else {
-                        $('#emptyTitle').textContent = 'No films found';
-                        $('#emptySub').textContent = 'Try adjusting your search.';
+                        // Build a descriptive empty-state from active filters
+                        const parts = [];
+                        if (state.watchedFilter) parts.push(state.watchedFilter);
+                        if (state.viewMode !== 'all') parts.push(state.viewMode === 'favorites' ? 'favorite' : 'watchlisted');
+                        if (state.genreFilter) parts.push(state.genreFilter);
+                        const desc = parts.length ? parts.join(' ') + ' ' : '';
+                        if (state.searchQuery) {
+                            $('#emptyTitle').textContent = `No ${desc}films found matching "${state.searchQuery}"`;
+                        } else {
+                            $('#emptyTitle').textContent = `No ${desc}films found`;
+                        }
+                        $('#emptySub').textContent = 'Try adjusting your filters or search.';
                     }
                 } else {
                     emptyState.classList.add('hidden');
@@ -1231,26 +1244,51 @@
         //  EXPORT
         // ════════════════════════════════════════════════
         function exportCollection() {
+            const today = new Date().toISOString().split('T')[0];
+
             const toEntry = (key) => {
                 const data = state.filmStore[key];
-                if (!data) {
-                    const [title, year] = key.split('|||');
-                    return { title, year };
-                }
-                return { ...data };
+                const watchedData = state.watched[key];
+                const base = data
+                    ? { ...data }
+                    : (() => { const [title, year] = key.split('|||'); return { title, year }; })();
+                base.watched = !!watchedData;
+                base.rating = watchedData ? (watchedData.rating ?? null) : null;
+                base.ratingTimestamp = watchedData ? (watchedData.timestamp ?? null) : null;
+                return base;
             };
 
+            const sortEntries = (a, b) =>
+                (a.year || '').localeCompare(b.year || '') || (a.title || '').localeCompare(b.title || '');
+
+            // Films watched but NOT already in favorites or watchlist
+            const watchedOnly = Object.keys(state.watched)
+                .filter(key => !state.favorites.has(key) && !state.watchlist.has(key))
+                .map(key => {
+                    const data = state.filmStore[key];
+                    const watchedData = state.watched[key];
+                    const base = data
+                        ? { ...data }
+                        : (() => { const [title, year] = key.split('|||'); return { title, year }; })();
+                    base.watched = true;
+                    base.rating = watchedData ? (watchedData.rating ?? null) : null;
+                    base.ratingTimestamp = watchedData ? (watchedData.timestamp ?? null) : null;
+                    return base;
+                })
+                .sort(sortEntries);
+
             const collection = {
-                exported: new Date().toISOString().split('T')[0],
-                favorites: [...state.favorites].map(toEntry).sort((a, b) => (a.year || '').localeCompare(b.year || '') || (a.title || '').localeCompare(b.title || '')),
-                watchlist: [...state.watchlist].map(toEntry).sort((a, b) => (a.year || '').localeCompare(b.year || '') || (a.title || '').localeCompare(b.title || '')),
+                exported: today,
+                favorites: [...state.favorites].map(toEntry).sort(sortEntries),
+                watchlist: [...state.watchlist].map(toEntry).sort(sortEntries),
+                watched: watchedOnly,
             };
 
             const blob = new Blob([JSON.stringify(collection, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'my_cinema_list.json';
+            a.download = `cinevault_export_${today}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

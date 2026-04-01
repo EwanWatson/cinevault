@@ -18,10 +18,10 @@
 ## Feature 3 — Advanced Filtering
 - [x] **Task 3.1**: Watched / Unwatched Toggle Filters
 - [x] **Task 3.2**: Genre Dropdown Filter
-- [ ] **Task 3.3**: Filter Combination Logic & Status
+- [x] **Task 3.3**: Filter Combination Logic & Status
 
 ## Feature 4 — Data Export 2.0
-- [ ] **Task 4.1**: Enrich Export with Watched Data
+- [x] **Task 4.1**: Enrich Export with Watched Data
 
 ## Integration & QA
 - [ ] **Task 5.1**: Wire Up Stats Refresh on Year Change
