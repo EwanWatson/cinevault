@@ -893,11 +893,10 @@
                 <!-- Poster area -->
                 <div class="relative aspect-[2/3] bg-[#0e0e0e] overflow-hidden">
                     ${posterUrl && posterUrl !== 'null'
-                        ? `<img class="poster-img w-full h-full object-cover absolute inset-0"
+                        ? `<img class="poster-img loaded w-full h-full object-cover absolute inset-0"
                                src="${esc(posterUrl)}"
                                alt="${esc(film.Title)}"
                                loading="eager"
-                               onload="this.classList.add('loaded')"
                                onerror="this.remove();this.parentElement.querySelector('.poster-placeholder').classList.remove('hidden')">`
                         : ''}
                     ${!posterUrl
@@ -994,10 +993,10 @@
             posterProcessing = true;
 
             while (posterQueue.length > 0) {
-                const batch = posterQueue.splice(0, 4);
+                const batch = posterQueue.splice(0, 8);
                 await Promise.allSettled(batch.map(item => fetchOnePoster(item)));
                 if (posterQueue.length > 0) {
-                    await new Promise(r => setTimeout(r, 180));
+                    await new Promise(r => setTimeout(r, 80));
                 }
             }
 
@@ -1059,12 +1058,12 @@
                     img.className = 'poster-img w-full h-full object-cover absolute inset-0';
                     img.alt = state.films[idx].Title;
                     img.loading = 'eager';
-                    img.onload = () => img.classList.add('loaded');
                     img.onerror = () => {
                         img.remove();
                         if (placeholder) placeholder.classList.remove('hidden');
                     };
                     img.src = url;
+                    img.classList.add('loaded');
                     posterArea.insertBefore(img, posterArea.firstChild);
                     if (placeholder) placeholder.classList.add('hidden');
                 }
