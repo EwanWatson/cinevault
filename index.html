@@ -280,6 +280,12 @@
         <!-- Film grid -->
         <div id="grid" class="film-grid"></div>
 
+        <!-- Tailwind CDN pre-scan: classes used only in JS-generated card HTML must appear
+             in the static DOM so Tailwind generates their CSS before the first render.
+             Without this, text-gray-100 falls back to browser-default black on the dark
+             card background and is invisible until the MutationObserver fires post-paint. -->
+        <div hidden aria-hidden="true" class="text-gray-100 text-[13px] text-[10px] text-[9px] bg-[#0e0e0e] inset-0 object-cover w-7 h-7 rounded-full leading-tight truncate tracking-wider flex-col gap-1 select-none bg-black/50 bg-black/70 bg-red-500/20 text-red-400 bg-blue-500/20 text-blue-400 bg-[#c9a84c]/20 border-[#c9a84c]/20 top-2 left-2 top-1.5 right-1.5"></div>
+
         <!-- Skeleton template (outside loadingSkeleton so innerHTML='' never destroys it) -->
         <template id="skeletonTpl">
             <div class="rounded-lg overflow-hidden border border-[#1a1a1a]">
