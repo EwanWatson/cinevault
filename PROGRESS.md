@@ -12,7 +12,7 @@
 - [x] **Task 2.2**: Genre Breakdown Doughnut Chart
 - [x] **Task 2.3**: Director Leaderboard Bar Chart
 - [x] **Task 2.4**: Quality Heatmap / Comparison Chart
-- [ ] **Task 2.5**: "All Time" Stats Aggregation
+- [x] **Task 2.5**: "All Time" Stats Aggregation
 - [ ] **Task 2.6**: Stats Panel — Empty States & Polish
 
 ## Feature 3 — Advanced Filtering

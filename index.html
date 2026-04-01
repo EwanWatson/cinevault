@@ -273,6 +273,18 @@
         <!-- Loading skeleton grid -->
         <div id="loadingSkeleton" class="film-grid hidden"></div>
 
+        <!-- All-time loading indicator -->
+        <div id="allTimeLoading" class="hidden text-center py-16 text-gray-600">
+            <p class="text-sm animate-pulse">Loading all years…</p>
+        </div>
+
+        <!-- All-time mode message -->
+        <div id="allTimeMsg" class="hidden flex flex-col items-center justify-center py-24 text-center">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.2"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="12" cy="10" r="3.5"/><path d="M2 18 l6-4 4 3 4-5 6 6"/></svg>
+            <p class="text-gray-500 text-base mt-4">Select a year to browse films</p>
+            <p class="text-gray-600 text-sm mt-1">All-time stats are shown in the Stats Dashboard above.</p>
+        </div>
+
         <!-- Empty state -->
         <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-center">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.2"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="12" cy="11" r="4"/><line x1="2" y1="18" x2="22" y2="18"/></svg>
@@ -342,6 +354,8 @@
             watched: {},         // filmKey → { rating: 1-5, timestamp: ISO string }
             filmStore: {},       // key → film data (for export)
             posterCache: {},     // key → poster URL or null
+            csvCache: {},        // year key → parsed films array
+            isAllTime: false,    // true when "All Time" year is selected
             loadId: 0,           // for cancelling stale loads
         };
 
@@ -427,12 +441,17 @@
         //  CSV LOADING
         // ════════════════════════════════════════════════
         async function loadYear(year) {
+            if (year === 'all') { return loadAllYears(); }
+            state.isAllTime = false;
             state.year = year;
             state.loadId++;
             const loadId = state.loadId;
 
             // UI: show loading
+            grid.classList.remove('hidden');
             grid.innerHTML = '';
+            document.getElementById('allTimeMsg').classList.add('hidden');
+            document.getElementById('allTimeLoading').classList.add('hidden');
             emptyState.classList.add('hidden');
             errorState.classList.add('hidden');
             showSkeletons();
@@ -461,6 +480,67 @@
             }
         }
 
+        async function loadAllYears() {
+            state.year = 'all';
+            state.isAllTime = true;
+            state.loadId++;
+            const loadId = state.loadId;
+
+            // UI: show loading
+            grid.classList.add('hidden');
+            document.getElementById('allTimeMsg').classList.add('hidden');
+            document.getElementById('allTimeLoading').classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            errorState.classList.add('hidden');
+            loadingSkeleton.classList.add('hidden');
+            statusText.textContent = 'Loading all years…';
+            yearLabel.textContent = 'All Time';
+
+            try {
+                const allFilms = await fetchAllCSVs(loadId);
+                if (loadId !== state.loadId) return;
+
+                state.films = allFilms;
+                state.filteredFilms = allFilms;
+                document.getElementById('allTimeLoading').classList.add('hidden');
+                document.getElementById('allTimeMsg').classList.remove('hidden');
+                renderStats();
+                updateStatus();
+            } catch (err) {
+                if (loadId !== state.loadId) return;
+                document.getElementById('allTimeLoading').classList.add('hidden');
+                errorState.classList.remove('hidden');
+                $('#errorDetail').textContent = `Could not load all years: ${err.message}`;
+                state.films = [];
+                statusText.textContent = 'Error';
+            }
+        }
+
+        async function fetchAllCSVs(loadId) {
+            const BATCH_SIZE = 6;
+            const allFilms = [];
+
+            for (let i = 0; i < YEARS.length; i += BATCH_SIZE) {
+                if (loadId !== state.loadId) return allFilms;
+                const batch = YEARS.slice(i, i + BATCH_SIZE);
+                const batchFilms = await Promise.all(
+                    batch.map(async (yearKey) => {
+                        if (state.csvCache[yearKey]) return state.csvCache[yearKey];
+                        const resp = await fetch(`films_${yearKey}.csv`);
+                        if (!resp.ok) throw new Error(`HTTP ${resp.status} for films_${yearKey}.csv`);
+                        const text = await resp.text();
+                        const result = Papa.parse(text, { header: true, skipEmptyLines: true });
+                        const films = result.data.filter(r => r.Title && r.Title.trim());
+                        state.csvCache[yearKey] = films;
+                        return films;
+                    })
+                );
+                allFilms.push(...batchFilms.flat());
+            }
+
+            return allFilms;
+        }
+
         // ════════════════════════════════════════════════
         //  FILTERING
         // ════════════════════════════════════════════════
@@ -484,6 +564,11 @@
             }
 
             state.filteredFilms = films;
+            if (state.isAllTime) {
+                renderStats();
+                updateStatus();
+                return;
+            }
             renderGrid();
             updateStatus();
             renderStats();
@@ -1466,7 +1551,12 @@
             loadPersisted();
             initStatsPanel();
 
-            // Populate year selector
+            // Populate year selector — "All Time" first, then individual years
+            const allOpt = document.createElement('option');
+            allOpt.value = 'all';
+            allOpt.textContent = 'All Time';
+            yearSelect.appendChild(allOpt);
+
             YEARS.forEach(y => {
                 const opt = document.createElement('option');
                 opt.value = y;
