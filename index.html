@@ -1371,11 +1371,92 @@
             });
         }
 
+        function calcQualityComparison(watchedData) {
+            const buckets = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+            Object.values(watchedData).forEach(entry => {
+                const r = parseInt(entry.rating, 10);
+                if (r >= 1 && r <= 5) buckets[r]++;
+            });
+            return [1, 2, 3, 4, 5].map(star => ({ star, count: buckets[star] }));
+        }
+
+        function renderQualityChart() {
+            const ctx = document.getElementById('chartQuality');
+            if (!ctx) return;
+            if (chartInstances.quality) { chartInstances.quality.destroy(); chartInstances.quality = null; }
+
+            const data = calcQualityComparison(state.watched);
+            const total = data.reduce((sum, d) => sum + d.count, 0);
+
+            if (total === 0) {
+                const wrapper = ctx.parentElement;
+                if (wrapper && !wrapper.querySelector('.quality-empty')) {
+                    const msg = document.createElement('p');
+                    msg.className = 'quality-empty text-center text-gray-500 text-sm py-4';
+                    msg.textContent = 'No rated films yet.';
+                    ctx.style.display = 'none';
+                    wrapper.appendChild(msg);
+                }
+                return;
+            }
+
+            // Remove any previous empty-state message
+            const wrapper = ctx.parentElement;
+            if (wrapper) {
+                wrapper.querySelectorAll('.quality-empty').forEach(el => el.remove());
+                ctx.style.display = '';
+            }
+
+            chartInstances.quality = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['1★', '2★', '3★', '4★', '5★'],
+                    datasets: [{
+                        label: 'Your ratings',
+                        data: data.map(d => d.count),
+                        backgroundColor: '#c9a84c',
+                        borderColor: '#c9a84c',
+                        borderWidth: 0,
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const count = ctx.parsed.y;
+                                    const pct = total > 0 ? Math.round(count / total * 100) : 0;
+                                    return ` ${count} film${count !== 1 ? 's' : ''} (${pct}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#e5e7eb', font: { size: 13 } },
+                            border: { color: '#1a1a1a' }
+                        },
+                        y: {
+                            grid: { color: '#1a1a1a' },
+                            ticks: { color: '#6b7280', font: { size: 10 }, stepSize: 1, precision: 0 },
+                            border: { color: '#1a1a1a' },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
         function renderStats() {
             const statsEmpty = document.getElementById('statsEmptyState');
             if (statsEmpty) statsEmpty.classList.toggle('hidden', state.films.length > 0);
             renderGenreChart();
             renderDirectorChart();
+            renderQualityChart();
         }
 
         // ════════════════════════════════════════════════
