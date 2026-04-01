@@ -16,8 +16,8 @@
 - [x] **Task 2.6**: Stats Panel — Empty States & Polish
 
 ## Feature 3 — Advanced Filtering
-- [ ] **Task 3.1**: Watched / Unwatched Toggle Filters
-- [ ] **Task 3.2**: Genre Dropdown Filter
+- [x] **Task 3.1**: Watched / Unwatched Toggle Filters
+- [x] **Task 3.2**: Genre Dropdown Filter
 - [ ] **Task 3.3**: Filter Combination Logic & Status
 
 ## Feature 4 — Data Export 2.0

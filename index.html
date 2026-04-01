@@ -191,6 +191,11 @@
                 </button>
             </div>
 
+            <!-- Genre filter -->
+            <select id="genreSelect" class="bg-[#151515] border border-[#2a2a2a] rounded-md px-3 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-[#c9a84c] cursor-pointer shrink-0 min-w-[110px]">
+                <option value="">All Genres</option>
+            </select>
+
             <!-- Spacer -->
             <div class="flex-1 hidden lg:block"></div>
 
@@ -209,6 +214,13 @@
                         Watchlist <span id="wlCount" class="opacity-60">0</span>
                     </span>
                 </button>
+                <button data-watched-filter="watched" class="view-pill px-3 py-1.5 rounded-full border border-[#2a2a2a] text-gray-500 hover:text-gray-300 hover:border-[#444]">
+                    <span class="inline-flex items-center gap-1">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Watched
+                    </span>
+                </button>
+                <button data-watched-filter="unwatched" class="view-pill px-3 py-1.5 rounded-full border border-[#2a2a2a] text-gray-500 hover:text-gray-300 hover:border-[#444]">Unwatched</button>
             </div>
 
             <!-- Export -->
@@ -375,6 +387,8 @@
             csvCache: {},        // year key → parsed films array
             isAllTime: false,    // true when "All Time" year is selected
             loadId: 0,           // for cancelling stale loads
+            watchedFilter: null, // null | 'watched' | 'unwatched'
+            genreFilter: null,   // null | genre string
         };
 
         // ════════════════════════════════════════════════
@@ -395,6 +409,7 @@
         const modal = $('#modal');
         const modalBody = $('#modalBody');
         const viewToggles = $('#viewToggles');
+        const genreSelect = $('#genreSelect');
 
         // ════════════════════════════════════════════════
         //  HELPERS
@@ -485,6 +500,8 @@
 
                 const result = Papa.parse(text, { header: true, skipEmptyLines: true });
                 state.films = result.data.filter(r => r.Title && r.Title.trim());
+                state.genreFilter = null;
+                populateGenreSelect();
                 hideSkeletons();
                 applyFilters();
                 fetchPosters(loadId);
@@ -520,6 +537,8 @@
 
                 state.films = allFilms;
                 state.filteredFilms = allFilms;
+                state.genreFilter = null;
+                populateGenreSelect();
                 document.getElementById('allTimeLoading').classList.add('hidden');
                 document.getElementById('allTimeMsg').classList.remove('hidden');
                 renderStats();
@@ -573,6 +592,21 @@
                 films = films.filter(f => state.watchlist.has(filmKey(f)));
             }
 
+            // Watched/unwatched filter
+            if (state.watchedFilter === 'watched') {
+                films = films.filter(f => !!state.watched[filmKey(f)]);
+            } else if (state.watchedFilter === 'unwatched') {
+                films = films.filter(f => !state.watched[filmKey(f)]);
+            }
+
+            // Genre filter
+            if (state.genreFilter) {
+                films = films.filter(f => {
+                    const genres = (f.Primary_Genre || '').split('/').map(g => g.trim());
+                    return genres.includes(state.genreFilter);
+                });
+            }
+
             // Search filter
             if (q) {
                 films = films.filter(f => {
@@ -595,14 +629,22 @@
         function updateStatus() {
             const total = state.films.length;
             const shown = state.filteredFilms.length;
-            const label = state.viewMode === 'favorites' ? 'favorite' : state.viewMode === 'watchlist' ? 'watchlisted' : '';
+            const viewLabel = state.viewMode === 'favorites' ? 'favorite' : state.viewMode === 'watchlist' ? 'watchlisted' : '';
+            const watchedLabel = state.watchedFilter || '';
+            const genreLabel = state.genreFilter || '';
 
-            if (state.searchQuery && label) {
-                statusText.textContent = `${shown} of ${total} ${label} films matching "${state.searchQuery}"`;
+            const descParts = [];
+            if (watchedLabel) descParts.push(watchedLabel);
+            if (viewLabel) descParts.push(viewLabel);
+            if (genreLabel) descParts.push(genreLabel);
+            const desc = descParts.join(' ');
+
+            if (state.searchQuery && desc) {
+                statusText.textContent = `${shown} of ${total} ${desc} films matching "${state.searchQuery}"`;
             } else if (state.searchQuery) {
                 statusText.textContent = `${shown} of ${total} films matching "${state.searchQuery}"`;
-            } else if (label) {
-                statusText.textContent = `${shown} ${label} film${shown !== 1 ? 's' : ''}`;
+            } else if (desc) {
+                statusText.textContent = `${shown} of ${total} ${desc} film${shown !== 1 ? 's' : ''}`;
             } else {
                 statusText.textContent = `${total} film${total !== 1 ? 's' : ''}`;
             }
@@ -624,6 +666,25 @@
             const fill  = document.getElementById('progressBarFill');
             if (label) label.textContent = `${watchedCount} / ${total} watched (${pct}%)`;
             if (fill)  fill.style.width = `${pct}%`;
+        }
+
+        function populateGenreSelect() {
+            const genres = new Set();
+            state.films.forEach(f => {
+                (f.Primary_Genre || '').split('/').forEach(g => {
+                    const trimmed = g.trim();
+                    if (trimmed) genres.add(trimmed);
+                });
+            });
+            const sorted = [...genres].sort();
+            genreSelect.innerHTML = '<option value="">All Genres</option>';
+            sorted.forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g;
+                opt.textContent = g;
+                genreSelect.appendChild(opt);
+            });
+            genreSelect.value = state.genreFilter || '';
         }
 
         // ════════════════════════════════════════════════
@@ -1237,6 +1298,30 @@
                 b.classList.toggle('border-[#2a2a2a]', !isActive);
                 b.classList.toggle('text-gray-500', !isActive);
             });
+            applyFilters();
+        });
+
+        // Watched/unwatched filter pills
+        viewToggles.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-watched-filter]');
+            if (!btn) return;
+            const val = btn.dataset.watchedFilter;
+            state.watchedFilter = state.watchedFilter === val ? null : val;
+
+            viewToggles.querySelectorAll('[data-watched-filter]').forEach(b => {
+                const isActive = b.dataset.watchedFilter === state.watchedFilter;
+                b.classList.toggle('border-[#c9a84c]', isActive);
+                b.classList.toggle('bg-[#c9a84c]/10', isActive);
+                b.classList.toggle('text-[#c9a84c]', isActive);
+                b.classList.toggle('border-[#2a2a2a]', !isActive);
+                b.classList.toggle('text-gray-500', !isActive);
+            });
+            applyFilters();
+        });
+
+        // Genre filter
+        genreSelect.addEventListener('change', () => {
+            state.genreFilter = genreSelect.value || null;
             applyFilters();
         });
 
