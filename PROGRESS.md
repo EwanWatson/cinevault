@@ -40,3 +40,8 @@
 - [x] **Task 7.2**: Edit Film Rankings via UI
 - [x] **Task 7.3**: Fix Mean Girls Data (remove 2024 duplicate, already exists in 2004)
 - [x] **Task 7.4**: Write Custom Films Directly to CSV (File System Access API) + Auto-create New Year CSVs
+
+## Round 4 — Data Portability & Decade Routing
+- [x] **Task 8.1**: Remove Glass Onion Duplicate in 2022
+- [x] **Task 8.2**: Persist User Data (favorites/watchlist/ratings) to a JSON file via File System Access API
+- [ ] **Task 8.3**: Route Pre-1990 Custom Films to Decade CSVs (films_1980s, films_1970s, etc.)

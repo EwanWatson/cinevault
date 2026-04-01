@@ -542,18 +542,22 @@
 
         function saveFavorites() {
             try { localStorage.setItem('cv_favorites', JSON.stringify([...state.favorites])); } catch { /* quota exceeded */ }
+            saveUserDataFile().catch(() => {});
         }
 
         function saveWatchlist() {
             try { localStorage.setItem('cv_watchlist', JSON.stringify([...state.watchlist])); } catch { /* quota exceeded */ }
+            saveUserDataFile().catch(() => {});
         }
 
         function saveWatched() {
             try { localStorage.setItem('cv_watched', JSON.stringify(state.watched)); } catch { /* quota exceeded */ }
+            saveUserDataFile().catch(() => {});
         }
 
         function saveFilmStore() {
             try { localStorage.setItem('cv_filmStore', JSON.stringify(state.filmStore)); } catch { /* quota exceeded */ }
+            saveUserDataFile().catch(() => {});
         }
 
         function savePosterCache() {
@@ -574,6 +578,54 @@
 
         function saveRankOverrides() {
             try { localStorage.setItem('cv_rank_overrides', JSON.stringify(state.rankOverrides)); } catch { /* quota exceeded */ }
+            saveUserDataFile().catch(() => {});
+        }
+
+        // ════════════════════════════════════════════════
+        //  USER DATA FILE (cross-machine portability)
+        // ════════════════════════════════════════════════
+        async function saveUserDataFile() {
+            if (!state.dirHandle) return;
+            try {
+                const data = {
+                    version: 1,
+                    favorites: [...state.favorites],
+                    watchlist: [...state.watchlist],
+                    watched: state.watched,
+                    filmStore: state.filmStore,
+                    rankOverrides: state.rankOverrides,
+                };
+                const fileHandle = await state.dirHandle.getFileHandle('user_data.json', { create: true });
+                const writable = await fileHandle.createWritable();
+                await writable.write(JSON.stringify(data, null, 2));
+                await writable.close();
+            } catch { /* silently ignore — folder may not be available */ }
+        }
+
+        async function loadUserDataFile() {
+            if (!state.dirHandle) return;
+            try {
+                const fileHandle = await state.dirHandle.getFileHandle('user_data.json', { create: false });
+                const file = await fileHandle.getFile();
+                const text = await file.text();
+                const data = JSON.parse(text);
+                // Merge favorites: union of localStorage set and file set
+                for (const k of (data.favorites || [])) state.favorites.add(k);
+                // Merge watchlist: union
+                for (const k of (data.watchlist || [])) state.watchlist.add(k);
+                // Merge watched: file takes priority
+                state.watched = Object.assign({}, state.watched, data.watched || {});
+                // Merge filmStore: file takes priority
+                state.filmStore = Object.assign({}, state.filmStore, data.filmStore || {});
+                // Merge rankOverrides: file takes priority
+                state.rankOverrides = Object.assign({}, state.rankOverrides, data.rankOverrides || {});
+                // Sync merged data back to localStorage
+                saveFavorites();
+                saveWatchlist();
+                saveWatched();
+                saveFilmStore();
+                saveRankOverrides();
+            } catch { /* file doesn't exist or parse error — silently continue */ }
         }
 
         function loadExtraYears() {
@@ -1646,6 +1698,7 @@
                 if (perm === 'granted') {
                     state.dirHandle = handle;
                     updateFolderAccessBtn(true);
+                    await loadUserDataFile();
                 }
             } catch { /* silently ignore — API not available or permission denied */ }
         }
