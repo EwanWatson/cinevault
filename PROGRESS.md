@@ -5,7 +5,7 @@
 - [x] **Task 1.2**: Star-Rating Picker UI Component
 - [x] **Task 1.3**: Display Rating on Film Cards
 - [x] **Task 1.4**: Display Rating in Modal
-- [ ] **Task 1.5**: Year Progress Bar
+- [x] **Task 1.5**: Year Progress Bar
 
 ## Feature 2 — Stats Dashboard
 - [ ] **Task 2.1**: Add Chart.js CDN & Collapsible Panel Skeleton

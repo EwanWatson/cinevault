@@ -118,6 +118,9 @@
         }
         #ratingPicker:not(.hidden) { animation: picker-in 0.12s ease; }
 
+        /* ── Year progress bar ── */
+        #progressBarFill { transition: width 0.4s ease; }
+
         /* ── Responsive grid ── */
         .film-grid {
             display: grid;
@@ -191,6 +194,16 @@
 
     <!-- ═══════════════════ MAIN ═══════════════════ -->
     <main class="max-w-[1600px] mx-auto px-4 pt-5 pb-16">
+        <!-- Year Progress Bar -->
+        <div id="progressBar" class="mb-5">
+            <div class="flex items-center justify-between text-[11px] text-gray-600 mb-1.5">
+                <span id="progressLabel">0 / 0 watched (0%)</span>
+            </div>
+            <div class="h-1 bg-[#1a1a1a] rounded-full overflow-hidden">
+                <div id="progressBarFill" class="h-full rounded-full" style="width:0%;background:#c9a84c"></div>
+            </div>
+        </div>
+
         <!-- Film grid -->
         <div id="grid" class="film-grid"></div>
 
@@ -444,6 +457,18 @@
             const wy = state.films.filter(f => state.watchlist.has(filmKey(f))).length;
             favCount.textContent = fy || '0';
             wlCount.textContent = wy || '0';
+
+            updateProgressBar();
+        }
+
+        function updateProgressBar() {
+            const total = state.films.length;
+            const watchedCount = state.films.filter(f => !!state.watched[filmKey(f)]).length;
+            const pct = total > 0 ? Math.round((watchedCount / total) * 100) : 0;
+            const label = document.getElementById('progressLabel');
+            const fill  = document.getElementById('progressBarFill');
+            if (label) label.textContent = `${watchedCount} / ${total} watched (${pct}%)`;
+            if (fill)  fill.style.width = `${pct}%`;
         }
 
         // ════════════════════════════════════════════════
