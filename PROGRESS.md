@@ -28,3 +28,9 @@
 - [x] **Task 5.2**: Mobile & Responsive Testing
 - [x] **Task 5.3**: Performance Audit
 - [x] **Task 5.4**: Final Polish & Edge Cases
+
+## Round 2 — New Feature & Bug Fixes
+- [x] **Task 6.1**: Remove Stats Panel Entirely
+- [ ] **Task 6.2**: Persist Selected Year Across Refreshes
+- [ ] **Task 6.3**: Immediate Icon Fill on Favorite / Watchlist Actions
+- [ ] **Task 6.4**: Add Film via IMDB or Rotten Tomatoes Link

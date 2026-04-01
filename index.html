@@ -9,8 +9,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- PapaParse for CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -123,37 +121,6 @@
         /* ── Year progress bar ── */
         #progressBarFill { transition: width 0.4s ease; }
 
-        /* ── Stats panel ── */
-        #statsContent {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.35s ease;
-        }
-        #statsContent.open {
-            max-height: 1400px;
-        }
-        #statsToggle { transition: color 0.15s ease; }
-
-        /* ── Chart canvas heights (needed for maintainAspectRatio:false) ── */
-        #chartGenre   { height: 220px; }
-        #chartDirector { height: 240px; }
-        #chartQuality { height: 180px; }
-
-        /* ── Per-chart empty states ── */
-        .chart-empty {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem 0;
-            text-align: center;
-            min-height: 120px;
-        }
-        .chart-empty svg { margin-bottom: 0.5rem; color: #252525; }
-        .chart-empty p { color: #4b5563; font-size: 0.75rem; line-height: 1.4; max-width: 180px; }
-        #statsChevron { display: inline-block; transition: transform 0.25s ease; }
-        #statsContent.open #statsChevron { transform: none; }
-
         /* ── Responsive grid ── */
         .film-grid {
             display: grid;
@@ -261,42 +228,6 @@
             </div>
         </div>
 
-        <!-- ══════ STATS PANEL ══════ -->
-        <section id="statsPanel" class="mb-5">
-            <div class="flex items-center justify-between px-0.5 mb-0">
-                <span class="text-[10px] uppercase tracking-widest text-gray-600 font-medium select-none">Stats Dashboard</span>
-                <button id="statsToggle" class="flex items-center gap-1.5 text-[11px] text-gray-500 hover:text-[#c9a84c] select-none" title="Toggle stats panel">
-                    <span class="text-[10px]">Stats</span>
-                    <span id="statsChevron" class="text-[10px]">&#9660;</span>
-                </button>
-            </div>
-
-            <div id="statsContent">
-                <div class="bg-[#0e0e0e] border border-[#1a1a1a] rounded-lg p-4 mt-2">
-                    <!-- Empty state -->
-                    <div id="statsEmptyState" class="text-center py-6">
-                        <svg class="mx-auto mb-3 text-[#252525]" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 17l3-4 3 3 2-3 3 4"/></svg>
-                        <p class="text-gray-600 text-sm">Start rating films to see your stats here.</p>
-                    </div>
-                    <!-- Charts grid (canvases rendered by tasks 2.2–2.4) -->
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-                        <div>
-                            <p class="text-[10px] uppercase tracking-widest text-gray-600 mb-3">Genre Breakdown</p>
-                            <canvas id="chartGenre"></canvas>
-                        </div>
-                        <div>
-                            <p class="text-[10px] uppercase tracking-widest text-gray-600 mb-3">Director Leaderboard</p>
-                            <canvas id="chartDirector"></canvas>
-                        </div>
-                        <div>
-                            <p class="text-[10px] uppercase tracking-widest text-gray-600 mb-3">Quality Comparison</p>
-                            <canvas id="chartQuality"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Film grid -->
         <div id="grid" class="film-grid"></div>
 
@@ -314,18 +245,6 @@
 
         <!-- Loading skeleton grid -->
         <div id="loadingSkeleton" class="film-grid hidden"></div>
-
-        <!-- All-time loading indicator -->
-        <div id="allTimeLoading" class="hidden text-center py-16 text-gray-600">
-            <p class="text-sm animate-pulse">Loading all years…</p>
-        </div>
-
-        <!-- All-time mode message -->
-        <div id="allTimeMsg" class="hidden flex flex-col items-center justify-center py-24 text-center">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.2"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="12" cy="10" r="3.5"/><path d="M2 18 l6-4 4 3 4-5 6 6"/></svg>
-            <p class="text-gray-500 text-base mt-4">Select a year to browse films</p>
-            <p class="text-gray-600 text-sm mt-1">All-time stats are shown in the Stats Dashboard above.</p>
-        </div>
 
         <!-- Empty state -->
         <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-center">
@@ -396,8 +315,6 @@
             watched: {},         // filmKey → { rating: 1-5, timestamp: ISO string }
             filmStore: {},       // key → film data (for export)
             posterCache: {},     // key → poster URL or null
-            csvCache: {},        // year key → parsed films array
-            isAllTime: false,    // true when "All Time" year is selected
             loadId: 0,           // for cancelling stale loads
             watchedFilter: null, // null | 'watched' | 'unwatched'
             genreFilter: null,   // null | genre string
@@ -486,8 +403,6 @@
         //  CSV LOADING
         // ════════════════════════════════════════════════
         async function loadYear(year) {
-            if (year === 'all') { return loadAllYears(); }
-            state.isAllTime = false;
             state.year = year;
             state.loadId++;
             const loadId = state.loadId;
@@ -495,8 +410,6 @@
             // UI: show loading
             grid.classList.remove('hidden');
             grid.innerHTML = '';
-            document.getElementById('allTimeMsg').classList.add('hidden');
-            document.getElementById('allTimeLoading').classList.add('hidden');
             emptyState.classList.add('hidden');
             errorState.classList.add('hidden');
             showSkeletons();
@@ -525,69 +438,6 @@
                 state.films = [];
                 statusText.textContent = 'Error';
             }
-        }
-
-        async function loadAllYears() {
-            state.year = 'all';
-            state.isAllTime = true;
-            state.loadId++;
-            const loadId = state.loadId;
-
-            // UI: show loading
-            grid.classList.add('hidden');
-            document.getElementById('allTimeMsg').classList.add('hidden');
-            document.getElementById('allTimeLoading').classList.remove('hidden');
-            emptyState.classList.add('hidden');
-            errorState.classList.add('hidden');
-            loadingSkeleton.classList.add('hidden');
-            statusText.textContent = 'Loading all years…';
-            yearLabel.textContent = 'All Time';
-
-            try {
-                const allFilms = await fetchAllCSVs(loadId);
-                if (loadId !== state.loadId) return;
-
-                state.films = allFilms;
-                state.filteredFilms = allFilms;
-                state.genreFilter = null;
-                populateGenreSelect();
-                document.getElementById('allTimeLoading').classList.add('hidden');
-                document.getElementById('allTimeMsg').classList.remove('hidden');
-                renderStats();
-                updateStatus();
-            } catch (err) {
-                if (loadId !== state.loadId) return;
-                document.getElementById('allTimeLoading').classList.add('hidden');
-                errorState.classList.remove('hidden');
-                $('#errorDetail').textContent = `Could not load all years: ${err.message}`;
-                state.films = [];
-                statusText.textContent = 'Error';
-            }
-        }
-
-        async function fetchAllCSVs(loadId) {
-            const BATCH_SIZE = 6;
-            const allFilms = [];
-
-            for (let i = 0; i < YEARS.length; i += BATCH_SIZE) {
-                if (loadId !== state.loadId) return allFilms;
-                const batch = YEARS.slice(i, i + BATCH_SIZE);
-                const batchFilms = await Promise.all(
-                    batch.map(async (yearKey) => {
-                        if (state.csvCache[yearKey]) return state.csvCache[yearKey];
-                        const resp = await fetch(`films_${yearKey}.csv`);
-                        if (!resp.ok) throw new Error(`HTTP ${resp.status} for films_${yearKey}.csv`);
-                        const text = await resp.text();
-                        const result = Papa.parse(text, { header: true, skipEmptyLines: true });
-                        const films = result.data.filter(r => r.Title && r.Title.trim());
-                        state.csvCache[yearKey] = films;
-                        return films;
-                    })
-                );
-                allFilms.push(...batchFilms.flat());
-            }
-
-            return allFilms;
         }
 
         // ════════════════════════════════════════════════
@@ -628,14 +478,8 @@
             }
 
             state.filteredFilms = films;
-            if (state.isAllTime) {
-                renderStats();
-                updateStatus();
-                return;
-            }
             renderGrid();
             updateStatus();
-            renderStats();
         }
 
         function updateStatus() {
@@ -1124,7 +968,6 @@
             state.watched[key] = { rating, timestamp: new Date().toISOString() };
             addToStore(key, film);
             saveWatched();
-            renderStats();
         }
 
         function removeWatched(film) {
@@ -1132,7 +975,6 @@
             delete state.watched[key];
             removeFromStore(key);
             saveWatched();
-            renderStats();
         }
 
         function removeFromStore(key) {
@@ -1428,312 +1270,12 @@
         $('#exportBtn').addEventListener('click', exportCollection);
 
         // ════════════════════════════════════════════════
-        //  STATS PANEL TOGGLE
-        // ════════════════════════════════════════════════
-        function applyStatsPanel(isOpen) {
-            const content = document.getElementById('statsContent');
-            const chevron = document.getElementById('statsChevron');
-            if (isOpen) {
-                content.classList.add('open');
-                chevron.innerHTML = '&#9650;';
-            } else {
-                content.classList.remove('open');
-                chevron.innerHTML = '&#9660;';
-            }
-        }
-
-        function initStatsPanel() {
-            const saved = localStorage.getItem('cv_statsOpen');
-            // Default: collapsed (false)
-            const isOpen = saved === 'true';
-            applyStatsPanel(isOpen);
-
-            document.getElementById('statsToggle').addEventListener('click', () => {
-                const isCurrentlyOpen = document.getElementById('statsContent').classList.contains('open');
-                const next = !isCurrentlyOpen;
-                applyStatsPanel(next);
-                try { localStorage.setItem('cv_statsOpen', String(next)); } catch { /* quota exceeded */ }
-                if (next) renderStats();
-            });
-        }
-
-        // ════════════════════════════════════════════════
-        //  STATS CHARTS (Tasks 2.2 & 2.3)
-        // ════════════════════════════════════════════════
-        const chartInstances = { genre: null, director: null, quality: null };
-
-        function createChartEmpty(message) {
-            const div = document.createElement('div');
-            div.className = 'chart-empty';
-            div.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 17l3-4 3 3 2-3 3 4"/></svg><p>${message}</p>`;
-            return div;
-        }
-
-        const CHART_PALETTE = [
-            '#c9a84c', // gold
-            '#5b7fa6', // muted blue
-            '#7a9e7e', // muted green
-            '#9b6a7a', // muted mauve
-            '#7a6aab', // muted purple
-            '#a87a5b', // muted terracotta
-            '#5ba0a0', // muted teal
-            '#a0a05b', // muted olive
-            '#a05b7a', // muted rose
-            '#5b8a7a', // muted seafoam
-        ];
-
-        Chart.defaults.color = '#9ca3af';
-        Chart.defaults.borderColor = '#1f2937';
-
-        function calcGenreCounts(films) {
-            const counts = {};
-            films.forEach(f => {
-                const genre = (f.Primary_Genre || '').split('/')[0].trim();
-                if (!genre) return;
-                counts[genre] = (counts[genre] || 0) + 1;
-            });
-            return Object.entries(counts)
-                .map(([genre, count]) => ({ genre, count }))
-                .sort((a, b) => b.count - a.count);
-        }
-
-        function renderGenreChart() {
-            const ctx = document.getElementById('chartGenre');
-            if (!ctx) return;
-            if (chartInstances.genre) { chartInstances.genre.destroy(); chartInstances.genre = null; }
-
-            const wrapper = ctx.parentElement;
-            if (wrapper) wrapper.querySelectorAll('.chart-empty').forEach(el => el.remove());
-
-            const data = calcGenreCounts(state.films);
-            if (data.length === 0) {
-                ctx.style.display = 'none';
-                if (wrapper) wrapper.appendChild(createChartEmpty('Rate some films to see your genre breakdown!'));
-                return;
-            }
-            ctx.style.display = '';
-
-            chartInstances.genre = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: data.map(d => d.genre),
-                    datasets: [{
-                        data: data.map(d => d.count),
-                        backgroundColor: data.map((_, i) => CHART_PALETTE[i % CHART_PALETTE.length]),
-                        borderColor: '#0e0e0e',
-                        borderWidth: 2,
-                        hoverOffset: 4,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: window.innerWidth >= 768 ? 'right' : 'bottom',
-                            labels: {
-                                color: '#9ca3af',
-                                boxWidth: 12,
-                                padding: 10,
-                                font: { size: 11 }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => ` ${ctx.label}: ${ctx.parsed} film${ctx.parsed !== 1 ? 's' : ''}`
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function calcDirectorLeaderboard(films) {
-            const trackedKeys = new Set([
-                ...state.favorites,
-                ...state.watchlist,
-                ...Object.keys(state.watched),
-            ]);
-
-            const counts = {};
-            const countedKeys = new Set();
-
-            films.forEach(f => {
-                const key = filmKey(f);
-                if (!trackedKeys.has(key)) return;
-                const director = (f.Director || '').trim();
-                if (!director || director.toLowerCase() === 'unknown') return;
-                counts[director] = (counts[director] || 0) + 1;
-                countedKeys.add(key);
-            });
-
-            Object.entries(state.filmStore).forEach(([key, data]) => {
-                if (!trackedKeys.has(key) || countedKeys.has(key)) return;
-                const director = (data.director || '').trim();
-                if (!director || director.toLowerCase() === 'unknown') return;
-                counts[director] = (counts[director] || 0) + 1;
-            });
-
-            return Object.entries(counts)
-                .map(([director, count]) => ({ director, count }))
-                .sort((a, b) => b.count - a.count)
-                .slice(0, 10);
-        }
-
-        function renderDirectorChart() {
-            const ctx = document.getElementById('chartDirector');
-            if (!ctx) return;
-            if (chartInstances.director) { chartInstances.director.destroy(); chartInstances.director = null; }
-
-            const wrapper = ctx.parentElement;
-            if (wrapper) wrapper.querySelectorAll('.chart-empty').forEach(el => el.remove());
-
-            const data = calcDirectorLeaderboard(state.films);
-            if (data.length === 0) {
-                ctx.style.display = 'none';
-                if (wrapper) wrapper.appendChild(createChartEmpty('Favourite or rate films to build your director leaderboard!'));
-                return;
-            }
-            ctx.style.display = '';
-
-            // Reverse so the highest-count director appears at the top
-            const labels = data.map(d => d.director).reverse();
-            const values = data.map(d => d.count).reverse();
-
-            chartInstances.director = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: '#c9a84c',
-                        borderColor: '#c9a84c',
-                        borderWidth: 0,
-                        borderRadius: 3,
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => ` ${ctx.parsed.x} film${ctx.parsed.x !== 1 ? 's' : ''}`
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: '#1a1a1a' },
-                            ticks: { color: '#6b7280', font: { size: 10 }, stepSize: 1 },
-                            border: { color: '#1a1a1a' }
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: { color: '#e5e7eb', font: { size: 11 } },
-                            border: { color: '#1a1a1a' }
-                        }
-                    }
-                }
-            });
-        }
-
-        function calcQualityComparison(watchedData) {
-            const buckets = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-            Object.values(watchedData).forEach(entry => {
-                const r = parseInt(entry.rating, 10);
-                if (r >= 1 && r <= 5) buckets[r]++;
-            });
-            return [1, 2, 3, 4, 5].map(star => ({ star, count: buckets[star] }));
-        }
-
-        function renderQualityChart() {
-            const ctx = document.getElementById('chartQuality');
-            if (!ctx) return;
-            if (chartInstances.quality) { chartInstances.quality.destroy(); chartInstances.quality = null; }
-
-            const wrapper = ctx.parentElement;
-            if (wrapper) wrapper.querySelectorAll('.chart-empty').forEach(el => el.remove());
-
-            const data = calcQualityComparison(state.watched);
-            const total = data.reduce((sum, d) => sum + d.count, 0);
-
-            if (total === 0) {
-                ctx.style.display = 'none';
-                if (wrapper) wrapper.appendChild(createChartEmpty('Rate some films to see your quality breakdown!'));
-                return;
-            }
-
-            ctx.style.display = '';
-
-            chartInstances.quality = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['1★', '2★', '3★', '4★', '5★'],
-                    datasets: [{
-                        label: 'Your ratings',
-                        data: data.map(d => d.count),
-                        backgroundColor: '#c9a84c',
-                        borderColor: '#c9a84c',
-                        borderWidth: 0,
-                        borderRadius: 4,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => {
-                                    const count = ctx.parsed.y;
-                                    const pct = total > 0 ? Math.round(count / total * 100) : 0;
-                                    return ` ${count} film${count !== 1 ? 's' : ''} (${pct}%)`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#e5e7eb', font: { size: 13 } },
-                            border: { color: '#1a1a1a' }
-                        },
-                        y: {
-                            grid: { color: '#1a1a1a' },
-                            ticks: { color: '#6b7280', font: { size: 10 }, stepSize: 1, precision: 0 },
-                            border: { color: '#1a1a1a' },
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderStats() {
-            const statsEmpty = document.getElementById('statsEmptyState');
-            if (statsEmpty) statsEmpty.classList.toggle('hidden', state.films.length > 0);
-            renderGenreChart();
-            renderDirectorChart();
-            renderQualityChart();
-        }
-
-        // ════════════════════════════════════════════════
         //  INIT
         // ════════════════════════════════════════════════
         function init() {
             loadPersisted();
-            initStatsPanel();
 
-            // Populate year selector — "All Time" first, then individual years
-            const allOpt = document.createElement('option');
-            allOpt.value = 'all';
-            allOpt.textContent = 'All Time';
-            yearSelect.appendChild(allOpt);
-
+            // Populate year selector
             YEARS.forEach(y => {
                 const opt = document.createElement('option');
                 opt.value = y;
