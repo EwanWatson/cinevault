@@ -239,6 +239,12 @@
         /* ── Folder access button active state ── */
         #folderAccessBtn.csv-active { color: #c9a84c; border-color: rgba(201, 168, 76, 0.5); }
 
+        /* ── Gist sync dot ── */
+        #gistSyncDot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #555; flex-shrink: 0; transition: background 0.3s; }
+        #gistSyncDot.synced  { background: #c9a84c; }
+        #gistSyncDot.pending { background: #f59e0b; }
+        #gistSyncDot.error   { background: #ef4444; }
+
         /* ── Data modal ── */
         #dataModal { display: none; }
         #dataModal.open { display: flex; }
@@ -349,6 +355,7 @@
             <button id="folderAccessBtn" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#2a2a2a] text-xs text-gray-400 hover:text-[#c9a84c] hover:border-[#c9a84c]/50 transition-colors" title="Manage your data — save/load favorites, watchlist & ratings">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                 Data
+                <span id="gistSyncDot" class="hidden" title="Gist sync status"></span>
             </button>
         </div>
 
@@ -516,6 +523,30 @@
                         </div>
                     </div>
                 </div>
+                <!-- GitHub Gist Sync -->
+                <div class="bg-[#0d0d0d] border border-[#1e1e1e] rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="mt-0.5 shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-200 font-medium mb-1">GitHub Gist Sync</p>
+                            <p class="text-[11px] text-gray-500 mb-3">Sync favorites, watchlist &amp; ratings across devices via a private GitHub Gist. Create a PAT with only the <span class="font-mono text-[#c9a84c]">gist</span> scope at <a href="https://github.com/settings/tokens/new?scopes=gist&description=CineVault+Sync" target="_blank" rel="noopener" class="text-[#c9a84c] hover:underline">github.com/settings/tokens</a>.</p>
+                            <div class="flex gap-2 mb-2">
+                                <input id="gistPatInput" type="password" autocomplete="off" spellcheck="false"
+                                    class="flex-1 bg-[#111] border border-[#2a2a2a] rounded-md px-3 py-1.5 text-xs text-gray-200 font-mono focus:outline-none focus:border-[#c9a84c]/50 placeholder-gray-600"
+                                    placeholder="GitHub PAT (gist scope only)…">
+                                <button id="gistSave" class="px-3 py-1.5 rounded-md bg-[#c9a84c]/10 border border-[#c9a84c]/30 text-[#c9a84c] text-xs font-medium hover:bg-[#c9a84c]/20 transition-colors whitespace-nowrap">Save</button>
+                                <button id="gistDisconnect" class="px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-gray-500 text-xs font-medium hover:text-red-400 hover:border-red-500/30 transition-colors whitespace-nowrap hidden">Disconnect</button>
+                            </div>
+                            <div id="gistIdRow" class="flex gap-2 mb-2 hidden">
+                                <input id="gistIdInput" type="text" autocomplete="off" spellcheck="false" readonly
+                                    class="flex-1 bg-[#111] border border-[#2a2a2a] rounded-md px-3 py-1.5 text-xs text-gray-500 font-mono focus:outline-none placeholder-gray-600"
+                                    placeholder="Gist ID (auto-filled on first save)…">
+                                <button id="gistSyncNow" class="px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-gray-300 text-xs font-medium hover:text-[#c9a84c] hover:border-[#c9a84c]/40 transition-colors whitespace-nowrap">Sync now</button>
+                            </div>
+                            <p id="gistStatus" class="text-[11px] mt-1 text-gray-600"></p>
+                        </div>
+                    </div>
+                </div>
                 <!-- Migrate user_data.json (shown when folder connected) -->
                 <div id="dataMigrateSection" class="hidden bg-[#0d0d0d] border border-[#1e1e1e] rounded-lg p-4">
                     <div class="flex items-start gap-3">
@@ -645,6 +676,229 @@
         }
 
         // ════════════════════════════════════════════════
+        //  GITHUB GIST SYNC
+        // ════════════════════════════════════════════════
+        const GIST_CONFIG = { pat: '', id: '' };
+
+        function loadGistConfig() {
+            try {
+                GIST_CONFIG.pat = localStorage.getItem('cv_gist_pat') || '';
+                GIST_CONFIG.id  = localStorage.getItem('cv_gist_id')  || '';
+            } catch {}
+        }
+
+        function saveGistConfig(pat, id) {
+            GIST_CONFIG.pat = pat != null ? String(pat) : GIST_CONFIG.pat;
+            GIST_CONFIG.id  = id  != null ? String(id)  : GIST_CONFIG.id;
+            try {
+                if (GIST_CONFIG.pat) localStorage.setItem('cv_gist_pat', GIST_CONFIG.pat);
+                else                  localStorage.removeItem('cv_gist_pat');
+                if (GIST_CONFIG.id)  localStorage.setItem('cv_gist_id',  GIST_CONFIG.id);
+                else                  localStorage.removeItem('cv_gist_id');
+            } catch {}
+        }
+
+        function updateSyncDot(dotState) { // 'off' | 'synced' | 'pending' | 'error'
+            const dot = document.getElementById('gistSyncDot');
+            if (!dot) return;
+            dot.classList.remove('hidden', 'synced', 'pending', 'error');
+            if (dotState === 'off') { dot.classList.add('hidden'); return; }
+            dot.classList.add(dotState);
+            dot.title = { synced: 'Gist: synced', pending: 'Gist: write pending…', error: 'Gist: sync error — check Data settings' }[dotState] || '';
+        }
+
+        function showToast(msg) {
+            let el = document.getElementById('cvToast');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'cvToast';
+                el.style.cssText = 'position:fixed;bottom:1.25rem;left:50%;transform:translateX(-50%) translateY(1rem);background:#1e1e1e;border:1px solid #2a2a2a;color:#c9a84c;font-size:12px;padding:0.5rem 1.1rem;border-radius:6px;z-index:9999;opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.5)';
+                document.body.appendChild(el);
+            }
+            el.textContent = msg;
+            el.style.opacity = '1';
+            el.style.transform = 'translateX(-50%) translateY(0)';
+            clearTimeout(el._hideTimer);
+            el._hideTimer = setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(-50%) translateY(0.5rem)';
+            }, 3000);
+        }
+
+        async function gistRead() {
+            if (!GIST_CONFIG.pat || !GIST_CONFIG.id) return null;
+            try {
+                const resp = await fetch(`https://api.github.com/gists/${GIST_CONFIG.id}`, {
+                    headers: {
+                        Authorization: `token ${GIST_CONFIG.pat}`,
+                        Accept: 'application/vnd.github+json',
+                    },
+                });
+                if (!resp.ok) return null;
+                const data = await resp.json();
+                const file = data.files && data.files['cinevault_sync.json'];
+                if (!file) return null;
+                return JSON.parse(file.content);
+            } catch { return null; }
+        }
+
+        async function gistWrite(payload) {
+            if (!GIST_CONFIG.pat) return false;
+            const content = JSON.stringify(payload, null, 2);
+            try {
+                if (!GIST_CONFIG.id) {
+                    // First run — create a new private Gist
+                    const resp = await fetch('https://api.github.com/gists', {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `token ${GIST_CONFIG.pat}`,
+                            Accept: 'application/vnd.github+json',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            description: 'CineVault sync data',
+                            public: false,
+                            files: { 'cinevault_sync.json': { content } },
+                        }),
+                    });
+                    if (!resp.ok) return false;
+                    const data = await resp.json();
+                    saveGistConfig(null, data.id);  // persist Gist ID, keep PAT
+                    return true;
+                } else {
+                    const resp = await fetch(`https://api.github.com/gists/${GIST_CONFIG.id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            Authorization: `token ${GIST_CONFIG.pat}`,
+                            Accept: 'application/vnd.github+json',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            files: { 'cinevault_sync.json': { content } },
+                        }),
+                    });
+                    return resp.ok;
+                }
+            } catch { return false; }
+        }
+
+        function gistMerge(remote, local) {
+            // favorites / watchlist: remote is authoritative (remote deletions propagate)
+            // watched:               last-timestamp-wins per key
+            // rankOverrides:         remote wins on conflict
+            const merged = {
+                favorites:    [...new Set(remote.favorites || [])],
+                watchlist:    [...new Set(remote.watchlist  || [])],
+                watched:      {},
+                rankOverrides: {},
+            };
+            const lw = local.watched  || {};
+            const rw = remote.watched || {};
+            const allWk = new Set([...Object.keys(lw), ...Object.keys(rw)]);
+            allWk.forEach(k => {
+                const l = lw[k], r = rw[k];
+                merged.watched[k] = (l && r)
+                    ? ((l.timestamp || '') >= (r.timestamp || '') ? l : r)
+                    : (l || r);
+            });
+            merged.rankOverrides = Object.assign({}, local.rankOverrides || {}, remote.rankOverrides || {});
+            return merged;
+        }
+
+        function buildGistPayload() {
+            return {
+                favorites:    [...state.favorites],
+                watchlist:    [...state.watchlist],
+                watched:      state.watched,
+                rankOverrides: state.rankOverrides,
+                _updated:     new Date().toISOString(),
+            };
+        }
+
+        let _gistLastSyncedAt = null;
+        let _gistSyncing = false;
+
+        async function gistSync() {
+            if (!GIST_CONFIG.pat || _gistSyncing) return;
+            _gistSyncing = true;
+            updateSyncDot('pending');
+            try {
+                const remote = await gistRead();
+                const local  = buildGistPayload();
+                let merged;
+                let changeCount = 0;
+                if (remote) {
+                    merged = gistMerge(remote, local);
+                    // Count meaningful remote-only additions
+                    merged.favorites.forEach(k => { if (!state.favorites.has(k)) changeCount++; });
+                    merged.watchlist.forEach(k => { if (!state.watchlist.has(k)) changeCount++; });
+                    Object.keys(merged.watched).forEach(k => {
+                        if (!state.watched[k]) changeCount++;
+                        else if (merged.watched[k].timestamp !== state.watched[k].timestamp) changeCount++;
+                    });
+                } else {
+                    merged = local;
+                }
+                // Apply merged state locally (suppressed by _gistSyncing flag)
+                state.favorites    = new Set(merged.favorites);
+                state.watchlist    = new Set(merged.watchlist);
+                state.watched      = merged.watched;
+                state.rankOverrides = merged.rankOverrides;
+                saveFavorites(); saveWatchlist(); saveWatched(); saveRankOverrides();
+                // Write merged result back to Gist
+                const ok = await gistWrite(Object.assign({}, merged, { _updated: new Date().toISOString() }));
+                if (!ok) { updateSyncDot('error'); return; }
+                _gistLastSyncedAt = new Date();
+                updateSyncDot('synced');
+                if (changeCount > 0) {
+                    showToast(`Synced — ${changeCount} change${changeCount !== 1 ? 's' : ''} pulled`);
+                }
+                updateStatus();
+                if (state.films.length > 0) applyFilters();
+                // Refresh gist section in modal if open
+                const dm = document.getElementById('dataModal');
+                if (dm && dm.classList.contains('open')) _refreshGistModalStatus();
+            } catch { updateSyncDot('error'); }
+            finally { _gistSyncing = false; }
+        }
+
+        const _gistWriteTimer = { id: null };
+        function scheduleGistWrite() {
+            if (!GIST_CONFIG.pat || _gistSyncing) return;
+            updateSyncDot('pending');
+            clearTimeout(_gistWriteTimer.id);
+            _gistWriteTimer.id = setTimeout(async () => {
+                const ok = await gistWrite(buildGistPayload());
+                if (ok) { _gistLastSyncedAt = new Date(); updateSyncDot('synced'); }
+                else updateSyncDot('error');
+            }, 2000);
+        }
+
+        function _refreshGistModalStatus() {
+            const patInput   = document.getElementById('gistPatInput');
+            const idInput    = document.getElementById('gistIdInput');
+            const idRow      = document.getElementById('gistIdRow');
+            const disconnBtn = document.getElementById('gistDisconnect');
+            const statusEl   = document.getElementById('gistStatus');
+            if (!patInput) return;
+            patInput.value = GIST_CONFIG.pat ? '••••••••••••••••' : '';
+            idInput.value  = GIST_CONFIG.id  || '';
+            const configured = !!GIST_CONFIG.pat;
+            idRow.classList.toggle('hidden', !configured);
+            disconnBtn.classList.toggle('hidden', !configured);
+            if (configured) {
+                const ts = _gistLastSyncedAt ? _gistLastSyncedAt.toLocaleTimeString() : 'not yet this session';
+                const link = GIST_CONFIG.id
+                    ? ` · <a href="https://gist.github.com/${GIST_CONFIG.id}" target="_blank" rel="noopener" class="text-[#c9a84c] hover:underline">View Gist ↗</a>`
+                    : '';
+                statusEl.innerHTML = `✓ Configured — last synced: ${ts}${link}`;
+                statusEl.style.color = '#6b9';
+            } else {
+                statusEl.textContent = '';
+            }
+        }
+
+        // ════════════════════════════════════════════════
         //  YEARS
         // ════════════════════════════════════════════════
         const YEARS = ['1960s', '1970s', '1980s', ...Array.from({ length: 37 }, (_, i) => String(1990 + i))];
@@ -757,14 +1011,17 @@
 
         function saveFavorites() {
             try { localStorage.setItem('cv_favorites', JSON.stringify([...state.favorites])); } catch { /* quota exceeded */ }
+            scheduleGistWrite();
         }
 
         function saveWatchlist() {
             try { localStorage.setItem('cv_watchlist', JSON.stringify([...state.watchlist])); } catch { /* quota exceeded */ }
+            scheduleGistWrite();
         }
 
         function saveWatched() {
             try { localStorage.setItem('cv_watched', JSON.stringify(state.watched)); } catch { /* quota exceeded */ }
+            scheduleGistWrite();
         }
 
         function saveFilmStore() {
@@ -790,6 +1047,7 @@
         function saveRankOverrides() {
             try { localStorage.setItem('cv_rank_overrides', JSON.stringify(state.rankOverrides)); } catch { /* quota exceeded */ }
             scheduleCSVUpdate(state.year);
+            scheduleGistWrite();
         }
 
         function loadExtraYears() {
@@ -2678,6 +2936,8 @@
                 apiKeyStatus.textContent = CONFIG.apiKey ? '✓ Key saved in this browser' : 'No key set — posters will not load';
                 apiKeyStatus.style.color = CONFIG.apiKey ? '#6b9' : '#777';
             }
+            // Populate Gist section
+            _refreshGistModalStatus();
             modal.classList.add('open');
         }
         function closeDataModal() {
@@ -2723,6 +2983,54 @@
             const status = document.getElementById('apiKeyStatus');
             status.textContent = 'Key cleared';
             status.style.color = '#777';
+        });
+        document.getElementById('gistSave').addEventListener('click', async () => {
+            const patInput = document.getElementById('gistPatInput');
+            const statusEl = document.getElementById('gistStatus');
+            const rawVal = patInput.value.trim();
+            // If the field shows the masked placeholder, user didn't type a new PAT
+            if (!rawVal || rawVal === '••••••••••••••••') {
+                statusEl.textContent = 'Please paste your GitHub PAT first.';
+                statusEl.style.color = '#f87171';
+                return;
+            }
+            statusEl.textContent = 'Validating token…';
+            statusEl.style.color = '#777';
+            try {
+                const check = await fetch('https://api.github.com/user', {
+                    headers: { Authorization: `token ${rawVal}`, Accept: 'application/vnd.github+json' },
+                });
+                if (!check.ok) {
+                    statusEl.textContent = '✗ Invalid token — check scope and expiry.';
+                    statusEl.style.color = '#f87171';
+                    return;
+                }
+            } catch {
+                statusEl.textContent = '✗ Network error — could not reach GitHub.';
+                statusEl.style.color = '#f87171';
+                return;
+            }
+            saveGistConfig(rawVal, GIST_CONFIG.id || null);
+            patInput.value = '';
+            statusEl.textContent = 'Token saved — syncing now…';
+            statusEl.style.color = '#6b9';
+            await gistSync();
+            _refreshGistModalStatus();
+        });
+        document.getElementById('gistDisconnect').addEventListener('click', () => {
+            saveGistConfig('', '');
+            updateSyncDot('off');
+            _refreshGistModalStatus();
+            const statusEl = document.getElementById('gistStatus');
+            statusEl.textContent = 'Disconnected. Local data is unchanged.';
+            statusEl.style.color = '#777';
+        });
+        document.getElementById('gistSyncNow').addEventListener('click', async () => {
+            const statusEl = document.getElementById('gistStatus');
+            statusEl.textContent = 'Syncing…';
+            statusEl.style.color = '#777';
+            await gistSync();
+            _refreshGistModalStatus();
         });
         $('#addFilmBackdrop').addEventListener('click', closeAddFilmModal);
         $('#addFilmFetch').addEventListener('click', fetchFilmDataFromUrl);
@@ -2802,10 +3110,14 @@
         // ════════════════════════════════════════════════
         function init() {
             loadApiKey();
+            loadGistConfig();
             loadPersisted();
             loadCustomFilms();
             loadRankOverrides();
             loadExtraYears(); // merge any extra/custom years before building the dropdown
+
+            // Show sync dot immediately if Gist is configured
+            if (GIST_CONFIG.pat) updateSyncDot('pending');
 
             // Populate year selector
             populateYearSelect();
@@ -2821,6 +3133,7 @@
 
             tryRestoreDirHandle(); // async — restores folder access handle in background
             backgroundScanAllYears(); // async — silently loads user state from all year CSVs
+            gistSync(); // async — non-blocking on-load sync
         }
 
         // ════════════════════════════════════════════════
