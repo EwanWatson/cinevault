@@ -856,17 +856,18 @@
                 // Read user state from CSV columns (Favorite, Watchlist, Rating, RatingTimestamp, RankOverride)
                 state.films.forEach(f => {
                     const key = filmKey(f);
-                    if (f.Favorite === '1') state.favorites.add(key);
-                    if (f.Watchlist === '1') state.watchlist.add(key);
-                    if (f.Rating) {
-                        if (!state.watched[key]) {
-                            state.watched[key] = { rating: parseInt(f.Rating, 10), timestamp: f.RatingTimestamp || new Date().toISOString() };
-                        }
+                    const hasFav    = f.Favorite === '1';
+                    const hasWl     = f.Watchlist === '1';
+                    const hasRating = f.Rating && f.Rating.trim();
+                    if (hasFav) state.favorites.add(key);
+                    if (hasWl)  state.watchlist.add(key);
+                    if (hasRating && !state.watched[key]) {
+                        state.watched[key] = { rating: parseInt(f.Rating, 10), timestamp: f.RatingTimestamp || new Date().toISOString() };
                     }
                     const ro = (f.RankOverride || '').trim();
-                    if (ro && !state.rankOverrides[key]) {
-                        state.rankOverrides[key] = ro;
-                    }
+                    if (ro && !state.rankOverrides[key]) state.rankOverrides[key] = ro;
+                    // Populate filmStore so Collection has full metadata (director, genre etc)
+                    if (hasFav || hasWl || hasRating) addToStore(key, f);
                 });
                 state.genreFilter = null;
                 populateGenreSelect();
@@ -2010,13 +2011,18 @@
 
                 all.forEach(f => {
                     const key = filmKey(f);
-                    if (f.Favorite === '1') state.favorites.add(key);
-                    if (f.Watchlist === '1') state.watchlist.add(key);
-                    if (f.Rating && !state.watched[key]) {
+                    const hasFav    = f.Favorite === '1';
+                    const hasWl     = f.Watchlist === '1';
+                    const hasRating = f.Rating && f.Rating.trim();
+                    if (hasFav) state.favorites.add(key);
+                    if (hasWl)  state.watchlist.add(key);
+                    if (hasRating && !state.watched[key]) {
                         state.watched[key] = { rating: parseInt(f.Rating, 10), timestamp: f.RatingTimestamp || new Date().toISOString() };
                     }
                     const ro = (f.RankOverride || '').trim();
                     if (ro && !state.rankOverrides[key]) state.rankOverrides[key] = ro;
+                    // Populate filmStore so Collection has full metadata
+                    if (hasFav || hasWl || hasRating) addToStore(key, f);
                 });
 
                 state.films = all;
@@ -2800,6 +2806,55 @@
             else loadYear(startYear);
 
             tryRestoreDirHandle(); // async — restores folder access handle in background
+            backgroundScanAllYears(); // async — silently loads user state from all year CSVs
+        }
+
+        // ════════════════════════════════════════════════
+        //  BACKGROUND YEAR SCAN
+        //  Silently fetches all CSVs at startup to populate state.favorites / watchlist /
+        //  watched / filmStore for years the user hasn't explicitly visited yet.
+        //  This ensures Collection shows all data, not just the currently-loaded year.
+        // ════════════════════════════════════════════════
+        async function backgroundScanAllYears() {
+            try {
+                const results = await Promise.allSettled(
+                    YEARS.map(y => fetch(`films_${y}.csv`).then(r => r.ok ? r.text() : Promise.reject()))
+                );
+                let changed = false;
+                results.forEach(res => {
+                    if (res.status !== 'fulfilled') return;
+                    const parsed = Papa.parse(res.value, { header: true, skipEmptyLines: true });
+                    parsed.data.forEach(f => {
+                        if (!f.Title) return;
+                        const key     = filmKey(f);
+                        const hasFav  = f.Favorite === '1';
+                        const hasWl   = f.Watchlist === '1';
+                        const hasRat  = f.Rating && f.Rating.trim();
+                        if (!hasFav && !hasWl && !hasRat) return;
+                        if (hasFav && !state.favorites.has(key)) { state.favorites.add(key); changed = true; }
+                        if (hasWl  && !state.watchlist.has(key)) { state.watchlist.add(key); changed = true; }
+                        if (hasRat && !state.watched[key]) {
+                            state.watched[key] = { rating: parseInt(f.Rating, 10), timestamp: f.RatingTimestamp || new Date().toISOString() };
+                            changed = true;
+                        }
+                        // Always refresh filmStore metadata so director/genre are never 'Unknown'
+                        if (!state.filmStore[key] || !state.filmStore[key].director) {
+                            addToStore(key, f);
+                            changed = true;
+                        }
+                    });
+                });
+                if (changed) {
+                    saveFavorites();
+                    saveWatchlist();
+                    saveWatched();
+                    saveFilmStore();
+                    updateStatus();
+                    // Re-render collection if it's already open
+                    const collOverlay = document.getElementById('collectionOverlay');
+                    if (collOverlay && collOverlay.classList.contains('cv-open')) renderCollectionGrid();
+                }
+            } catch { /* silently ignore — background task */ }
         }
 
         init();
