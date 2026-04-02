@@ -1,4 +1,11 @@
 // CineVault Service Worker
+// Disable entirely on localhost so Live Server hot-reload keeps working
+if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
+  self.addEventListener('install', () => self.skipWaiting());
+  self.addEventListener('activate', () => self.clients.claim());
+  // No fetch handler — pass everything straight through
+} else {
+
 const CACHE_VERSION = 'v1';
 const SHELL_CACHE   = `cinevault-shell-${CACHE_VERSION}`;
 const DATA_CACHE    = `cinevault-data-${CACHE_VERSION}`;
@@ -113,3 +120,5 @@ function offlineResponse() {
     { status: 503, headers: { 'Content-Type': 'application/json' } }
   );
 }
+
+} // end localhost else block
