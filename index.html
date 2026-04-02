@@ -250,30 +250,6 @@
         }
         .rank-edit-input::-webkit-outer-spin-button,
         .rank-edit-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
-        /* ── Year range slider ── */
-        .year-range-wrap { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        .all-btn {
-            font-size: 11px; font-weight: 600; color: #6b7280;
-            border: 1px solid #2a2a2a; border-radius: 4px; padding: 3px 8px;
-            background: #151515; cursor: pointer; white-space: nowrap;
-            transition: color 0.15s ease, border-color 0.15s ease;
-        }
-        .all-btn:hover, .all-btn.yr-active { color: #c9a84c; border-color: rgba(201,168,76,0.4); }
-        .year-track {
-            position: relative; width: 160px; height: 4px; background: #252525;
-            border-radius: 2px; cursor: pointer; flex-shrink: 0;
-        }
-        .year-fill { position: absolute; height: 100%; background: #c9a84c; border-radius: 2px; pointer-events: none; }
-        .year-thumb {
-            position: absolute; top: 50%; width: 14px; height: 14px;
-            background: #c9a84c; border-radius: 50%; border: 2px solid #0c0c0c;
-            transform: translate(-50%, -50%); cursor: grab; outline: none;
-            transition: box-shadow 0.1s ease;
-        }
-        .year-thumb:hover { box-shadow: 0 0 0 4px rgba(201,168,76,0.25); }
-        .year-thumb:active { cursor: grabbing; }
-        .year-range-label { font-size: 12px; color: #c9a84c; min-width: 6em; text-align: center; white-space: nowrap; font-weight: 500; }
     </style>
 </head>
 <body class="text-gray-300 min-h-screen">
@@ -288,16 +264,8 @@
                 <span class="font-display text-lg text-white tracking-wide">CineVault</span>
             </a>
 
-            <!-- Year range selector -->
-            <div id="yearRangeWrap" class="year-range-wrap">
-                <button id="allFilmsBtn" class="all-btn" title="Show all years">All</button>
-                <div id="yearTrack" class="year-track">
-                    <div id="yearFill" class="year-fill"></div>
-                    <div id="thumbStart" class="year-thumb" tabindex="0"></div>
-                    <div id="thumbEnd" class="year-thumb" tabindex="0"></div>
-                </div>
-                <span id="yearRangeLabel" class="year-range-label">2026</span>
-            </div>
+            <!-- Year selector -->
+            <select id="yearSelect" class="bg-[#151515] border border-[#2a2a2a] rounded-md px-3 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-[#c9a84c] cursor-pointer shrink-0 min-w-[80px]"></select>
 
             <!-- Search -->
             <div class="relative flex-1 min-w-[180px] max-w-md">
@@ -609,13 +577,6 @@
         //  YEARS
         // ════════════════════════════════════════════════
         const YEARS = ['1960s', '1970s', '1980s', ...Array.from({ length: 37 }, (_, i) => String(1990 + i))];
-        let sliderStart = YEARS.length - 1;
-        let sliderEnd   = YEARS.length - 1;
-        let sliderDragging = null;
-        function isYearInRange(yearKey) {
-            const idx = YEARS.indexOf(yearKey);
-            return idx !== -1 && idx >= sliderStart && idx <= sliderEnd;
-        }
 
         // Maps a 4-digit year (string or number) to its CSV file key.
         // Pre-1990 years map to a decade string ("1980s", "1970s", etc.);
@@ -663,6 +624,7 @@
         //  DOM REFS
         // ════════════════════════════════════════════════
         const $ = (s) => document.querySelector(s);
+        const yearSelect = $('#yearSelect');
         const searchInput = $('#searchInput');
         const searchClear = $('#searchClear');
         const grid = $('#grid');
@@ -756,8 +718,7 @@
 
         function saveRankOverrides() {
             try { localStorage.setItem('cv_rank_overrides', JSON.stringify(state.rankOverrides)); } catch { /* quota exceeded */ }
-            const yrKeys = new Set(state.films.map(f => yearToFileKey(parseInt(f.Year, 10))));
-            yrKeys.forEach(y => scheduleCSVUpdate(y));
+            scheduleCSVUpdate(state.year);
         }
 
         function loadExtraYears() {
@@ -1367,7 +1328,7 @@
                 addToStore(key, film);
             }
             saveFavorites();
-            scheduleCSVUpdate(yearToFileKey(parseInt(film.Year, 10)));
+            scheduleCSVUpdate(state.year);
             refreshCard(film);
         }
 
@@ -1381,7 +1342,7 @@
                 addToStore(key, film);
             }
             saveWatchlist();
-            scheduleCSVUpdate(yearToFileKey(parseInt(film.Year, 10)));
+            scheduleCSVUpdate(state.year);
             refreshCard(film);
         }
 
@@ -1403,7 +1364,7 @@
             state.watched[key] = { rating, timestamp: new Date().toISOString() };
             addToStore(key, film);
             saveWatched();
-            scheduleCSVUpdate(yearToFileKey(parseInt(film.Year, 10)));
+            scheduleCSVUpdate(state.year);
         }
 
         function removeWatched(film) {
@@ -1411,7 +1372,7 @@
             delete state.watched[key];
             removeFromStore(key);
             saveWatched();
-            scheduleCSVUpdate(yearToFileKey(parseInt(film.Year, 10)));
+            scheduleCSVUpdate(state.year);
         }
 
         function removeFromStore(key) {
@@ -1782,8 +1743,8 @@
                     return parseInt(a) - parseInt(b);
                 });
                 saveExtraYears();
-                const newIdx = YEARS.indexOf(year);
-                if (newIdx !== -1) { sliderStart = newIdx; sliderEnd = newIdx; updateSliderUI(); }
+                populateYearSelect();
+                yearSelect.value = year;
             }
 
             if (!state.customFilms[year]) state.customFilms[year] = [];
@@ -1944,150 +1905,14 @@
         // ════════════════════════════════════════════════
         //  YEAR SELECT POPULATION
         // ════════════════════════════════════════════════
-        // ════════════════════════════════════════════════
-        //  YEAR SLIDER
-        // ════════════════════════════════════════════════
-        const DEC_MAP = { '1960s': '1960–69', '1970s': '1970–79', '1980s': '1980–89' };
-        const decLabel = k => DEC_MAP[k] || k;
-
-        function updateSliderUI() {
-            const track = $('#yearTrack');
-            if (!track) return;
-            const n = YEARS.length - 1;
-            const pS = n ? (sliderStart / n * 100) : 0;
-            const pE = n ? (sliderEnd   / n * 100) : 100;
-            $('#thumbStart').style.left  = pS.toFixed(2) + '%';
-            $('#thumbEnd').style.left    = pE.toFixed(2) + '%';
-            $('#yearFill').style.left    = pS.toFixed(2) + '%';
-            $('#yearFill').style.width   = (pE - pS).toFixed(2) + '%';
-            const allMode = sliderStart === 0 && sliderEnd === YEARS.length - 1;
-            $('#allFilmsBtn').classList.toggle('yr-active', allMode);
-            $('#yearRangeLabel').textContent = allMode
-                ? 'All Films'
-                : sliderStart === sliderEnd
-                    ? decLabel(YEARS[sliderStart])
-                    : decLabel(YEARS[sliderStart]) + ' – ' + decLabel(YEARS[sliderEnd]);
-            state.year = YEARS[sliderEnd];
-        }
-
-        function initSlider() {
-            const track = $('#yearTrack');
-            const tS = $('#thumbStart');
-            const tE = $('#thumbEnd');
-            function idxFromX(clientX) {
-                const r = track.getBoundingClientRect();
-                return Math.round(Math.max(0, Math.min(1, (clientX - r.left) / r.width)) * (YEARS.length - 1));
-            }
-            tS.addEventListener('mousedown',  e => { sliderDragging = 'start'; e.preventDefault(); });
-            tE.addEventListener('mousedown',  e => { sliderDragging = 'end';   e.preventDefault(); });
-            tS.addEventListener('touchstart', e => { sliderDragging = 'start'; e.preventDefault(); }, { passive: false });
-            tE.addEventListener('touchstart', e => { sliderDragging = 'end';   e.preventDefault(); }, { passive: false });
-            document.addEventListener('mousemove', e => {
-                if (!sliderDragging) return;
-                const i = idxFromX(e.clientX);
-                if (sliderDragging === 'start') sliderStart = Math.min(i, sliderEnd);
-                else sliderEnd = Math.max(i, sliderStart);
-                updateSliderUI();
+        function populateYearSelect() {
+            yearSelect.innerHTML = '';
+            YEARS.forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                yearSelect.appendChild(opt);
             });
-            document.addEventListener('mouseup', () => {
-                if (sliderDragging) { sliderDragging = null; commitSlider(); }
-            });
-            document.addEventListener('touchmove', e => {
-                if (!sliderDragging) return;
-                const i = idxFromX(e.touches[0].clientX);
-                if (sliderDragging === 'start') sliderStart = Math.min(i, sliderEnd);
-                else sliderEnd = Math.max(i, sliderStart);
-                updateSliderUI();
-            }, { passive: true });
-            document.addEventListener('touchend', () => {
-                if (sliderDragging) { sliderDragging = null; commitSlider(); }
-            });
-            track.addEventListener('click', e => {
-                if (sliderDragging) return;
-                const i = idxFromX(e.clientX);
-                Math.abs(i - sliderStart) <= Math.abs(i - sliderEnd)
-                    ? (sliderStart = Math.min(i, sliderEnd))
-                    : (sliderEnd   = Math.max(i, sliderStart));
-                updateSliderUI();
-                commitSlider();
-            });
-            $('#allFilmsBtn').addEventListener('click', () => {
-                sliderStart = 0; sliderEnd = YEARS.length - 1;
-                updateSliderUI(); commitSlider();
-            });
-        }
-
-        function commitSlider() {
-            try { localStorage.setItem('cv_slider', JSON.stringify({ start: sliderStart, end: sliderEnd })); } catch {}
-            loadRange(sliderStart, sliderEnd);
-        }
-
-        // ════════════════════════════════════════════════
-        //  RANGE LOADING
-        // ════════════════════════════════════════════════
-        async function loadRange(startIdx, endIdx) {
-            // Single year: delegate to loadYear which has full custom-film / error handling
-            if (startIdx === endIdx) return loadYear(YEARS[startIdx]);
-
-            state.year = YEARS[endIdx];
-            state.loadId++;
-            const loadId = state.loadId;
-            const keys = YEARS.slice(startIdx, endIdx + 1);
-
-            grid.classList.remove('hidden');
-            grid.innerHTML = '';
-            emptyState.classList.add('hidden');
-            errorState.classList.add('hidden');
-            showSkeletons();
-            statusText.textContent = 'Loading…';
-            yearLabel.textContent = decLabel(YEARS[startIdx]) + ' – ' + decLabel(YEARS[endIdx]);
-
-            try {
-                const fetches = await Promise.allSettled(
-                    keys.map(y => fetch(`films_${y}.csv`).then(r => r.ok ? r.text() : Promise.reject(new Error(y))))
-                );
-                if (loadId !== state.loadId) return;
-
-                let all = [];
-                fetches.forEach((res, i) => {
-                    if (res.status !== 'fulfilled') return;
-                    const yk = keys[i];
-                    const parsed = Papa.parse(res.value, { header: true, skipEmptyLines: true });
-                    const films = parsed.data.filter(r => r.Title && r.Title.trim());
-                    const seen = new Set(films.map(f => f.Title.toLowerCase().trim()));
-                    const custom = (state.customFilms[yk] || []).filter(f => {
-                        const k = f.Title.toLowerCase().trim();
-                        if (seen.has(k)) return false;
-                        seen.add(k); return true;
-                    });
-                    all = [...all, ...films, ...custom];
-                });
-
-                all.forEach(f => {
-                    const key = filmKey(f);
-                    if (f.Favorite === '1') state.favorites.add(key);
-                    if (f.Watchlist === '1') state.watchlist.add(key);
-                    if (f.Rating && !state.watched[key]) {
-                        state.watched[key] = { rating: parseInt(f.Rating, 10), timestamp: f.RatingTimestamp || new Date().toISOString() };
-                    }
-                    const ro = (f.RankOverride || '').trim();
-                    if (ro && !state.rankOverrides[key]) state.rankOverrides[key] = ro;
-                });
-
-                state.films = all;
-                state.genreFilter = null;
-                populateGenreSelect();
-                hideSkeletons();
-                applyFilters();
-                fetchPosters(loadId);
-            } catch (err) {
-                if (loadId !== state.loadId) return;
-                hideSkeletons();
-                errorState.classList.remove('hidden');
-                $('#errorDetail').textContent = `Could not load range: ${err.message}`;
-                state.films = [];
-                statusText.textContent = 'Error';
-            }
         }
 
         // ════════════════════════════════════════════════
@@ -2178,7 +2003,7 @@
 
         async function updateYearCSV(year) {
             if (!state.dirHandle) return;
-            if (!isYearInRange(year)) return;
+            if (state.year !== year) return;
             try {
                 const headers = ['Rank', 'Title', 'Year', 'Director', 'Primary_Genre', 'Synopsis', 'Major_Awards', 'Key_Sources', 'Favorite', 'Watchlist', 'Rating', 'RatingTimestamp', 'RankOverride'];
                 const csvRow = (film) => {
@@ -2194,8 +2019,7 @@
                     };
                     return headers.map(h => csvEscape(row[h] != null ? String(row[h]) : '')).join(',');
                 };
-                const filmsForYear = state.films.filter(f => yearToFileKey(parseInt(f.Year, 10)) === year);
-                const lines = [headers.join(','), ...filmsForYear.map(csvRow)].join('\r\n');
+                const lines = [headers.join(','), ...state.films.map(csvRow)].join('\r\n');
                 const fileHandle = await state.dirHandle.getFileHandle(`films_${year}.csv`, { create: false });
                 const writable = await fileHandle.createWritable();
                 await writable.write(lines + '\r\n');
@@ -2423,8 +2247,10 @@
         //  EVENT LISTENERS
         // ════════════════════════════════════════════════
 
-        // Initialise year slider (attaches all drag/click/touch events)
-        initSlider();
+        // Year selector
+        yearSelect.addEventListener('change', (e) => {
+            loadYear(e.target.value);
+        });
 
         // Search input (debounced)
         let searchTimer;
@@ -2676,20 +2502,16 @@
             loadRankOverrides();
             loadExtraYears(); // merge any extra/custom years before building the dropdown
 
-            // Restore slider position from localStorage, falling back to cv_year or default
+            // Populate year selector
+            populateYearSelect();
+
+            let startYear = CONFIG.defaultYear;
             try {
-                const saved = JSON.parse(localStorage.getItem('cv_slider') || 'null');
-                if (saved && typeof saved.start === 'number' && typeof saved.end === 'number') {
-                    sliderStart = Math.max(0, Math.min(saved.start, YEARS.length - 1));
-                    sliderEnd   = Math.max(0, Math.min(saved.end,   YEARS.length - 1));
-                } else {
-                    const s = localStorage.getItem('cv_year');
-                    const idx = (s && YEARS.includes(s)) ? YEARS.indexOf(s) : YEARS.indexOf(CONFIG.defaultYear);
-                    sliderStart = sliderEnd = Math.max(0, idx);
-                }
+                const s = localStorage.getItem('cv_year');
+                if (s && YEARS.includes(s)) startYear = s;
             } catch {}
-            updateSliderUI();
-            loadRange(sliderStart, sliderEnd);
+            yearSelect.value = startYear;
+            loadYear(startYear);
 
             tryRestoreDirHandle(); // async — restores folder access handle in background
         }
