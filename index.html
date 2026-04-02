@@ -1096,7 +1096,7 @@
             const decadeMap = { '1960s': '1960 – 1969', '1970s': '1970 – 1979', '1980s': '1980 – 1989' };
             yearLabel.textContent = decadeMap[year] || year;
 
-            const fileName = `films_${year}.csv`;
+            const fileName = `data/films_${year}.csv`;
             try {
                 const resp = await fetch(fileName);
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -2205,7 +2205,7 @@
                 const csvHeaders = ['Rank','Title','Year','Director','Primary_Genre','Synopsis','Major_Awards','Key_Sources','Favorite','Watchlist','Rating','RatingTimestamp','RankOverride'];
                 for (const [fk, keys] of Object.entries(byFileKey)) {
                     try {
-                        const fh = await state.dirHandle.getFileHandle(`films_${fk}.csv`, { create: false });
+                        const fh = await (await getDataDirHandle()).getFileHandle(`films_${fk}.csv`, { create: false });
                         const f = await fh.getFile();
                         const parsed = Papa.parse(await f.text(), { header: true, skipEmptyLines: true });
                         const rows = parsed.data.map(row => {
@@ -2267,7 +2267,7 @@
 
             try {
                 const results = await Promise.allSettled(
-                    YEARS.map(y => fetch(`films_${y}.csv`).then(r => r.ok ? r.text() : Promise.reject()))
+                    YEARS.map(y => fetch(`data/films_${y}.csv`).then(r => r.ok ? r.text() : Promise.reject()))
                 );
                 if (loadId !== state.loadId) return;
 
@@ -2377,6 +2377,10 @@
                 : 'Grant folder access to save films to CSV';
         }
 
+        async function getDataDirHandle() {
+            return state.dirHandle.getDirectoryHandle('data', { create: true });
+        }
+
         async function tryRestoreDirHandle() {
             try {
                 const handle = await loadDirHandle();
@@ -2393,7 +2397,7 @@
             if (!state.dirHandle) return false;
             try {
                 const fileName = `films_${year}.csv`;
-                const fileHandle = await state.dirHandle.getFileHandle(fileName, { create: true });
+                const fileHandle = await (await getDataDirHandle()).getFileHandle(fileName, { create: true });
                 const file = await fileHandle.getFile();
                 const existing = await file.text();
                 const headers = ['Rank', 'Title', 'Year', 'Director', 'Primary_Genre', 'Synopsis', 'Major_Awards', 'Key_Sources', 'Favorite', 'Watchlist', 'Rating', 'RatingTimestamp', 'RankOverride'];
@@ -2440,7 +2444,7 @@
                     return headers.map(h => csvEscape(row[h] != null ? String(row[h]) : '')).join(',');
                 };
                 const lines = [headers.join(','), ...state.films.map(csvRow)].join('\r\n');
-                const fileHandle = await state.dirHandle.getFileHandle(`films_${year}.csv`, { create: false });
+                const fileHandle = await (await getDataDirHandle()).getFileHandle(`films_${year}.csv`, { create: false });
                 const writable = await fileHandle.createWritable();
                 await writable.write(lines + '\r\n');
                 await writable.close();
@@ -2580,7 +2584,7 @@
             if (yearFilter) {
                 try {
                     const result = await new Promise((res, rej) =>
-                        Papa.parse('films_' + yearFilter + '.csv', {
+                        Papa.parse('data/films_' + yearFilter + '.csv', {
                             download: true, header: true, skipEmptyLines: true,
                             complete: res, error: rej
                         })
@@ -2590,7 +2594,7 @@
             } else {
                 const results = await Promise.allSettled(
                     YEARS.map(y => new Promise((res, rej) =>
-                        Papa.parse('films_' + y + '.csv', {
+                        Papa.parse('data/films_' + y + '.csv', {
                             download: true, header: true, skipEmptyLines: true,
                             complete: res, error: rej
                         })
@@ -3151,7 +3155,7 @@
         async function backgroundScanAllYears() {
             try {
                 const results = await Promise.allSettled(
-                    YEARS.map(y => fetch(`films_${y}.csv`).then(r => r.ok ? r.text() : Promise.reject()))
+                    YEARS.map(y => fetch(`data/films_${y}.csv`).then(r => r.ok ? r.text() : Promise.reject()))
                 );
                 let changed = false;
                 results.forEach(res => {

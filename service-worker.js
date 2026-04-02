@@ -70,7 +70,7 @@ self.addEventListener('fetch', event => {
   }
 
   // Local CSV data files — network-first so pushed updates are always picked up
-  if (url.pathname.match(/\/films_[\w]+\.csv$/)) {
+  if (url.pathname.match(/\/data\/films_[\w]+\.csv$/)) {
     event.respondWith(networkFirst(request, DATA_CACHE));
     return;
   }
