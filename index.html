@@ -1902,11 +1902,77 @@
             }
         }
 
+        async function loadAllYears() {
+            state.year = 'all';
+            try { localStorage.setItem('cv_year', 'all'); } catch {}
+            state.loadId++;
+            const loadId = state.loadId;
+
+            grid.classList.remove('hidden');
+            grid.innerHTML = '';
+            emptyState.classList.add('hidden');
+            errorState.classList.add('hidden');
+            showSkeletons();
+            statusText.textContent = 'Loading…';
+            yearLabel.textContent = 'All Films';
+
+            try {
+                const results = await Promise.allSettled(
+                    YEARS.map(y => fetch(`films_${y}.csv`).then(r => r.ok ? r.text() : Promise.reject()))
+                );
+                if (loadId !== state.loadId) return;
+
+                let all = [];
+                results.forEach((res, i) => {
+                    if (res.status !== 'fulfilled') return;
+                    const yk = YEARS[i];
+                    const parsed = Papa.parse(res.value, { header: true, skipEmptyLines: true });
+                    const films = parsed.data.filter(r => r.Title && r.Title.trim());
+                    const seen = new Set(films.map(f => f.Title.toLowerCase().trim()));
+                    const custom = (state.customFilms[yk] || []).filter(f => {
+                        const k = f.Title.toLowerCase().trim();
+                        if (seen.has(k)) return false;
+                        seen.add(k); return true;
+                    });
+                    all = [...all, ...films, ...custom];
+                });
+
+                all.forEach(f => {
+                    const key = filmKey(f);
+                    if (f.Favorite === '1') state.favorites.add(key);
+                    if (f.Watchlist === '1') state.watchlist.add(key);
+                    if (f.Rating && !state.watched[key]) {
+                        state.watched[key] = { rating: parseInt(f.Rating, 10), timestamp: f.RatingTimestamp || new Date().toISOString() };
+                    }
+                    const ro = (f.RankOverride || '').trim();
+                    if (ro && !state.rankOverrides[key]) state.rankOverrides[key] = ro;
+                });
+
+                state.films = all;
+                state.genreFilter = null;
+                populateGenreSelect();
+                hideSkeletons();
+                applyFilters();
+                fetchPosters(loadId);
+            } catch (err) {
+                if (loadId !== state.loadId) return;
+                hideSkeletons();
+                errorState.classList.remove('hidden');
+                document.getElementById('errorDetail').textContent = 'Could not load all films: ' + err.message;
+                state.films = [];
+                statusText.textContent = 'Error';
+            }
+        }
+
         // ════════════════════════════════════════════════
         //  YEAR SELECT POPULATION
         // ════════════════════════════════════════════════
         function populateYearSelect() {
             yearSelect.innerHTML = '';
+            const allOpt = document.createElement('option');
+            allOpt.value = 'all';
+            allOpt.textContent = 'All Films';
+            yearSelect.appendChild(allOpt);
             YEARS.forEach(y => {
                 const opt = document.createElement('option');
                 opt.value = y;
@@ -2249,7 +2315,8 @@
 
         // Year selector
         yearSelect.addEventListener('change', (e) => {
-            loadYear(e.target.value);
+            if (e.target.value === 'all') loadAllYears();
+            else loadYear(e.target.value);
         });
 
         // Search input (debounced)
@@ -2508,10 +2575,11 @@
             let startYear = CONFIG.defaultYear;
             try {
                 const s = localStorage.getItem('cv_year');
-                if (s && YEARS.includes(s)) startYear = s;
+                if (s && (s === 'all' || YEARS.includes(s))) startYear = s;
             } catch {}
             yearSelect.value = startYear;
-            loadYear(startYear);
+            if (startYear === 'all') loadAllYears();
+            else loadYear(startYear);
 
             tryRestoreDirHandle(); // async — restores folder access handle in background
         }
