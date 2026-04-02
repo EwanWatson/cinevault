@@ -822,6 +822,8 @@
             if (!GIST_CONFIG.pat || _gistSyncing) return;
             _gistSyncing = true;
             updateSyncDot('pending');
+            // Snapshot the current load generation so we never clobber an in-progress year load
+            const syncLoadId = state.loadId;
             try {
                 const remote = await gistRead();
                 const local  = buildGistPayload();
@@ -852,9 +854,13 @@
                 updateSyncDot('synced');
                 if (changeCount > 0) {
                     showToast(`Synced — ${changeCount} change${changeCount !== 1 ? 's' : ''} pulled`);
+                    // Only re-render if the grid still belongs to the same load session
+                    // (guards against racing with loadYear / loadAllYears)
+                    if (state.loadId === syncLoadId && state.films.length > 0) {
+                        updateStatus();
+                        applyFilters();
+                    }
                 }
-                updateStatus();
-                if (state.films.length > 0) applyFilters();
                 // Refresh gist section in modal if open
                 const dm = document.getElementById('dataModal');
                 if (dm && dm.classList.contains('open')) _refreshGistModalStatus();
