@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="#0c0c0c"/>
+
+  <!-- Film strip bar — top -->
+  <rect x="0" y="0" width="512" height="88" rx="0" fill="#141414"/>
+  <rect x="0" y="0" width="512" height="6" rx="0" fill="#1e1e1e"/>
+  <rect x="0" y="82" width="512" height="6" rx="0" fill="#1e1e1e"/>
+
+  <!-- Film strip bar — bottom -->
+  <rect x="0" y="424" width="512" height="88" rx="0" fill="#141414"/>
+  <rect x="0" y="424" width="512" height="6" rx="0" fill="#1e1e1e"/>
+  <rect x="0" y="506" width="512" height="6" rx="0" fill="#1e1e1e"/>
+
+  <!-- Sprocket holes — top row -->
+  <rect x="30"  y="18" width="48" height="52" rx="7" fill="#0c0c0c"/>
+  <rect x="116" y="18" width="48" height="52" rx="7" fill="#0c0c0c"/>
+  <rect x="202" y="18" width="48" height="52" rx="7" fill="#0c0c0c"/>
+  <rect x="288" y="18" width="48" height="52" rx="7" fill="#0c0c0c"/>
+  <rect x="374" y="18" width="48" height="52" rx="7" fill="#0c0c0c"/>
+  <rect x="434" y="18" width="48" height="52" rx="7" fill="#0c0c0c"/>
+
+  <!-- Sprocket holes — bottom row -->
+  <rect x="30"  y="442" width="48" height="52" rx="7" fill="#0c0c0c"/>
+  <rect x="116" y="442" width="48" height="52" rx="7" fill="#0c0c0c"/>
+  <rect x="202" y="442" width="48" height="52" rx="7" fill="#0c0c0c"/>
+  <rect x="288" y="442" width="48" height="52" rx="7" fill="#0c0c0c"/>
+  <rect x="374" y="442" width="48" height="52" rx="7" fill="#0c0c0c"/>
+  <rect x="434" y="442" width="48" height="52" rx="7" fill="#0c0c0c"/>
+
+  <!-- Gold "CV" lettermark -->
+  <text x="256" y="330"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="210"
+        font-weight="bold"
+        fill="#d4af37"
+        text-anchor="middle"
+        letter-spacing="-8">CV</text>
+</svg>

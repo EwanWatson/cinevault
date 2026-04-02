@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CineVault — Personal Cinema Collection</title>
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#080808">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CineVault">
+    <link rel="apple-touch-icon" href="icon.svg">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -490,6 +498,24 @@
                         </div>
                     </div>
                 </div>
+                <!-- TMDB API Key -->
+                <div class="bg-[#0d0d0d] border border-[#1e1e1e] rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="mt-0.5 shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6"/><path d="M15.5 7.5l3 3L22 7l-3-3"/></svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-200 font-medium mb-1">TMDB API Key</p>
+                            <p class="text-[11px] text-gray-500 mb-3">Stored only in your browser — never in the source code. Get a free key at <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener" class="text-[#c9a84c] hover:underline">themoviedb.org</a>.</p>
+                            <div class="flex gap-2">
+                                <input id="apiKeyInput" type="password" autocomplete="off" spellcheck="false"
+                                    class="flex-1 bg-[#111] border border-[#2a2a2a] rounded-md px-3 py-1.5 text-xs text-gray-200 font-mono focus:outline-none focus:border-[#c9a84c]/50 placeholder-gray-600"
+                                    placeholder="Paste your v3 API key…">
+                                <button id="apiKeySave" class="px-3 py-1.5 rounded-md bg-[#c9a84c]/10 border border-[#c9a84c]/30 text-[#c9a84c] text-xs font-medium hover:bg-[#c9a84c]/20 transition-colors whitespace-nowrap">Save</button>
+                                <button id="apiKeyClear" class="px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-gray-500 text-xs font-medium hover:text-red-400 hover:border-red-500/30 transition-colors whitespace-nowrap">Clear</button>
+                            </div>
+                            <p id="apiKeyStatus" class="text-[11px] mt-2 text-gray-600"></p>
+                        </div>
+                    </div>
+                </div>
                 <!-- Migrate user_data.json (shown when folder connected) -->
                 <div id="dataMigrateSection" class="hidden bg-[#0d0d0d] border border-[#1e1e1e] rounded-lg p-4">
                     <div class="flex items-start gap-3">
@@ -594,11 +620,29 @@
         //  https://www.themoviedb.org/settings/api
         // ════════════════════════════════════════════════
         const CONFIG = {
-            apiKey: 'TMDB_KEY_REMOVED',   // TMDB v3 API key
+            apiKey: '',                              // set via Data Management → TMDB API Key
             posterSize: 'w342',        // w185, w342, w500
             posterSizeLg: 'w500',      // for modal
             defaultYear: '2024',
         };
+
+        // ════════════════════════════════════════════════
+        //  API KEY  (stored in localStorage, never in source)
+        // ════════════════════════════════════════════════
+        function loadApiKey() {
+            try {
+                const saved = localStorage.getItem('cv_tmdb_key');
+                if (saved) CONFIG.apiKey = saved;
+            } catch {}
+        }
+        function saveApiKey(key) {
+            const clean = (key || '').trim();
+            try {
+                if (clean) localStorage.setItem('cv_tmdb_key', clean);
+                else localStorage.removeItem('cv_tmdb_key');
+            } catch {}
+            CONFIG.apiKey = clean;
+        }
 
         // ════════════════════════════════════════════════
         //  YEARS
@@ -2606,6 +2650,14 @@
             } else {
                 migrateSection.classList.add('hidden');
             }
+            // Populate API key input
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const apiKeyStatus = document.getElementById('apiKeyStatus');
+            if (apiKeyInput) {
+                apiKeyInput.value = CONFIG.apiKey || '';
+                apiKeyStatus.textContent = CONFIG.apiKey ? '✓ Key saved in this browser' : 'No key set — posters will not load';
+                apiKeyStatus.style.color = CONFIG.apiKey ? '#6b9' : '#777';
+            }
             modal.classList.add('open');
         }
         function closeDataModal() {
@@ -2629,6 +2681,22 @@
         document.getElementById('dataModalFolderBtn').addEventListener('click', connectFolder);
         document.getElementById('dataModalDownloadCsv').addEventListener('click', downloadYearCsv);
         document.getElementById('dataMigrateBtn').addEventListener('click', migrateUserDataJson);
+        document.getElementById('apiKeySave').addEventListener('click', () => {
+            const input = document.getElementById('apiKeyInput');
+            const status = document.getElementById('apiKeyStatus');
+            const val = input.value.trim();
+            if (!val) { status.textContent = 'Please paste a key first.'; status.style.color = '#f87171'; return; }
+            saveApiKey(val);
+            status.textContent = '✓ Key saved — reload posters to apply';
+            status.style.color = '#6b9';
+        });
+        document.getElementById('apiKeyClear').addEventListener('click', () => {
+            saveApiKey('');
+            document.getElementById('apiKeyInput').value = '';
+            const status = document.getElementById('apiKeyStatus');
+            status.textContent = 'Key cleared';
+            status.style.color = '#777';
+        });
         $('#addFilmBackdrop').addEventListener('click', closeAddFilmModal);
         $('#addFilmFetch').addEventListener('click', fetchFilmDataFromUrl);
         $('#addFilmUrl').addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchFilmDataFromUrl(); });
@@ -2706,6 +2774,7 @@
         //  INIT
         // ════════════════════════════════════════════════
         function init() {
+            loadApiKey();
             loadPersisted();
             loadCustomFilms();
             loadRankOverrides();
@@ -2728,6 +2797,16 @@
 
         init();
     })();
+    </script>
+
+    <!-- Service Worker registration -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./service-worker.js')
+                .catch(err => console.warn('SW registration failed:', err));
+        });
+    }
     </script>
 </body>
 </html>
