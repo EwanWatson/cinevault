@@ -1066,7 +1066,7 @@
             const watchedData = state.watched[key] || null;
 
             return `
-            <div class="film-card bg-[#111] rounded-lg overflow-hidden border border-[#1a1a1a] cursor-default" data-idx="${idx}">
+            <div class="film-card bg-[#111] rounded-lg overflow-hidden border border-[#1a1a1a] cursor-default" data-idx="${idx}" data-key="${key}">
                 <!-- Poster area -->
                 <div class="card-poster">
                     ${posterUrl && posterUrl !== 'null'
@@ -1181,8 +1181,19 @@
             savePosterCache();
         }
 
+        // Fetch posters for collection films not yet in cache.
+        // Uses loadId=0 which is never cancelled by year changes.
+        function fetchCollectionPosters(films) {
+            if (!CONFIG.apiKey) return;
+            const toFetch = films.filter(f => !(filmKey(f) in state.posterCache));
+            if (toFetch.length === 0) return;
+            posterQueue.push(...toFetch.map(f => ({ film: f, loadId: 0 })));
+            if (!posterProcessing) processPosterQueue();
+        }
+
         async function fetchOnePoster({ film, loadId }) {
-            if (loadId !== state.loadId) return;
+            // loadId===0 means a collection fetch — never cancel it on year change
+            if (loadId !== 0 && loadId !== state.loadId) return;
             const key = filmKey(film);
             if (key in state.posterCache) return;
 
@@ -1209,36 +1220,24 @@
                 state.posterCache[key] = null;
             }
 
-            if (loadId !== state.loadId) return;
+            if (loadId !== 0 && loadId !== state.loadId) return;
             updateCardPoster(key);
         }
 
-        function updateCardPoster(key) {
-            const idx = state.films.findIndex(f => filmKey(f) === key);
-            if (idx === -1) return;
-
-            const card = grid.querySelector(`[data-idx="${idx}"]`);
-            if (!card) return;
-
+        function _applyPosterToCard(card, url, title) {
             const posterArea = card.querySelector('.card-poster');
             if (!posterArea) return;
-
-            const skeleton = posterArea.querySelector('.poster-skeleton');
+            const skeleton    = posterArea.querySelector('.poster-skeleton');
             const placeholder = posterArea.querySelector('.poster-placeholder');
             const existingImg = posterArea.querySelector('.poster-img');
-
-            const url = state.posterCache[key];
             if (url && url !== 'null') {
                 if (skeleton) skeleton.remove();
                 if (!existingImg) {
                     const img = document.createElement('img');
                     img.className = 'poster-img';
-                    img.alt = state.films[idx].Title;
+                    img.alt = title || '';
                     img.loading = 'eager';
-                    img.onerror = () => {
-                        img.remove();
-                        if (placeholder) placeholder.classList.remove('hidden');
-                    };
+                    img.onerror = () => { img.remove(); if (placeholder) placeholder.classList.remove('hidden'); };
                     img.src = url;
                     posterArea.insertBefore(img, posterArea.firstChild);
                     if (placeholder) placeholder.classList.add('hidden');
@@ -1246,6 +1245,20 @@
             } else {
                 if (skeleton) skeleton.remove();
                 if (placeholder) placeholder.classList.remove('hidden');
+            }
+        }
+
+        function updateCardPoster(key) {
+            const url   = state.posterCache[key];
+            const title = key.split('|||')[0];
+            // Update in main year grid
+            const mainCard = [...grid.querySelectorAll('[data-key]')].find(c => c.dataset.key === key);
+            if (mainCard) _applyPosterToCard(mainCard, url, title);
+            // Update in collection grid
+            const collGrid = document.getElementById('collectionGrid');
+            if (collGrid) {
+                const collCard = [...collGrid.querySelectorAll('[data-key]')].find(c => c.dataset.key === key);
+                if (collCard) _applyPosterToCard(collCard, url, title);
             }
         }
 
@@ -2454,6 +2467,7 @@
             }
 
             collGrid.innerHTML = films.map((film, i) => createCardHTML(film, i)).join('');
+            fetchCollectionPosters(films);
         }
 
         // ════════════════════════════════════════════════
