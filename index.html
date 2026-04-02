@@ -2687,8 +2687,15 @@
             const val = input.value.trim();
             if (!val) { status.textContent = 'Please paste a key first.'; status.style.color = '#f87171'; return; }
             saveApiKey(val);
-            status.textContent = '✓ Key saved — reload posters to apply';
+            status.textContent = '✓ Key saved — fetching posters…';
             status.style.color = '#6b9';
+            closeDataModal();
+            // Clear null entries so fetchPosters retries them
+            Object.keys(state.posterCache).forEach(k => {
+                if (state.posterCache[k] === null) delete state.posterCache[k];
+            });
+            const loadId = ++state.loadId;
+            fetchPosters(loadId);
         });
         document.getElementById('apiKeyClear').addEventListener('click', () => {
             saveApiKey('');
