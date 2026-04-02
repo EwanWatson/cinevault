@@ -6,7 +6,7 @@ if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.
   // No fetch handler — pass everything straight through
 } else {
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const SHELL_CACHE   = `cinevault-shell-${CACHE_VERSION}`;
 const DATA_CACHE    = `cinevault-data-${CACHE_VERSION}`;
 const IMG_CACHE     = `cinevault-images-${CACHE_VERSION}`;
@@ -69,9 +69,9 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Local CSV data files — cache-first (static data files)
+  // Local CSV data files — network-first so pushed updates are always picked up
   if (url.pathname.match(/\/films_[\w]+\.csv$/)) {
-    event.respondWith(cacheFirst(request, DATA_CACHE));
+    event.respondWith(networkFirst(request, DATA_CACHE));
     return;
   }
 
