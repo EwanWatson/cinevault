@@ -250,6 +250,10 @@
         }
         .rank-edit-input::-webkit-outer-spin-button,
         .rank-edit-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* ── Stats bars ── */
+        .stat-bar-bg { background: #1a1a1a; border-radius: 4px; height: 6px; flex: 1; overflow: hidden; }
+        .stat-bar-fill { height: 100%; background: #c9a84c; border-radius: 4px; transition: width 0.45s ease; }
     </style>
 </head>
 <body class="text-gray-300 min-h-screen">
@@ -319,6 +323,12 @@
             <button id="collectionBtn" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#2a2a2a] text-xs text-gray-400 hover:text-[#c9a84c] hover:border-[#c9a84c]/50 transition-colors" title="View your complete collection">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M15 3H5a2 2 0 0 0-2 2v14l4-2.5" stroke-width="1.5"/></svg>
                 Collection
+            </button>
+
+            <!-- Stats -->
+            <button id="statsBtn" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#2a2a2a] text-xs text-gray-400 hover:text-[#c9a84c] hover:border-[#c9a84c]/50 transition-colors" title="View rating stats by genre and director">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="13" width="4" height="8" rx="1"/><rect x="9" y="8" width="4" height="13" rx="1"/><rect x="16" y="3" width="4" height="18" rx="1"/></svg>
+                Stats
             </button>
 
             <!-- Add Film -->
@@ -553,6 +563,23 @@
             <div class="max-w-[1600px] mx-auto px-4 pt-5 pb-16">
                 <div id="collectionGrid" class="film-grid"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ STATS OVERLAY ═══════════════════ -->
+    <div id="statsOverlay" class="fixed inset-0 z-[55] bg-[#080808] hidden" role="dialog" aria-modal="true" aria-label="Stats" style="overflow-y:auto">
+        <div class="sticky top-0 z-10 bg-[#0c0c0c]/95 backdrop-blur-md border-b border-[#1a1a1a]">
+            <div class="max-w-[860px] mx-auto px-4 py-3 flex items-center gap-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round"><rect x="2" y="13" width="4" height="8" rx="1"/><rect x="9" y="8" width="4" height="13" rx="1"/><rect x="16" y="3" width="4" height="18" rx="1"/></svg>
+                <h2 class="font-display text-base text-white">Stats</h2>
+                <select id="statsYearSelect" class="ml-2 bg-[#151515] border border-[#2a2a2a] rounded-md px-3 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-[#c9a84c] cursor-pointer shrink-0"></select>
+                <button id="statsCloseBtn" class="ml-auto text-gray-500 hover:text-white transition-colors" aria-label="Close stats">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+        </div>
+        <div id="statsContent" class="max-w-[860px] mx-auto px-4 pt-6 pb-16">
+            <p class="text-gray-600 text-sm">Loading…</p>
         </div>
     </div>
 
@@ -2193,6 +2220,116 @@
             document.body.style.overflow = '';
         }
 
+        // ── Stats ─────────────────────────────────────────────────────────────
+
+        async function openStatsView() {
+            const overlay = document.getElementById('statsOverlay');
+            overlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            const sel = document.getElementById('statsYearSelect');
+            if (sel.options.length === 0) {
+                const allOpt = document.createElement('option');
+                allOpt.value = ''; allOpt.textContent = 'All Years';
+                sel.appendChild(allOpt);
+                YEARS.forEach(y => {
+                    const o = document.createElement('option');
+                    o.value = y; o.textContent = y;
+                    sel.appendChild(o);
+                });
+            }
+            await renderStats(sel.value);
+        }
+
+        function closeStatsView() {
+            document.getElementById('statsOverlay').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        async function renderStats(yearFilter) {
+            const content = document.getElementById('statsContent');
+            content.innerHTML = '<p class="text-gray-600 text-sm py-8 text-center">Loading…</p>';
+
+            let allFilms = [];
+            if (yearFilter) {
+                try {
+                    const result = await new Promise((res, rej) =>
+                        Papa.parse('films_' + yearFilter + '.csv', {
+                            download: true, header: true, skipEmptyLines: true,
+                            complete: res, error: rej
+                        })
+                    );
+                    allFilms = result.data.filter(r => r.Title && r.Title.trim());
+                } catch (e) { allFilms = []; }
+            } else {
+                const results = await Promise.allSettled(
+                    YEARS.map(y => new Promise((res, rej) =>
+                        Papa.parse('films_' + y + '.csv', {
+                            download: true, header: true, skipEmptyLines: true,
+                            complete: res, error: rej
+                        })
+                    ))
+                );
+                allFilms = results
+                    .filter(r => r.status === 'fulfilled')
+                    .flatMap(r => r.value.data.filter(f => f.Title && f.Title.trim()));
+            }
+
+            const genreStats = {};
+            const directorStats = {};
+
+            for (const film of allFilms) {
+                const key = filmKey(film);
+                const w = state.watched[key];
+                if (!w || !w.rating) continue;
+                const rating = w.rating;
+                (film.Primary_Genre || '').split('/').forEach(g => {
+                    g = g.trim();
+                    if (!g) return;
+                    if (!genreStats[g]) genreStats[g] = { sum: 0, count: 0 };
+                    genreStats[g].sum += rating;
+                    genreStats[g].count++;
+                });
+                const dir = (film.Director || '').trim();
+                if (dir) {
+                    if (!directorStats[dir]) directorStats[dir] = { sum: 0, count: 0 };
+                    directorStats[dir].sum += rating;
+                    directorStats[dir].count++;
+                }
+            }
+
+            const toRows = obj => Object.entries(obj)
+                .map(([name, v]) => ({ name, avg: v.sum / v.count, count: v.count }))
+                .sort((a, b) => b.avg - a.avg || b.count - a.count);
+
+            const genres = toRows(genreStats);
+            const directors = toRows(directorStats);
+
+            if (genres.length === 0 && directors.length === 0) {
+                content.innerHTML = '<p class="text-gray-500 text-sm py-12 text-center">No rated films yet. Rate some films to see stats here.</p>';
+                return;
+            }
+
+            const makeRows = items => items.map(item => {
+                const safeName = item.name.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                return '<div class="flex items-center gap-3 py-2.5 border-b border-[#1a1a1a]">'
+                    + '<div class="w-44 shrink-0 text-xs text-gray-300 truncate" title="' + safeName + '">' + safeName + '</div>'
+                    + '<div class="stat-bar-bg"><div class="stat-bar-fill" style="width:' + (item.avg / 5 * 100).toFixed(1) + '%"></div></div>'
+                    + '<div class="w-9 text-right text-xs font-medium shrink-0" style="color:#c9a84c">' + item.avg.toFixed(2) + '</div>'
+                    + '<div class="w-16 text-right shrink-0" style="font-size:10px;color:#555">' + item.count + ' film' + (item.count !== 1 ? 's' : '') + '</div>'
+                    + '</div>';
+            }).join('');
+
+            content.innerHTML =
+                '<div class="mb-10">'
+                + '<h3 class="font-display text-xs uppercase tracking-widest mb-4" style="color:#c9a84c">Average Rating by Genre</h3>'
+                + (genres.length ? makeRows(genres) : '<p class="text-gray-600 text-xs">No rated films.</p>')
+                + '</div>'
+                + '<div>'
+                + '<h3 class="font-display text-xs uppercase tracking-widest mb-4" style="color:#c9a84c">Average Rating by Director</h3>'
+                + (directors.length ? makeRows(directors) : '<p class="text-gray-600 text-xs">No rated films.</p>')
+                + '</div>';
+        }
+
         function renderCollectionGrid() {
             let films = getCollectionFilms();
 
@@ -2501,6 +2638,11 @@
         // Collection overlay
         $('#collectionBtn').addEventListener('click', openCollectionView);
         $('#collCloseBtn').addEventListener('click', closeCollectionView);
+
+        // Stats overlay
+        $('#statsBtn').addEventListener('click', openStatsView);
+        $('#statsCloseBtn').addEventListener('click', closeStatsView);
+        $('#statsYearSelect').addEventListener('change', e => renderStats(e.target.value));
 
         // Collection tab pills
         document.getElementById('collectionOverlay').addEventListener('click', e => {
