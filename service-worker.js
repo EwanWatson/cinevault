@@ -6,7 +6,7 @@ if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.
   // No fetch handler — pass everything straight through
 } else {
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const SHELL_CACHE   = `cinevault-shell-${CACHE_VERSION}`;
 const DATA_CACHE    = `cinevault-data-${CACHE_VERSION}`;
 const IMG_CACHE     = `cinevault-images-${CACHE_VERSION}`;
@@ -75,9 +75,10 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // TMDB API calls — network-first so data stays fresh, fallback to cache
+  // TMDB API calls — cache-first so posters resolve instantly on repeat visits
+  // (search results are stable for a given title+year query)
   if (url.hostname === 'api.themoviedb.org') {
-    event.respondWith(networkFirst(request, DATA_CACHE));
+    event.respondWith(cacheFirst(request, DATA_CACHE));
     return;
   }
 
