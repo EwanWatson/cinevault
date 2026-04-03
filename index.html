@@ -4,14 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CineVault — Personal Cinema Collection</title>
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#080808">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CineVault">
-    <link rel="apple-touch-icon" href="icon.svg">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1434,11 +1426,12 @@
             posterProcessing = true;
 
             while (posterQueue.length > 0) {
-                const batch = posterQueue.splice(0, 4);
+                const batch = posterQueue.splice(0, 8);
                 await Promise.allSettled(batch.map(item => fetchOnePoster(item)));
                 _schedulePosterCacheSave();
-                // Yield to the main thread between batches so the UI stays responsive
-                await new Promise(r => setTimeout(r, 120));
+                if (posterQueue.length > 0) {
+                    await new Promise(r => setTimeout(r, 80));
+                }
             }
 
             posterProcessing = false;
@@ -3147,11 +3140,8 @@
             else loadYear(startYear);
 
             tryRestoreDirHandle(); // async — restores folder access handle in background
-            // Defer background scan until after the initial year load settles,
-            // so we don't hammer the network / main thread on mobile.
-            const deferBg = () => { backgroundScanAllYears(); gistSync(); };
-            if (typeof requestIdleCallback === 'function') requestIdleCallback(deferBg, { timeout: 4000 });
-            else setTimeout(deferBg, 3000);
+            backgroundScanAllYears(); // async — silently loads user state from all year CSVs
+            gistSync(); // async — non-blocking on-load sync
         }
 
         // ════════════════════════════════════════════════
@@ -3162,15 +3152,9 @@
         // ════════════════════════════════════════════════
         async function backgroundScanAllYears() {
             try {
-                // Fetch in small batches to avoid saturating mobile connections
-                const results = [];
-                for (let i = 0; i < YEARS.length; i += 6) {
-                    const batch = YEARS.slice(i, i + 6);
-                    const batchResults = await Promise.allSettled(
-                        batch.map(y => fetch(`data/films_${y}.csv`).then(r => r.ok ? r.text() : Promise.reject()))
-                    );
-                    results.push(...batchResults);
-                }
+                const results = await Promise.allSettled(
+                    YEARS.map(y => fetch(`data/films_${y}.csv`).then(r => r.ok ? r.text() : Promise.reject()))
+                );
                 let changed = false;
                 results.forEach(res => {
                     if (res.status !== 'fulfilled') return;
@@ -3210,16 +3194,6 @@
 
         init();
     })();
-    </script>
-
-    <!-- Service Worker registration -->
-    <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./service-worker.js')
-                .catch(err => console.warn('SW registration failed:', err));
-        });
-    }
     </script>
 </body>
 </html>
