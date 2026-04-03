@@ -530,9 +530,9 @@
                                 <button id="gistDisconnect" class="px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-gray-500 text-xs font-medium hover:text-red-400 hover:border-red-500/30 transition-colors whitespace-nowrap hidden">Disconnect</button>
                             </div>
                             <div id="gistIdRow" class="flex gap-2 mb-2 hidden">
-                                <input id="gistIdInput" type="text" autocomplete="off" spellcheck="false" readonly
-                                    class="flex-1 bg-[#111] border border-[#2a2a2a] rounded-md px-3 py-1.5 text-xs text-gray-500 font-mono focus:outline-none placeholder-gray-600"
-                                    placeholder="Gist ID (auto-filled on first save)…">
+                                <input id="gistIdInput" type="text" autocomplete="off" spellcheck="false"
+                                    class="flex-1 bg-[#111] border border-[#2a2a2a] rounded-md px-3 py-1.5 text-xs text-gray-300 font-mono focus:outline-none focus:border-[#c9a84c]/50 placeholder-gray-600"
+                                    placeholder="Paste Gist ID here (or leave blank to auto-create)…">
                                 <button id="gistSyncNow" class="px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-gray-300 text-xs font-medium hover:text-[#c9a84c] hover:border-[#c9a84c]/40 transition-colors whitespace-nowrap">Sync now</button>
                             </div>
                             <p id="gistStatus" class="text-[11px] mt-1 text-gray-600"></p>
@@ -718,7 +718,13 @@
         }
 
         async function gistRead() {
-            if (!GIST_CONFIG.pat || !GIST_CONFIG.id) return null;
+            if (!GIST_CONFIG.pat) return null;
+            // Auto-discover the Gist ID if not yet stored in this browser
+            if (!GIST_CONFIG.id) {
+                const existingId = await _findExistingGist();
+                if (existingId) saveGistConfig(null, existingId);
+                else return null;
+            }
             try {
                 const resp = await fetch(`https://api.github.com/gists/${GIST_CONFIG.id}`, {
                     headers: {
@@ -739,39 +745,69 @@
             const content = JSON.stringify(payload, null, 2);
             try {
                 if (!GIST_CONFIG.id) {
-                    // First run — create a new private Gist
-                    const resp = await fetch('https://api.github.com/gists', {
-                        method: 'POST',
-                        headers: {
-                            Authorization: `token ${GIST_CONFIG.pat}`,
-                            Accept: 'application/vnd.github+json',
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            description: 'CineVault sync data',
-                            public: false,
-                            files: { 'cinevault_sync.json': { content } },
-                        }),
-                    });
-                    if (!resp.ok) return false;
-                    const data = await resp.json();
-                    saveGistConfig(null, data.id);  // persist Gist ID, keep PAT
-                    return true;
-                } else {
-                    const resp = await fetch(`https://api.github.com/gists/${GIST_CONFIG.id}`, {
-                        method: 'PATCH',
-                        headers: {
-                            Authorization: `token ${GIST_CONFIG.pat}`,
-                            Accept: 'application/vnd.github+json',
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            files: { 'cinevault_sync.json': { content } },
-                        }),
-                    });
-                    return resp.ok;
+                    // No ID in localStorage — search existing Gists for one we already created
+                    // so we never accidentally create duplicates across browsers/devices.
+                    const existingId = await _findExistingGist();
+                    if (existingId) {
+                        saveGistConfig(null, existingId);
+                    } else {
+                        // Genuinely first run — create a new private Gist
+                        const resp = await fetch('https://api.github.com/gists', {
+                            method: 'POST',
+                            headers: {
+                                Authorization: `token ${GIST_CONFIG.pat}`,
+                                Accept: 'application/vnd.github+json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                description: 'CineVault sync data',
+                                public: false,
+                                files: { 'cinevault_sync.json': { content } },
+                            }),
+                        });
+                        if (!resp.ok) return false;
+                        const data = await resp.json();
+                        saveGistConfig(null, data.id);
+                        return true;
+                    }
                 }
+                // GIST_CONFIG.id is now guaranteed to be set
+                const resp = await fetch(`https://api.github.com/gists/${GIST_CONFIG.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        Authorization: `token ${GIST_CONFIG.pat}`,
+                        Accept: 'application/vnd.github+json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        files: { 'cinevault_sync.json': { content } },
+                    }),
+                });
+                return resp.ok;
             } catch { return false; }
+        }
+
+        // Search the authenticated user's Gists for an existing CineVault sync Gist.
+        // Returns the Gist ID string, or null if not found.
+        async function _findExistingGist() {
+            try {
+                // GitHub returns up to 30 per page; iterate pages until found or exhausted
+                for (let page = 1; page <= 5; page++) {
+                    const resp = await fetch(`https://api.github.com/gists?per_page=100&page=${page}`, {
+                        headers: {
+                            Authorization: `token ${GIST_CONFIG.pat}`,
+                            Accept: 'application/vnd.github+json',
+                        },
+                    });
+                    if (!resp.ok) return null;
+                    const list = await resp.json();
+                    if (!list.length) return null;
+                    const found = list.find(g => g.files && g.files['cinevault_sync.json']);
+                    if (found) return found.id;
+                    if (list.length < 100) return null; // last page
+                }
+            } catch { /* ignore */ }
+            return null;
         }
 
         function gistMerge(remote, local) {
@@ -880,7 +916,10 @@
             const statusEl   = document.getElementById('gistStatus');
             if (!patInput) return;
             patInput.value = GIST_CONFIG.pat ? '••••••••••••••••' : '';
-            idInput.value  = GIST_CONFIG.id  || '';
+            // Only overwrite the ID field if user hasn't typed in it
+            if (document.activeElement !== idInput) {
+                idInput.value = GIST_CONFIG.id || '';
+            }
             const configured = !!GIST_CONFIG.pat;
             idRow.classList.toggle('hidden', !configured);
             disconnBtn.classList.toggle('hidden', !configured);
@@ -2994,10 +3033,21 @@
         });
         document.getElementById('gistSave').addEventListener('click', async () => {
             const patInput = document.getElementById('gistPatInput');
+            const idInput  = document.getElementById('gistIdInput');
             const statusEl = document.getElementById('gistStatus');
-            const rawVal = patInput.value.trim();
+            const rawPat = patInput.value.trim();
+            const rawId  = idInput.value.trim();
             // If the field shows the masked placeholder, user didn't type a new PAT
-            if (!rawVal || rawVal === '••••••••••••••••') {
+            if (!rawPat || rawPat === '••••••••••••••••') {
+                // Allow saving just a new Gist ID without re-entering PAT
+                if (rawId && rawId !== GIST_CONFIG.id) {
+                    saveGistConfig(null, rawId);
+                    statusEl.textContent = 'Gist ID updated — syncing now…';
+                    statusEl.style.color = '#6b9';
+                    await gistSync();
+                    _refreshGistModalStatus();
+                    return;
+                }
                 statusEl.textContent = 'Please paste your GitHub PAT first.';
                 statusEl.style.color = '#f87171';
                 return;
@@ -3006,7 +3056,7 @@
             statusEl.style.color = '#777';
             try {
                 const check = await fetch('https://api.github.com/user', {
-                    headers: { Authorization: `token ${rawVal}`, Accept: 'application/vnd.github+json' },
+                    headers: { Authorization: `token ${rawPat}`, Accept: 'application/vnd.github+json' },
                 });
                 if (!check.ok) {
                     statusEl.textContent = '✗ Invalid token — check scope and expiry.';
@@ -3018,7 +3068,9 @@
                 statusEl.style.color = '#f87171';
                 return;
             }
-            saveGistConfig(rawVal, GIST_CONFIG.id || null);
+            // If user also pasted a Gist ID, honour it; otherwise keep existing or let sync discover it
+            const manualId = rawId || GIST_CONFIG.id || null;
+            saveGistConfig(rawPat, manualId);
             patInput.value = '';
             statusEl.textContent = 'Token saved — syncing now…';
             statusEl.style.color = '#6b9';

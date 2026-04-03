@@ -1,0 +1,16 @@
+{
+  "name": "cinevault",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CineVault data sync scripts",
+  "scripts": {
+    "flush": "node scripts/flush-gist.js",
+    "flush:dry": "node scripts/flush-gist.js --dry-run"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
