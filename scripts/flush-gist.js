@@ -121,8 +121,9 @@ async function main() {
   const watchlist    = new Set(payload.watchlist     || []);
   const watched      = payload.watched               || {};
   const rankOverrides = payload.rankOverrides        || {};
+  const customFilms  = payload.customFilms           || {};
 
-  console.log(`Gist snapshot: ${favorites.size} favorites, ${watchlist.size} watchlist, ${Object.keys(watched).length} rated, ${Object.keys(rankOverrides).length} rank overrides`);
+  console.log(`Gist snapshot: ${favorites.size} favorites, ${watchlist.size} watchlist, ${Object.keys(watched).length} rated, ${Object.keys(rankOverrides).length} rank overrides, ${Object.keys(customFilms).reduce((sum, y) => sum + (customFilms[y]?.length || 0), 0)} custom films`);
   console.log(`Gist last updated: ${payload._updated || 'unknown'}`);
 
   // 2. Collect all affected film keys and group by CSV file key
@@ -132,6 +133,14 @@ async function main() {
     ...Object.keys(watched),
     ...Object.keys(rankOverrides),
   ]);
+
+  // Add keys from customFilms
+  for (const year in customFilms) {
+    const films = customFilms[year];
+    if (Array.isArray(films)) {
+      films.forEach(f => allKeys.add(filmKey(f)));
+    }
+  }
 
   if (allKeys.size === 0) {
     console.log('Nothing to flush — Gist payload is empty.');
@@ -196,6 +205,43 @@ async function main() {
       rowsChanged++;
       return { ...row, Favorite: newFav, Watchlist: newWl, Rating: newRat, RatingTimestamp: newTs, RankOverride: newRank };
     });
+
+    // Add new custom films that don't exist in this CSV yet
+    const existingKeys = new Set(parsed.rows.map(r => filmKey(r)));
+    for (const key of keys) {
+      if (existingKeys.has(key)) continue;
+      // This is a custom film that's not in the CSV — add it
+      const [title, year] = key.split('|||');
+      // Find the custom film data
+      let customFilm = null;
+      for (const cy in customFilms) {
+        const films = customFilms[cy];
+        if (Array.isArray(films)) {
+          customFilm = films.find(f => filmKey(f) === key);
+          if (customFilm) break;
+        }
+      }
+      if (customFilm) {
+        const wd = watched[key];
+        const newRow = {
+          Rank: customFilm.Rank || '',
+          Title: customFilm.Title || '',
+          Year: customFilm.Year || '',
+          Director: customFilm.Director || '',
+          Primary_Genre: customFilm.Primary_Genre || '',
+          Synopsis: customFilm.Synopsis || '',
+          Major_Awards: customFilm.Major_Awards || '',
+          Key_Sources: customFilm.Key_Sources || '',
+          Favorite: favorites.has(key) ? '1' : '',
+          Watchlist: watchlist.has(key) ? '1' : '',
+          Rating: wd ? String(wd.rating) : '',
+          RatingTimestamp: wd ? wd.timestamp : '',
+          RankOverride: rankOverrides[key] != null ? String(rankOverrides[key]) : '',
+        };
+        updatedRows.push(newRow);
+        rowsChanged++;
+      }
+    }
 
     if (rowsChanged === 0) {
       console.log(`  OK    films_${fk}.csv — already up to date`);

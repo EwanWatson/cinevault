@@ -850,6 +850,24 @@
             merged.favoritesOrder = (remote.favoritesOrder && remote.favoritesOrder.length)
                 ? remote.favoritesOrder
                 : (local.favoritesOrder || []);
+            // customFilms: merge by year, combining films from both local and remote
+            merged.customFilms = {};
+            const remoteYears = new Set(Object.keys(remote.customFilms || {}));
+            const localYears = new Set(Object.keys(local.customFilms || {}));
+            new Set([...remoteYears, ...localYears]).forEach(year => {
+                const rYearFilms = (remote.customFilms && remote.customFilms[year]) || [];
+                const lYearFilms = (local.customFilms && local.customFilms[year]) || [];
+                const seen = new Set();
+                const combined = [];
+                [...rYearFilms, ...lYearFilms].forEach(f => {
+                    const key = filmKey(f);
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        combined.push(f);
+                    }
+                });
+                if (combined.length > 0) merged.customFilms[year] = combined;
+            });
             return merged;
         }
 
@@ -860,6 +878,7 @@
                 watched:        state.watched,
                 rankOverrides:  state.rankOverrides,
                 favoritesOrder: [...state.favoritesOrder],
+                customFilms:    state.customFilms,
                 _updated:       new Date().toISOString(),
             };
         }
@@ -896,7 +915,8 @@
                 state.watched      = merged.watched;
                 state.rankOverrides  = merged.rankOverrides;
                 state.favoritesOrder = merged.favoritesOrder || [];
-                saveFavorites(); saveWatchlist(); saveWatched(); saveRankOverrides(); saveFavoritesOrder();
+                state.customFilms  = merged.customFilms || {};
+                saveFavorites(); saveWatchlist(); saveWatched(); saveRankOverrides(); saveFavoritesOrder(); saveCustomFilms();
                 // Write merged result back to Gist
                 const ok = await gistWrite(Object.assign({}, merged, { _updated: new Date().toISOString() }));
                 if (!ok) { updateSyncDot('error'); return; }
@@ -1098,6 +1118,15 @@
 
         function saveCustomFilms() {
             try { localStorage.setItem('cv_custom_films', JSON.stringify(state.customFilms)); } catch { /* quota exceeded */ }
+            scheduleGistWrite();
+        }
+
+        function migrateCustomFilmsToGist() {
+            // If customFilms has content, it may have been added before Gist support was added.
+            // Trigger a Gist write so pre-existing custom films get synced.
+            if (GIST_CONFIG.pat && Object.keys(state.customFilms).length > 0) {
+                scheduleGistWrite();
+            }
         }
 
         function loadRankOverrides() {
@@ -3284,6 +3313,7 @@
             loadGistConfig();
             loadPersisted();
             loadCustomFilms();
+            migrateCustomFilmsToGist(); // Sync any pre-existing custom films to Gist
             loadRankOverrides();
             loadFavoritesOrder();
             loadExtraYears(); // merge any extra/custom years before building the dropdown
